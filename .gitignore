@@ -1,0 +1,13 @@
+venv
+.idea
+.vs
+.vscode
+__pycache__
+.dev.env
+debug.log
+src/debug.log
+src/__pycache__
+src/MomsPops_API/__pycache__
+src/users/__pycache__
+
+
