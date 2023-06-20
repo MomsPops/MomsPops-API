@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.contrib.auth.hashers import get_hasher
 
 from uuid import uuid4
@@ -13,12 +14,15 @@ password_hasher = django_pbkdf2_sha256
 
 class UserCustomManager(UserManager):
     def create(self, **data):
-        new_user: User = self.model(
-            **data
-        )
-        new_user.password = password_hasher.hash(new_user.password)
-        new_user.save()
-        return new_user
+        data['password'] = password_hasher.hash(data.get("password"))
+        try:
+            new_user: User = self.model(
+                **data
+            )
+            new_user.save()
+            return new_user
+        except IntegrityError:
+            return None
 
     def login(self, username: str, password: str) -> models.Model | None:
         try:

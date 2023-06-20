@@ -77,6 +77,8 @@ class TestUserUrl(UserSettings):
             "username": "1asfaskda",
             "password": "a9r12uru1n",
             "email": "suialsdn@gmail.ru",
+            "first_name": "Michael",
+            "last_name": "Bilmoure"
         }
 
         response = self.client.post(
@@ -98,7 +100,22 @@ class TestUserUrl(UserSettings):
 
     def test_create_fail(self):
         response = self.client.post(reverse("users_create"))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_existed_fail(self):
+        user_dara = {
+            "username": self.user_data['username'],
+            'password': "1092eoqjskdna",
+            "first_name": "Asdiojq09rj",
+            "last_name": "Sd09ir1",
+            "email": "aspdkajs@mail.ru"
+        }
+        response = self.client.post(
+            path=reverse("users_create"),
+            data=user_dara
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"username": ["A user with that username already exists."]})
 
     # def test_update(self):
     #     client = APIClient()

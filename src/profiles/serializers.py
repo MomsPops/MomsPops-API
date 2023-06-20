@@ -40,8 +40,8 @@ class NoteListSerializer(serializers.ModelSerializer):
         model = Note
         fields = "__all__"
 
-    def validate_content(self, value):
-        return value[:100] + '...'
+    def validate_text(self, value):
+        return value[:100] + "..."
 
 
 class NoteDetailSerializer(serializers.ModelSerializer):

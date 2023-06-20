@@ -1,13 +1,11 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Profile, Note
 from .serializers import (ProfileListSerializer, ProfileCreateSerializer, ProfileDetailSerializer,
                           NoteListSerializer, NoteDetailSerializer, NoteCreateSerializer)
-from .permissions import HasProfile, IsOwner
+from .permissions import IsOwner
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -36,7 +34,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
             instance=Profile.objects.get_all_active(),
             many=True
         )
-        return Response({"profiles": serializer.data})
+        return Response(serializer.data)
 
 
 class NoteViewSet(viewsets.ModelViewSet):
@@ -56,6 +54,14 @@ class NoteViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = (IsAuthenticated, )
         return [pc() for pc in permission_classes]
+
+    def list(self, request, *args, **kwargs):
+        username = kwargs.get('username')
+        serializer = self.get_serializer_class()(
+            instance=Note.objects.get_by_username(username),
+            many=True
+        )
+        return Response(serializer.data)
 
 
 

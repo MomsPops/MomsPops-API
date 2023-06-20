@@ -14,6 +14,6 @@ class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         try:
             profile = request.user.profile
-            return obj.profile == profile
+            return obj == profile
         except:
             return False
