@@ -32,9 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # apps
+    "api",
     "users",
-    # "profiles",
-    # "chat",
 
     # libraries
     "rest_framework",
@@ -53,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'MomsPops_API.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
@@ -72,13 +71,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'MomsPops_API.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv("DB_NAME"),
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
@@ -167,8 +166,8 @@ SIMPLE_JWT = {
 
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    "USER_ID_FIELD": "uuid",
-    "USER_ID_CLAIM": "user_uuid",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
 
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
