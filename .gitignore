@@ -4,8 +4,12 @@ venv
 .vscode
 __pycache__
 .dev.env
+dev.env
+src/media/
 debug.log
 src/debug.log
+src/momspops
+src/mosmpops.sqlite3
 src/__pycache__
 src/MomsPops_API/__pycache__
 src/users/__pycache__
