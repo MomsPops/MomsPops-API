@@ -19,3 +19,6 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 ```
+
+## Database schema
+https://drive.google.com/file/d/120bxgsR9spj89HfDvYM9-zAic_IlBGEc/view
