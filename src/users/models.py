@@ -42,6 +42,7 @@ class Account(models.Model):
     notification = models.ManyToManyField(
         Notification, related_name="account", blank=True
     )
+    tags = models.ManyToManyField("Tags", blank=True, verbose_name="account")
     objects = AccountManager()
 
     def __str__(self):
@@ -76,3 +77,8 @@ class SocialNetworkLinks(models.Model):
     class Meta:
         verbose_name = "Ссылка на социальные сети"
         verbose_name_plural = "Ссылки на социальные сети"
+
+
+class Tags(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4)
+    name = models.TextField(max_length=20)
