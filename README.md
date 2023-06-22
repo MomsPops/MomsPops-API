@@ -4,7 +4,7 @@
 
 
 #### Аgreements:
-- default .env file: dev.env;
+- default .env file: .dev.env;
 - default database: Postgres;
 - default requirements file: "requirements.txt";
 - unit tests folders: "tests" folder in each app with "test_model.py" and "test_view.py";
@@ -18,7 +18,7 @@ You can change it in settings.
 
 
 #### Environ variables example:
-"dev.env" file:
+".dev.env" file:
 ```dotenv
 SECRET_KEY=secret_SECRET
 
