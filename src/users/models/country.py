@@ -1,10 +1,6 @@
 from django.db import models
 
 
-# class CountryChoices(models.TextChoices):
-#     Russsia = ("Russia", "Russia")
-
-
 class Country(models.Model):
     name = models.CharField(max_length=100)
 
