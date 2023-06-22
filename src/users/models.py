@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from uuid import uuid4
 
-from .city import City
+from locations.models import City
 
 
 class AccountManager(models.Manager):
@@ -15,7 +15,7 @@ class AccountManager(models.Manager):
     ):
         city = City.objects.get(
             name=city_name, country__name=country_name
-        )  # TODO: need unique fields
+        )
         new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)

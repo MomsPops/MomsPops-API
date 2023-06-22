@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     # apps
     "api",
     "users",
+    "coordinates",
+    "locations",
 
     # libraries
     "rest_framework",

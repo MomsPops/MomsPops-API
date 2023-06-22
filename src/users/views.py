@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
 from .serializers import AccountCreateSerializer, AccountDetailSerializer
-from .models.account import Account
+from .models import Account
 
 
 class AccountViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
