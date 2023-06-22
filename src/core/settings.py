@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     "coordinates",
     "locations",
     "notification",
-
-
+    "chat",
     # libraries
     "rest_framework",
     "drf_yasg",
