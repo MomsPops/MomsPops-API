@@ -4,8 +4,6 @@ from .country import Country
 
 
 class City(models.Model):
-    # TODO: Country choices
-
     name = models.CharField(max_length=100)
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, related_name="country"
@@ -18,3 +16,6 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ("name", "country")

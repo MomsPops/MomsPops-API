@@ -9,27 +9,17 @@ from .city import City
 class AccountManager(models.Manager):
     def create_account(
         self,
-        username: str,
-        password: str,
-        first_name: str,
-        last_name: str,
         city_name: str,
         country_name: str,
-        email: str | None = None,
+        user: dict[str, str]
     ):
-        user = User.objects.create_user(
-            username=username,
-            password=password,
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-        )
         city = City.objects.get(
             name=city_name, country__name=country_name
         )  # TODO: need unique fields
-        account = self.model(user=user, city=city)
-        account.save(using=self._db)
-        return account
+        new_user = User.objects.create_user(**user)
+        new_account = self.model(user=new_user, city=city)
+        new_account.save(using=self._db)
+        return new_account
 
 
 class Account(models.Model):
