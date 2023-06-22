@@ -161,3 +161,7 @@ cython_debug/
 
 # Visual Studio
 .vs
+
+
+# Django
+migrations/
