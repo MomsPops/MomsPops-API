@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from uuid import uuid4
 
 from locations.models import City
+from notification.models import Notification
 
 
 class AccountManager(models.Manager):
@@ -38,6 +39,9 @@ class Account(models.Model):
 
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город")
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
+    notification = models.ManyToManyField(
+        Notification, related_name="account", blank=True
+    )
     objects = AccountManager()
 
     def __str__(self):
