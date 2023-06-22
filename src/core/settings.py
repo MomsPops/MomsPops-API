@@ -36,8 +36,10 @@ INSTALLED_APPS = [
     "users",
     "coordinates",
     "locations",
-    # libraries
     "notification",
+
+
+    # libraries
     "rest_framework",
     "drf_yasg",
     "rest_framework_simplejwt",
