@@ -33,4 +33,6 @@ jobs:
       - name: Run Tests
         run: |
           cd src
+          python manage.py makemigrations
+          python manage.py migrate
           python manage.py test
