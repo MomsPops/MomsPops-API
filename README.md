@@ -2,9 +2,8 @@
 
 ## For developers:
 
-
 #### Аgreements:
-- default .env file: .dev.env;
+- default .env file: .dev.env (in ./src);
 - default database: Postgres;
 - default requirements file: "requirements.txt";
 - unit tests folders: "tests" folder in each app with "test_model.py" and "test_view.py";
@@ -16,9 +15,8 @@ You can change it in settings.
 - api: api application;
 - users: application for users; 
 
-
 #### Environ variables example:
-".dev.env" file:
+".dev.env" file in ./src:
 ```dotenv
 SECRET_KEY=secret_SECRET
 
@@ -28,7 +26,22 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 ```
+#### Linter:
 
+We use `flake8`.
+```commandline
+flake8
+```
+
+#### Type-checker:
+
+We use `mypy`
+```commandline
+mypy .
+```
+
+#### PRs:
+IMPORTANT! You should check your code by linter and type-checker before making pull-request.
 
 ## Installing requirements
 ```commandline
