@@ -38,10 +38,8 @@ class Account(models.Model):
         User, related_name="account", on_delete=models.CASCADE
     )
     city = models.ForeignKey(City, on_delete=models.PROTECT)
-    followers = models.ManyToManyField(
-        to="Account", related_name="followers"
-    )  # TODO: naming
-    black_list = models.ManyToManyField(to="Account", related_name="black_list")
+    followers = models.ManyToManyField("self", blank=True)  # TODO: naming
+    black_list = models.ManyToManyField("self", blank=True)
 
     objects = AccountManager()
 
