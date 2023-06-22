@@ -21,4 +21,3 @@ urlpatterns = [
     path(r"swagger/", schema_view.with_ui("swagger", cache_timeout=0), name='swagger'),
     path(r"redoc/", schema_view.with_ui("redoc", cache_timeout=0), name='redoc')
 ]
-
