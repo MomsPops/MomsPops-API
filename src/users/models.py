@@ -7,6 +7,9 @@ from locations.models import City
 
 
 class AccountManager(models.Manager):
+    """
+    Custom account manager.
+    """
     def create_account(
         self,
         city_name: str,
@@ -23,14 +26,21 @@ class AccountManager(models.Manager):
 
 
 class Account(models.Model):
+    """
+    Account model.
+    """
     id = models.UUIDField(primary_key=True, default=uuid4)
-    user: User = models.OneToOneField(
-        User, related_name="account", on_delete=models.CASCADE
-    )
-    city = models.ForeignKey(City, on_delete=models.PROTECT)
-    followers = models.ManyToManyField("self", blank=True)  # TODO: naming
-    black_list = models.ManyToManyField("self", blank=True)
+    user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
 
+    bio = models.TextField(blank=True, null=True, verbose_name="Биография")
+    birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
+    photo = models.ImageField(
+        upload_to="uploads/account_img/", verbose_name="Фото", blank=True, null=True
+    )
+    status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
+
+    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город")
+    black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
     objects = AccountManager()
 
     def __str__(self):
