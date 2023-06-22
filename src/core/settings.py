@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     # apps
     "api",
     "users",
+    "profiles",
     # libraries
     "rest_framework",
     "drf_yasg",
