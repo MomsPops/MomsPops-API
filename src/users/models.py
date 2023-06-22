@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from uuid import uuid4
 
 from locations.models import City
-from notification.models import Notification
+from notifications.models import Notification
 
 
 class AccountManager(models.Manager):
