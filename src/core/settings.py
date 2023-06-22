@@ -151,9 +151,6 @@ REST_FRAMEWORK = {
 
 }
 
-# authentication
-AUTH_USER_MODEL = 'users.User'
-
 
 # JWT
 SIMPLE_JWT = {
@@ -225,4 +222,3 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["console"]}},
 }
-
