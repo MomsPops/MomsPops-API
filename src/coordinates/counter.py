@@ -14,7 +14,6 @@ def coordinates_distance(lat1, lat2, lon1, lon2) -> float:
     где R = 6371 км — средний радиус земного шара.
     """
     R = 6371
-    """Function calculates vector length of the coordinates."""
     cos_d = sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)
     d = acos(cos_d)
 

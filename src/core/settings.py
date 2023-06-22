@@ -36,8 +36,8 @@ INSTALLED_APPS = [
     "users",
     "coordinates",
     "locations",
-    "notification",
-
+    "notifications",
+    "profiles",
 
     # libraries
     "rest_framework",
