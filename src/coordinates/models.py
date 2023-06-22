@@ -1,5 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime, timedelta
+
+from .counter import coordinates_distance
+
+
+class CoordinateManager(models.Manager):
+    distance_needed: float = 3.0  # in kilometers
+    delta_limit: timedelta = timedelta(minutes=5)
+
+    def filter_time(self) -> filter:
+        now_time = datetime.now()
+        return filter(
+            lambda coord: now_time - coord.last_time <= self.delta_limit,
+            self.get_queryset()
+        )
+
+    def all_near(self, user_coordinate) -> filter:
+        filtered_coords = self.filter_time()
+        return filter(
+            lambda coord: coordinates_distance(coord.lat, user_coordinate.lat, coord.lon, user_coordinate.lon)
+            <= self.distance_needed,
+            filtered_coords
+        )
 
 
 class Coordinate(models.Model):
@@ -8,10 +31,11 @@ class Coordinate(models.Model):
     """
     lat = models.DecimalField("Latitude", decimal_places=6, max_digits=8)
     lon = models.DecimalField("Longitude", decimal_places=6, max_digits=9)
-    user = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name="+", on_delete=models.CASCADE, null=True)
     last_time = models.DateTimeField("Last time", auto_created=True, auto_now=True)
 
     object = models.Manager()
+    coordinate_manager = CoordinateManager()
 
     def __str__(self):
         return f"{self.lat}; {self.lon}"
