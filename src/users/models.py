@@ -56,3 +56,8 @@ class User(AbstractUser):
     class Meta:
         ordering = ['last_login']
 
+
+class CustomUser(models.Model):
+    user = ...
+    ...
+
