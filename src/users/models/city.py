@@ -8,8 +8,7 @@ class City(models.Model):
 
     name = models.CharField(max_length=100)
     country = models.ForeignKey(
-        Country,
-        on_delete=models.CASCADE
+        Country, on_delete=models.CASCADE, related_name="country"
     )
 
     objects = models.Manager()
