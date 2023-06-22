@@ -6,7 +6,7 @@ from .country import Country
 class City(models.Model):
     name = models.CharField(max_length=100)
     country = models.ForeignKey(
-        Country, on_delete=models.CASCADE, related_name="country"
+        Country, on_delete=models.CASCADE, related_name="+"
     )
 
     objects = models.Manager()

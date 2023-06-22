@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.models import User
 
-from .models import Account
+from .models.account import Account
 
 
 class UserCreateSerializer(ModelSerializer):
