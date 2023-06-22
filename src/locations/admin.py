@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import City, Country
+from .models import City, Region
 
 
-@admin.register(Country)
-class CountryAdmin(admin.ModelAdmin):
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
     list_display = ("name", )
 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    list_display = ("name", "country")
+    list_display = ("name", "region")
