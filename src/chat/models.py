@@ -1,6 +1,7 @@
 from django.db import models
 from uuid import uuid4
 from users.models import Account
+from reactions.models import Reaction
 
 
 def get_chat_preview_file_path(instance, filename):
@@ -39,3 +40,6 @@ class Message(models.Model):
     text = models.TextField(max_length=500, verbose_name="Текст сообщения")
     img = models.ImageField(upload_to=get_message_img_file_path, null=True)
     created = models.DateTimeField(auto_now_add=True)
+    reactions = models.ManyToManyField(
+        Reaction, blank=True, verbose_name="Реакции на сообщение"
+    )
