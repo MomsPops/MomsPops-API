@@ -35,7 +35,7 @@ class Account(UUIDModel):
     )
     status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
 
-    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город")
+    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
     notifications = models.ManyToManyField(
         Notification, related_name="account", blank=True
