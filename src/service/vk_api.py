@@ -44,7 +44,7 @@ class LocationParser:
             time.sleep(0.5)
             # print(f"Offset: {ok}")
             cities_response = self.api.database.getCities(
-                count=10**3, need_all=1, region_id=reg_id, offset=ok*10**3
+                count=10 ** 3, need_all=1, region_id=reg_id, offset=ok * 10 ** 3
             )['items']
             for idx, city in enumerate(cities_response):
                 id_ = city.get("id")
