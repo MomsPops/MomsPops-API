@@ -20,9 +20,9 @@ class CoordinateManager(models.Manager):
     def all_near(self, user_coordinate) -> filter:
         filtered_coords = self.filter_time()
         return filter(
-            lambda coord: coordinates_distance(coord.lat, user_coordinate.lat, coord.lon, user_coordinate.lon)
-            <= self.distance_needed,
-            filtered_coords
+            lambda coord: coordinates_distance(coord.lat, user_coordinate.lat, coord.lon, user_coordinate.lon)    # type: ignore
+            <= self.distance_needed,     # type: ignore
+            filtered_coords     # type: ignore
         )
 
 
