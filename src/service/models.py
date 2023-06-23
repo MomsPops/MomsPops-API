@@ -45,3 +45,28 @@ class AccountOneToOneModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+def AccountOneToOneFunc(related_name=None, verbose_name=None):
+    """Abstract model decorator."""
+    class InnerModel(models.Model):
+        account = models.OneToOneField(
+            to="users.Account",
+            verbose_name=verbose_name,
+            related_name=related_name,
+            on_delete=models.CASCADE
+        )
+    return InnerModel
+
+
+def AccountForeignFunc(related_name=None, verbose_name=None):
+    """Abstract model decorator."""
+    class InnerModel(models.Model):
+        account = models.ForeignKey(
+            to="users.Account",
+            verbose_name=verbose_name,
+            related_name=related_name,
+            on_delete=models.CASCADE
+        )
+    return InnerModel
+

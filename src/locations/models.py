@@ -3,7 +3,7 @@ from django.db import models
 
 class City(models.Model):
     name = models.CharField(max_length=100)
-    region = models.ForeignKey("Region", on_delete=models.CASCADE, related_name="city")
+    region = models.ForeignKey("Region", on_delete=models.CASCADE, related_name="city", null=True)
 
     objects = models.Manager()
 
