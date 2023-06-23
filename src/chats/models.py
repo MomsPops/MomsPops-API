@@ -49,7 +49,7 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     )
     members = models.ManyToManyField(Account, blank=True)
 
-    meeting_time = models.DateTimeField(verbose_name="Время встречи")
+    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
     lacations_coordinates = models.ForeignKey(
         Coordinate,
         default=None,
