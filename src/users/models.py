@@ -6,6 +6,7 @@ from service.models import UUIDModel
 
 from locations.models import City
 from notifications.models import Notification
+from typing import Union
 
 
 class AccountManager(models.Manager):
@@ -13,9 +14,17 @@ class AccountManager(models.Manager):
     Custom account manager.
     """
 
-    def create_account(self, city_name: str, country_name: str, user: Dict[str, str]):
-        city = City.objects.get(name=city_name, country__name=country_name)
-        new_user = User.objects.create_user(**user)
+    def create_account(
+        self,
+        user_data: Dict[str, str],
+        city_name: Union[str, None] = None,
+        region_name: Union[str, None] = None,
+    ):
+        city = None
+        if city_name and region_name:
+            city = City.objects.get_or_create(name=city_name, region__name=region_name)
+
+        new_user = User.objects.create_user(**user_data)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         return new_account
@@ -25,6 +34,7 @@ class Account(UUIDModel):
     """
     Account model.
     """
+
     user: User = models.OneToOneField(
         User, related_name="account", on_delete=models.CASCADE
     )
@@ -35,7 +45,9 @@ class Account(UUIDModel):
     )
     status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
 
-    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город")
+    city = models.ForeignKey(
+        City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True
+    )
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
     notifications = models.ManyToManyField(
         Notification, related_name="account", blank=True
@@ -47,7 +59,7 @@ class Account(UUIDModel):
         return self.user.username
 
 
-SOCIAL_NETWORK_LINK_NAME = (    # Choices
+SOCIAL_NETWORK_LINK_NAME = (  # Choices
     ("VK", "Вконтакте"),
     ("INST", "Instagram"),
     ("FB", "Facebook"),
@@ -60,6 +72,7 @@ class SocialNetworkLink(UUIDModel):
     """
     Social network link model.
     """
+
     account = models.ForeignKey(
         Account,
         verbose_name="Пользователь",
@@ -83,4 +96,5 @@ class Tag(UUIDModel):
     """
     Tag model.
     """
+
     name = models.TextField(max_length=20)

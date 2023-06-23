@@ -7,6 +7,7 @@ class UUIDModel(models.Model):
     """
     Generic with pk represented as UUID.
     """
+
     id = models.UUIDField(primary_key=True, default=uuid4)
 
     class Meta:
@@ -17,6 +18,7 @@ class TimeCreateModel(models.Model):
     """
     Generic model with auto created time.
     """
+
     time_created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -27,6 +29,7 @@ class TimeCreateUpdateModel(models.Model):
     """
     Generic model with auto created and updated time.
     """
+
     time_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -34,6 +37,7 @@ class TimeCreateUpdateModel(models.Model):
 
 
 class AccountForeignModel(models.Model):
+    # TODO: delet this model verbose_name - important !!!
     account = models.ForeignKey("users.Account", on_delete=models.CASCADE)
 
     class Meta:
@@ -41,6 +45,7 @@ class AccountForeignModel(models.Model):
 
 
 class AccountOneToOneModel(models.Model):
+    # TODO: delet this model verbose_name - important !!!
     account = models.OneToOneField("users.Account", on_delete=models.CASCADE)
 
     class Meta:
