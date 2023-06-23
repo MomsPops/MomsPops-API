@@ -6,6 +6,7 @@ from service.models import UUIDModel
 
 from locations.models import City
 from notifications.models import Notification
+from typing import Union
 
 
 class AccountManager(models.Manager):
@@ -16,8 +17,8 @@ class AccountManager(models.Manager):
     def create_account(
         self,
         user_data: Dict[str, str],
-        city_name: str | None = None,
-        region_name: str | None = None,
+        city_name: Union[str, None] = None,
+        region_name: Union[str, None] = None,
     ):
         city = None
         if city_name and region_name:
