@@ -164,4 +164,7 @@ cython_debug/
 
 
 # Django
+
+src/service/files/
+# *_initial.py
 migrations/

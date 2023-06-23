@@ -3,11 +3,13 @@ extend-ignore = E203
 exclude =
     .git,
     __pycache__,
-    venv
-    migrations
+    venv,
+    migrations,
+    __init__.py,
     docs/source/conf.py,
     old,
     build,
-    dist
+    dist,
+
 max-complexity = 10
 max-line-length = 120
