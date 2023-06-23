@@ -5,7 +5,7 @@ import json
 class LocationParser:
 
     @classmethod
-    def parse_cities(cls, api: vk.API, filename: str | None = None):
+    def parse_cities(cls, api: vk.API, filename=None):
         cities = api.database.getCities(count=10 ** 3, need_all=1)['items']
         if filename is not None:
             with open(filename, 'w') as file:
