@@ -69,4 +69,3 @@ def AccountForeignFunc(related_name=None, verbose_name=None):
             on_delete=models.CASCADE
         )
     return InnerModel
-
