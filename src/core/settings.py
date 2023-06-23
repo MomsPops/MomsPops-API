@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "notifications",
     "profiles",
     "chats",
+
     # libraries
     "rest_framework",
     "drf_yasg",
