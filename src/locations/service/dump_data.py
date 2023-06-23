@@ -20,6 +20,7 @@ def dump_cities() -> None:
     for c in cities:
         try:
             City.objects.create(id=c['id'], name=c['name'], region=Region.objects.get(id=c['region']))
+            print(c)
         except Exception:
             pass
 

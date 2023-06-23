@@ -59,6 +59,8 @@ class LocationParser:
 
 
 if __name__ == '__main__':
-    TOKEN = "vk1.a.UEQ9gmOD1UklHN71ctztqP7VsGdYx1br-bXq3pUt4DAsnd_X9LvLFHrIrX5XKWqSDNXrV3Ydzr8a_QkU5OuzjKx-Z0s65T4ZCBi-xYUORiymL3rD0pqjxbR__qK_CUg-BuYO7TOPeDb5R8SnNtKGtUgyNqit21yXNIMhu1Pd-OHbmME4fwEy_y9wQXplEeng"
+    TOKEN = "vk1.a.UEQ9gmOD1UklHN71ctztqP7VsGdYx1br-bXq3pUt4DAsnd_X9LvLFHrIrX5XKWqSDNXrV3Yd\
+    zr8a_QkU5OuzjKx-Z0s65T4ZCBi-xYUORiymL3rD0pqjxbR__qK_CUg-BuYO7TOPeDb5R8SnNtKGtUgyNqit21y\
+    XNIMhu1Pd-OHbmME4fwEy_y9wQXplEeng"
     api_ = vk.API(access_token=TOKEN, v=5.81)
     LocationParser(api_).parse_locations("files/russia_cities.json", "files/russia_regions.json")
