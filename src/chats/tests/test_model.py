@@ -1,7 +1,6 @@
-from django.test import TestCase
-from django.db import transaction
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.test import TestCase
 from users.models import Account
 from chats.models import Chat, ChatType, Message
 
@@ -69,3 +68,4 @@ class ChatTest(TestCase):
         self.assertTrue(message is not None)
         self.assertEqual(message.text, "test message")
         self.assertEqual(message.viewed, False)
+        self.assertEqual(message.account, account)

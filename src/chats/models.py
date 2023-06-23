@@ -9,10 +9,12 @@ from users.models import Account
 from coordinates.models import Coordinate
 
 
+# TODO: change folder path
 def get_group_preview_file_path(instance, *_, **__):
     return instance.created.strftime("uploads/chat_previews/%Y/%m/%d/") + instance.id
 
 
+# TODO: change folder path
 def get_message_img_file_path(instance, *_, **__):
     return instance.created.strftime("uploads/message_img/%Y/%m/%d/") + instance.id
 
@@ -49,7 +51,9 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     )
     members = models.ManyToManyField(Account, blank=True)
 
-    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
+    meeting_time = models.DateTimeField(
+        verbose_name="Время встречи", blank=True, null=True
+    )
     lacations_coordinates = models.ForeignKey(
         Coordinate,
         default=None,
