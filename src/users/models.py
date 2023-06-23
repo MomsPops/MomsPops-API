@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from typing import Dict
 
 from service.models import UUIDModel
 
@@ -12,7 +13,7 @@ class AccountManager(models.Manager):
     Custom account manager.
     """
 
-    def create_account(self, city_name: str, country_name: str, user: dict[str, str]):
+    def create_account(self, city_name: str, country_name: str, user: Dict[str, str]):
         city = City.objects.get(name=city_name, country__name=country_name)
         new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
