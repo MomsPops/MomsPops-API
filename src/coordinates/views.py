@@ -18,6 +18,12 @@ class CoordinateCreateAPIView(generics.CreateAPIView):
         return Response(serializer.validated_data)
 
 
+class CoordinateDecodeAPIView(generics.RetrieveAPIView):
+    queryset = Coordinate.object.all()
+    serializer_class = CoordinateCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class CoordinateNearAPIView(generics.ListAPIView):
     queryset = Coordinate.object.all()
     serializer_class = CoordinateListSerializer
