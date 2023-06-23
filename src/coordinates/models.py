@@ -17,12 +17,20 @@ class CoordinateManager(models.Manager):
             self.get_queryset()
         )
 
+    def is_near(self, coord) -> bool:
+        distance = coordinates_distance(
+            lat1=coord.lat,
+            lat2=user_coordinate.lat,
+            lon1=coord.lon,
+            lon2=user_coordinate.lon
+        )
+        return distance <= self.distance_needed
+        
     def all_near(self, user_coordinate) -> filter:
         filtered_coords = self.filter_time()
         return filter(
-            lambda coord: coordinates_distance(coord.lat, user_coordinate.lat, coord.lon, user_coordinate.lon)    # type: ignore
-            <= self.distance_needed,     # type: ignore
-            filtered_coords     # type: ignore
+            self.is_near,
+            filtered_coords 
         )
 
 
