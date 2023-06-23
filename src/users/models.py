@@ -15,13 +15,15 @@ class AccountManager(models.Manager):
 
     def create_account(
         self,
-        user: Dict[str, str],
-        city_name: str,
-        region_name: str,
+        user_data: Dict[str, str],
+        city_name: str | None = None,
+        region_name: str | None = None,
     ):
-        city = City.objects.get_or_create(name=city_name, region__name=region_name)
+        city = None
+        if city_name and region_name:
+            city = City.objects.get_or_create(name=city_name, region__name=region_name)
 
-        new_user = User.objects.create_user(**user)
+        new_user = User.objects.create_user(**user_data)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         return new_account
