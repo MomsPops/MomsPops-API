@@ -22,6 +22,11 @@ You can change it in settings.
 - chat
 - reactions
 
+#### Important Files and Folders:
+- _service_: abstract_models, vk_api
+- _.flake8_: linter settings
+- _mypy.ini_: settings for checking typing configuration
+
 
 #### Environ variables example:
 ".dev.env" file in ./src:
