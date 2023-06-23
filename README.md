@@ -11,9 +11,17 @@
 You can change it in settings.
 
 #### Applications:
-- core: project root app;
-- api: api application;
-- users: application for users; 
+- _core_: project root app;
+- _api_: api application;
+
+- users
+- coordinates
+- locations
+- notifications
+- profiles
+- chat
+- reactions
+
 
 #### Environ variables example:
 ".dev.env" file in ./src:
@@ -58,4 +66,4 @@ python manage.py runserver
 
 
 ## Database schema
-https://drive.google.com/file/d/120bxgsR9spj89HfDvYM9-zAic_IlBGEc/view
+https://lucid.app/lucidchart/736ac949-7e84-4be3-96b2-25e91ec53ec8/edit?beaconFlowId=C39989B530A6D57F&invitationId=inv_c894ff77-5e97-4e8d-823f-0ffeb53dc3c7&page=0_0#
