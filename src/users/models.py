@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from uuid import uuid4
+from service.models import UUIDModel
 
 from locations.models import City
 from notifications.models import Notification
@@ -20,16 +20,13 @@ class AccountManager(models.Manager):
         return new_account
 
 
-class Account(models.Model):
+class Account(UUIDModel):
     """
     Account model.
     """
-
-    id = models.UUIDField(primary_key=True, default=uuid4)
     user: User = models.OneToOneField(
         User, related_name="account", on_delete=models.CASCADE
     )
-
     bio = models.TextField(blank=True, null=True, verbose_name="Биография")
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
     photo = models.ImageField(
@@ -39,17 +36,17 @@ class Account(models.Model):
 
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город")
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    notification = models.ManyToManyField(
+    notifications = models.ManyToManyField(
         Notification, related_name="account", blank=True
     )
-    tags = models.ManyToManyField("Tags", blank=True, verbose_name="account")
+    tags = models.ManyToManyField("Tag", blank=True, verbose_name="account")
     objects = AccountManager()
 
     def __str__(self):
         return self.user.username
 
 
-SOCIAL_NETWORK_LINK_NAME = (
+SOCIAL_NETWORK_LINK_NAME = (    # Choices
     ("VK", "Вконтакте"),
     ("INST", "Instagram"),
     ("FB", "Facebook"),
@@ -58,8 +55,10 @@ SOCIAL_NETWORK_LINK_NAME = (
 )
 
 
-class SocialNetworkLinks(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
+class SocialNetworkLink(UUIDModel):
+    """
+    Social network link model.
+    """
     account = models.ForeignKey(
         Account,
         verbose_name="Пользователь",
@@ -79,6 +78,8 @@ class SocialNetworkLinks(models.Model):
         verbose_name_plural = "Ссылки на социальные сети"
 
 
-class Tags(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
+class Tag(UUIDModel):
+    """
+    Tag model.
+    """
     name = models.TextField(max_length=20)
