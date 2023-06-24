@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -6,10 +6,7 @@ from .serializers import AccountCreateSerializer, AccountDetailSerializer
 from .models import Account
 
 
-class AccountViewSet(mixins.CreateModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.RetrieveModelMixin,
-                     viewsets.GenericViewSet):
+class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountCreateSerializer
 
@@ -34,3 +31,11 @@ class AccountViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(request.user.account)
         serializer.update(**request.data)
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.data:
+            self.perform_destroy(request.user)
+            return Response({"detail": "User deleted."})
+        else:
+            Account.objects.deactivate(request.user.account)
+            return Response({"detail": "User deactivated."})

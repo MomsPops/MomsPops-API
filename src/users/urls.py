@@ -11,5 +11,6 @@ urlpatterns = [
     path("accounts/", AccountViewSet.as_view({"post": "create"}), name='accounts_create'),
     path("accounts/update/", AccountViewSet.as_view({"patch": "update"}), name="accounts_update"),
     path("accounts/me/", AccountViewSet.as_view({"get": "retrieve"}), name="accounts_me"),
+    path("accounts/delete/", AccountViewSet.as_view({"delete": "destroy"}), name="accounts_delete"),
 
 ]
