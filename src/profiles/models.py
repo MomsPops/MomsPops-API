@@ -1,6 +1,6 @@
 from django.db import models
 from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
-from settings.settings import MEDIA_URL
+from django.conf import settings
 
 
 class Profile(UUIDModel, AccountOneToOneModel):
@@ -17,10 +17,10 @@ class Profile(UUIDModel, AccountOneToOneModel):
     objects = models.Manager()
 
     def get_image(self):
-        path_for_default_img = MEDIA_URL + "default_img/user_standart_avatar.png"
+        path_for_default_img = settings.MEDIA_URL + "default_img/user_standart_avatar.png"
         if self.photo:
             return "http://127.0.0.1:8000" + self.photo.url
-        return "http://127.0.0.1:8000" + path_for_default_img 
+        return "http://127.0.0.1:8000" + path_for_default_img
 
 
 class Post(UUIDModel, TimeCreateUpdateModel):
