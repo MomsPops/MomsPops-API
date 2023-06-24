@@ -13,4 +13,8 @@ urlpatterns = [
             path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh")
         ]
     )),
+    path("coordinates/", include("coordinates.urls")),
+    path("locations/", include("locations.urls")),
+    path("profiles/", include("profiles.urls")),
+
 ]
