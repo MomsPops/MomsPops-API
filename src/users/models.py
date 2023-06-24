@@ -5,7 +5,6 @@ from typing import Dict
 from service.models import UUIDModel
 
 from locations.models import City
-from notifications.models import Notification
 
 
 class AccountManager(models.Manager):

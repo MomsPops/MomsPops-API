@@ -39,7 +39,7 @@ class TestAccountModel(TestUserFixture, TestLocationFixture, APITestCase):
             "password": "0a9d000"
         }
         with self.assertRaises(ObjectDoesNotExist):
-            account = Account.objects.create_account(
+            Account.objects.create_account(
                 user=user_data,
                 city_name=self.city1.name,
                 region_name=self.region2.name
