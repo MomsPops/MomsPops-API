@@ -49,5 +49,3 @@ class TestProfileFixture(TestAccountFixture, APITestCase):
         cls.user_pofile = Profile.objects.create(
             account=cls.user_account
         )
-
-

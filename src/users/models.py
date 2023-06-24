@@ -18,7 +18,7 @@ class AccountManager(models.Manager):
         new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
-        new_profile = Profile.objects.create(account=new_account)
+        Profile.objects.create(account=new_account)
         return new_account
 
 

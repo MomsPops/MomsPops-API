@@ -26,4 +26,3 @@ class ProfileViewSet(mixins.ListModelMixin,
         else:
             perm_classes = [IsAuthenticated, IsProfileOwner]
         return [pc() for pc in perm_classes]
-
