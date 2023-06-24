@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "notifications",
     "profiles",
     "chats",
+    "reactions",
 
     # libraries
     "rest_framework",
