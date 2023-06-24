@@ -21,6 +21,21 @@ class AccountManager(models.Manager):
         Profile.objects.create(account=new_account)
         return new_account
 
+    def deactivate(self, instance):
+        if instance.user.is_active:
+            instance.user.is_active = False
+            instance.user.save()
+            instance.save()
+
+    def activate(self, instance):
+        if not instance.user.is_active:
+            instance.user.is_active = True
+            instance.save()
+
+    def change_is_active(self, instance):
+        instance.user = not instance.user
+        instance.save()
+
 
 class Account(UUIDModel):
     """
