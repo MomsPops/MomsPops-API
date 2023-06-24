@@ -41,6 +41,12 @@ class Post(UUIDModel, TimeCreateUpdateModel):
 
     objects = models.Manager()
 
+    def get_preview_text(self):
+        return self.text[:150] + '...'
+
+    def __str__(self):
+        return self.get_preview_text()
+
 
 SOCIAL_NETWORK_LINK_NAME = (    # Choices
     ("VK", "Вконтакте"),
@@ -55,7 +61,7 @@ class SocialNetworkLink(UUIDModel):
     """
     Social network link model.
     """
-    account = models.ForeignKey(
+    profile = models.ForeignKey(
         "Profile",
         verbose_name="Профиль",
         related_name="social_network_links",
@@ -64,12 +70,13 @@ class SocialNetworkLink(UUIDModel):
     name = models.CharField(
         max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK"
     )
-    links = models.URLField()
+    link = models.URLField()
 
     def __str__(self):
-        return f"{self.get_name_display()}:{self.links}"
+        return f"{self.name}:{self.link}"
 
     class Meta:
+        unique_together = ("name", "profile", "link")
         verbose_name = "Ссылка на социальные сети"
         verbose_name_plural = "Ссылки на социальные сети"
 
@@ -78,4 +85,4 @@ class Tag(UUIDModel):
     """
     Tag model.
     """
-    name = models.TextField(max_length=20)
+    name = models.TextField(max_length=30, unique=True)
