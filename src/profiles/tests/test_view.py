@@ -22,10 +22,11 @@ class TestProfileViews(TestProfileFixture, APITestCase):
         assert response.status_code == 200
         assert len(response.json()) == 1
 
-    # def test_profile_update(self):
-    #     data_update = {"bio": "I was born tomorrow."}
-    #     response = self.user_client.patch(
-    #         reverse("profiles_update", kwargs={'username': self.user_account.user.username}), data=data_update
-    #     )
-    #     assert response.status_code == 200
-    #     assert self.user_pofile.bio == data_update['bio']
+    def test_profile_update(self):
+        data_update = {"bio": "I was born tomorrow."}
+        response = self.user_client.patch(
+            reverse("profiles_update", kwargs={'username': self.user_account.user.username}), data=data_update
+        )
+        assert response.status_code == 200
+        self.user_pofile.refresh_from_db()
+        assert self.user_pofile.bio == data_update['bio']

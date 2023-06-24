@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 
 from users.models import Account
-from service.fixtues import TestLocationFixture, TestUserFixture, TestAccountFixture
+from service.fixtues import TestAccountFixture
 
 
 class TestAccountView(TestAccountFixture, APITestCase):
@@ -53,3 +53,17 @@ class TestAccountView(TestAccountFixture, APITestCase):
                 "last_name": self.user.last_name
             }
         }
+
+    def test_account_deactivate(self):
+        response = self.user_client.delete(reverse("accounts_delete"))
+        assert response.status_code == 200
+        assert response.json() == {"detail": "User deactivated."}
+        self.user.refresh_from_db()
+        assert not self.user.is_active
+
+    def test_account_delete(self):
+        pre_accounts_count = Account.objects.count()
+        response = self.user_client.delete(reverse("accounts_delete"), {"delete": True})
+        assert response.status_code == 200
+        assert response.json() == {"detail": "User deleted."}
+        assert pre_accounts_count - Account.objects.count() == 1

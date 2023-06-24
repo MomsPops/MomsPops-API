@@ -40,6 +40,10 @@ class TestAccountFixture(TestUserFixture, TestLocationFixture, APITestCase):
             city=cls.city1,
             user=cls.user
         )
+        cls.superuser_account = Account.objects.create(
+            city=cls.city2,
+            user=cls.superuser
+        )
 
 
 class TestProfileFixture(TestAccountFixture, APITestCase):

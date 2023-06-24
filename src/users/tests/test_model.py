@@ -1,11 +1,11 @@
 from rest_framework.test import APITestCase
 from django.core.exceptions import ObjectDoesNotExist
-from service.fixtues import TestUserFixture, TestLocationFixture
+from service.fixtues import TestAccountFixture
 
 from users.models import Account
 
 
-class TestAccountModel(TestUserFixture, TestLocationFixture, APITestCase):
+class TestAccountModel(TestAccountFixture, APITestCase):
 
     def test_account_create(self):
         user_data = {
@@ -44,3 +44,19 @@ class TestAccountModel(TestUserFixture, TestLocationFixture, APITestCase):
                 city_name=self.city1.name,
                 region_name=self.region2.name
             )
+
+    def test_account_deactivate(self):
+        assert self.user_account.user.is_active
+        Account.objects.deactivate(self.user_account)
+        assert not self.user_account.user.is_active
+        Account.objects.deactivate(self.user_account)
+        assert not self.user_account.user.is_active
+
+    def test_account_activate(self):
+        assert self.superuser_account.user.is_active
+        Account.objects.deactivate(self.superuser_account)
+        assert not self.superuser_account.user.is_active
+        Account.objects.activate(self.superuser_account)
+        assert self.superuser_account.user.is_active
+        Account.objects.activate(self.superuser_account)
+        assert self.user_account.user.is_active
