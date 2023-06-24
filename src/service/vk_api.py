@@ -1,6 +1,7 @@
 import vk
 import json
 import time
+from typing import List
 
 
 class LocationParser:
@@ -8,7 +9,7 @@ class LocationParser:
     def __init__(self, api):
         self.api = api
 
-    def parse_regions(self) -> list[dict]:
+    def parse_regions(self) -> List[dict]:
         regions_response = self.api.database.getRegions(country_id=1, count=10**3)['items']
         regions = []
         for reg in regions_response:
@@ -37,7 +38,7 @@ class LocationParser:
         else:
             print(cities)
 
-    def parse_cities(self, reg_id) -> list[dict]:
+    def parse_cities(self, reg_id) -> List[dict]:
         cities = []
         cities_ids = set()
         for ok in range(3):
