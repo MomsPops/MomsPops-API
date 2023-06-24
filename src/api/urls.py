@@ -15,4 +15,6 @@ urlpatterns = [
     )),
     path("coordinates/", include("coordinates.urls")),
     path("locations/", include("locations.urls")),
+    path("profiles/", include("profiles.urls")),
+
 ]

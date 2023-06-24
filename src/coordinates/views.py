@@ -2,7 +2,7 @@ from rest_framework import generics, views, mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .serializer import CoordinateCreateSerializer, CoordinateListSerializer
+from .serializers import CoordinateCreateSerializer, CoordinateListSerializer
 from .models import Coordinate
 
 

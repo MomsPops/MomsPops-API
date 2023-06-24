@@ -2,18 +2,10 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 
 from users.models import Account
-from service.fixtues import TestLocationFixture, TestUserFixture
+from service.fixtues import TestLocationFixture, TestUserFixture, TestAccountFixture
 
 
-class TestAccountView(TestLocationFixture, TestUserFixture, APITestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.account = Account.objects.create(
-            city=cls.city1,
-            user=cls.user
-        )
+class TestAccountView(TestAccountFixture, APITestCase):
 
     def test_account_create(self):
         data = {

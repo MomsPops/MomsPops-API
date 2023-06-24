@@ -1,26 +1,32 @@
 from django.db import models
-from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
+from django.urls import reverse
 from django.conf import settings
+
+from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
 
 
 class Profile(UUIDModel, AccountOneToOneModel):
     """
     Profile model.
     """
-    bio = models.TextField(blank=True, null=True, verbose_name="Биография")
+    bio = models.TextField(default='', verbose_name="Биография")
     photo = models.ImageField(
         upload_to="uploads/profile_img/", verbose_name="Фото", blank=True, null=True
     )   # default='default_image.jpg'
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
-    status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
-    tags = models.ManyToManyField("Tag", blank=True, verbose_name="profile")
+    status = models.CharField(max_length=100, verbose_name="Статус", default="")
+    tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
+
     objects = models.Manager()
 
-    def get_image(self):
+    def get_photo_url(self):
         path_for_default_img = settings.MEDIA_URL + "default_img/user_standart_avatar.png"
         if self.photo:
             return "http://127.0.0.1:8000" + self.photo.url
         return "http://127.0.0.1:8000" + path_for_default_img
+
+    def get_profile_url(self):
+        return reverse("profiles_detail", kwargs={"username": self.account.user.username})
 
 
 class Post(UUIDModel, TimeCreateUpdateModel):

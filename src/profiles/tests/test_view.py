@@ -1,0 +1,18 @@
+from django.urls import reverse
+from rest_framework.test import APITestCase
+
+from service.fixtues import TestProfileFixture
+
+
+class TestProfileViews(TestProfileFixture, APITestCase):
+    def test_profile_detail(self):
+        response = self.user_client.get(
+            reverse("profiles_detail", kwargs={'username': self.user_account.user.username})
+        )
+        assert response.status_code == 200
+
+    def test_profile_detail_fail(self):
+        response = self.user_client.get(
+            reverse("profiles_detail", kwargs={'username': self.superuser.username})
+        )
+        assert response.status_code == 404

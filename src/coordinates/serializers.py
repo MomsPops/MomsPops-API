@@ -13,7 +13,8 @@ class CoordinateCreateSerializer(ModelSerializer):
 
 
 class CoordinateListSerializer(ModelSerializer):
+    get_profile_url = serializers.URLField(source="account.profile.get_profile_url")
 
     class Meta:
         model = Coordinate
-        fields = "__all__"
+        fields = ('lat', "lon", "get_profile_url")

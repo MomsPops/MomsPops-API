@@ -2,19 +2,19 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIClient
 
 from locations.models import Region, City
+from profiles.models import Profile
 from users.models import Account
 
 
 class TestUserFixture(APITestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User(username='michael7', password='rammqueen')
-        cls.user.set_password('rammqueen')
+        cls.user = User(username='michael7123', password='rammqueen123')
+        cls.user.set_password('rammqueen123')
         cls.user.save()
-        cls.superuser = User.objects.create_superuser(username='admin', password='password')
-        cls.superuser.set_password('passowrd')
+        cls.superuser = User.objects.create_superuser(username='admin12', password='password12')
+        cls.superuser.set_password('password12')
         cls.superuser.save()
         cls.user_client = APIClient()
         cls.user_client.force_login(cls.user)
@@ -32,9 +32,22 @@ class TestLocationFixture(APITestCase):
         cls.city2 = City.objects.create(name='Париж', region=cls.region2)
 
 
-class TestAccountFixture(TestUserFixture):
-
+class TestAccountFixture(TestUserFixture, TestLocationFixture, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user_account = Account.objects.create_account()
+        cls.user_account = Account.objects.create(
+            city=cls.city1,
+            user=cls.user
+        )
+
+
+class TestProfileFixture(TestAccountFixture, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_pofile = Profile.objects.create(
+            account=cls.user_account
+        )
+
+

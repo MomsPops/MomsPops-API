@@ -8,7 +8,7 @@ from .service.google_api import decode_coordinate
 
 
 class CoordinateManager(models.Manager):
-    distance_needed: float = 3.0  # in kilometers
+    distance_needed: float = 3000  # in meters
     delta_limit: timedelta = timedelta(minutes=5)
 
     def filter_time(self) -> filter:
