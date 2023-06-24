@@ -47,25 +47,27 @@ class AccountOneToOneModel(models.Model):
         abstract = True
 
 
-def AccountOneToOneFunc(related_name=None, verbose_name=None):
+def AccountOneToOneFunc(related_name=None, verbose_name=None, null=False):
     """Abstract model decorator."""
     class InnerModel(models.Model):
         account = models.OneToOneField(
             to="users.Account",
             verbose_name=verbose_name,
             related_name=related_name,
-            on_delete=models.CASCADE
+            on_delete=models.CASCADE,
+            null=null
         )
     return InnerModel
 
 
-def AccountForeignFunc(related_name=None, verbose_name=None):
+def AccountForeignFunc(related_name=None, verbose_name=None, null=False):
     """Abstract model decorator."""
     class InnerModel(models.Model):
         account = models.ForeignKey(
             to="users.Account",
             verbose_name=verbose_name,
             related_name=related_name,
-            on_delete=models.CASCADE
+            on_delete=models.CASCADE,
+            null=null
         )
     return InnerModel
