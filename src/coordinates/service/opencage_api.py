@@ -1,14 +1,11 @@
 from opencage.geocoder import OpenCageGeocode
+import os
 
 
-API_KEY = 'b8fcd228862e4ee9b8efd5817fac44ea'
-geo_point = '55.694170717163146, 37.8804331967079'
-
-
-def get_location_details(geo_point, API_KEY):
+def get_location_details(geo_point: str) -> str:
     lat, lon = geo_point.split(', ')
 
-    geocoder = OpenCageGeocode(API_KEY)
+    geocoder = OpenCageGeocode(os.getenv("OPENCAGE_API_KET"))
     results = geocoder.reverse_geocode(float(lat), float(lon), language='ru')
 
     if results:
@@ -21,6 +18,3 @@ def get_location_details(geo_point, API_KEY):
         return f"Город: {city}, Улица: {road}"
 
     return "Местоположение не найдено"
-
-
-print(get_location_details(geo_point, API_KEY))

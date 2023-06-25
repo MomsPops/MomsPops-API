@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 from service.models import AccountOneToOneModel
 from users.models import Account
-from .service.calculations import coordinates_distance
-from .service.google_api import decode_coordinate
+from .service.calculations import coordinates_distance_1
+from .service.google_api import get_location_details
 
 
 class CoordinateManager(models.Manager):
@@ -20,7 +20,7 @@ class CoordinateManager(models.Manager):
 
     def all_near(self, user_coordinate) -> filter:
         def is_near(coord) -> bool:
-            distance = coordinates_distance(
+            distance = coordinates_distance_1(
                 lat1=coord.lat,
                 lat2=user_coordinate.lat,
                 lon1=coord.lon,
@@ -36,7 +36,7 @@ class CoordinateManager(models.Manager):
 
     def decode(self, coord) -> str:
         """Returns place by coordinate."""
-        return decode_coordinate(lat=coord.lat, lon=coord.lon)
+        return get_location_details(lat=coord.lat, lon=coord.lon)
 
     def deactivate(self, account) -> None:
         """Sets account coordinate to None"""

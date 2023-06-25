@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import patch
-from coordinates.service.distance_calculation import calculate_distance_in_meters, distance_formatter
-from coordinates.service.city_by_google import get_location_details
+from coordinates.service.calculations import calculate_distance_2, distance_formatter
+from coordinates.service.google_api import get_location_details
 
 
 class GetLocationDetailsTestCase(unittest.TestCase):
-    @patch('coordinates.service.city_by_google.googlemaps.Client')
+    @patch('coordinates.service.google_api.googlemaps.Client')
     def test_small_city_by_google(self, mock_client):
         mock_geocode_result = [
             {
@@ -22,7 +22,7 @@ class GetLocationDetailsTestCase(unittest.TestCase):
         result = get_location_details(latitude, longitude)
         self.assertEqual(result, expected_result)
 
-    @patch('coordinates.service.city_by_google.googlemaps.Client')
+    @patch('coordinates.service.google_api.googlemaps.Client')
     def test_big_city_by_google_1(self, mock_client):
         mock_geocode_result = [
             {
@@ -40,7 +40,7 @@ class GetLocationDetailsTestCase(unittest.TestCase):
         result = get_location_details(latitude, longitude)
         self.assertEqual(result, expected_result)
 
-    @patch('coordinates.service.city_by_google.googlemaps.Client')
+    @patch('coordinates.service.google_api.googlemaps.Client')
     def test_other_city_by_google_2(self, mock_client):
         mock_geocode_result = [
             {
@@ -59,11 +59,11 @@ class GetLocationDetailsTestCase(unittest.TestCase):
 
 
 class CalculateDistanceTestCase(unittest.TestCase):
-    def test_calculate_distance_in_meters(self):
+    def test_calculate_distance_2(self):
         lat = 43.237834
         lon = 76.945856
         expected_result = "Обернитесь, вы рядом!"
-        distance = distance_formatter(calculate_distance_in_meters)(lat, lon, lat, lon)
+        distance = distance_formatter(calculate_distance_2)(lat, lon, lat, lon)
         self.assertEqual(distance, expected_result)
 
         lat1 = 43.237834
@@ -71,15 +71,15 @@ class CalculateDistanceTestCase(unittest.TestCase):
         lat2 = 43.237743
         lon2 = 76.945665
         expected_result = "18 м"
-        distance = distance_formatter(calculate_distance_in_meters)(lat1, lon1, lat2, lon2)
+        distance = distance_formatter(calculate_distance_2)(lat1, lon1, lat2, lon2)
         self.assertEqual(distance, expected_result)
 
         lat1 = 43.237834
         lon1 = 76.945856
         lat2 = 43.237743
         lon2 = 76.945665
-        distance1 = calculate_distance_in_meters(lat1, lon1, lat2, lon2)
-        distance2 = calculate_distance_in_meters(lat2, lon2, lat1, lon1)
+        distance1 = calculate_distance_2(lat1, lon1, lat2, lon2)
+        distance2 = calculate_distance_2(lat2, lon2, lat1, lon1)
         self.assertEqual(distance1, distance2)
 
     def test_distance_in_kilometers(self):
@@ -88,7 +88,7 @@ class CalculateDistanceTestCase(unittest.TestCase):
         lat2 = 43.229381
         lon2 = 76.944408
         expected_result = "1.47 км"
-        distance = distance_formatter(calculate_distance_in_meters)(lat1, lon1, lat2, lon2)
+        distance = distance_formatter(calculate_distance_2)(lat1, lon1, lat2, lon2)
         self.assertEqual(distance, expected_result)
 
 

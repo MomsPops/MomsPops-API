@@ -1,7 +1,7 @@
-from math import cos, sin, acos
+from math import cos, sin, acos, radians, atan2, sqrt
 
 
-def coordinates_distance(lat1, lat2, lon1, lon2) -> float:
+def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
     """
     cos(d) = sin(φА)·sin(φB) + cos(φА)·cos(φB)·cos(λА − λB),
     где φА и φB — широты, λА, λB — долготы данных пунктов, d — расстояние между пунктами,
@@ -15,3 +15,30 @@ def coordinates_distance(lat1, lat2, lon1, lon2) -> float:
     d = acos(cos_d)
 
     return d * R * 1000   # return L
+
+
+def distance_formatter(func):
+    """ Можно использывать как @distance_formatter """
+    def wrapper(lat1, lon1, lat2, lon2):
+        distance_in_meters = func(lat1, lon1, lat2, lon2)
+
+        if distance_in_meters >= 1000:
+            return f"{round(distance_in_meters / 1000, 2)} км"
+        elif distance_in_meters >= 1:
+            return f"{distance_in_meters} м"
+        return "Обернитесь, вы рядом!"
+
+    return wrapper
+
+
+def calculate_distance_2(lat1, lon1, lat2, lon2):
+    radius = 6371000
+
+    # Формула Винсенти
+    a = sin((radians(lat2) - radians(lat1)) / 2) ** 2 + \
+        cos(radians(lat1)) * cos(radians(lat2)) * \
+        sin((radians(lon2) - radians(lon1)) / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = radius * c
+
+    return round(distance)
