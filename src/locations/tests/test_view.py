@@ -9,13 +9,13 @@ class TestLoadData(TestUserFixture):
 
     def test_load_data_regions(self):
         response = self.superuser_client.post(reverse("locations_load_data_regions"))
-        assert response.status_code == 200
-        assert response.json() == {"detail": "Regions` data loaded successfully."}
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"detail": "Regions` data loaded successfully."})
 
     def test_load_data_fail(self):
         response = self.user_client.post(reverse("locations_load_data"))
-        assert response.status_code == 403
-        assert response.json() == {'detail': 'You do not have permission to perform this action.'}
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
 
 
 class TestViews(APITestCase):
@@ -30,8 +30,8 @@ class TestViews(APITestCase):
 
     def test_location_list(self):
         response = self.client.get(reverse("locations_all"))
-        assert response.status_code == 200
-        assert response.json() == [
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
             {
                 "id": self.region1.id,
                 "name": self.region1.name,
@@ -52,4 +52,4 @@ class TestViews(APITestCase):
                     }
                 ]
             }
-        ]
+        ])

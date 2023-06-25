@@ -20,11 +20,11 @@ class TestAccountView(TestAccountFixture, APITestCase):
             }
         }
         response = self.client.post(path=reverse("accounts_create"), data=data, format='json')
-        assert response.status_code == 201
+        self.assertEqual(response.status_code, 201)
         user_data = data['user']
         user_data.pop("password")
         data['user'] = user_data
-        assert response.json() == data
+        self.assertEqual(response.json(), data)
 
     def test_account_create_fail(self):
         data = {
@@ -36,14 +36,14 @@ class TestAccountView(TestAccountFixture, APITestCase):
             }
         }
         response = self.client.post(path=reverse("accounts_create"), data=data, format='json')
-        assert response.status_code == 400
-        assert response.json() == {'user': {'first_name': ['This field is required.'],
-                                            'last_name': ['This field is required.']}}
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'user': {'first_name': ['This field is required.'],
+                                            'last_name': ['This field is required.']}})
 
     def test_account_retrieve(self):
         response = self.user_client.get(reverse("accounts_me"))
-        assert response.status_code == 200
-        assert response.json() == {
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
             "city_name": self.city1.name,
             "region_name": self.city1.region.name,
             "user": {
@@ -52,18 +52,18 @@ class TestAccountView(TestAccountFixture, APITestCase):
                 "first_name": self.user.first_name,
                 "last_name": self.user.last_name
             }
-        }
+        })
 
     def test_account_deactivate(self):
         response = self.user_client.delete(reverse("accounts_delete"))
-        assert response.status_code == 200
-        assert response.json() == {"detail": "User deactivated."}
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"detail": "User deactivated."})
         self.user.refresh_from_db()
-        assert not self.user.is_active
+        self.assertEqual(self.user.is_active, False)
 
     def test_account_delete(self):
         pre_accounts_count = Account.objects.count()
         response = self.user_client.delete(reverse("accounts_delete"), {"delete": True})
-        assert response.status_code == 200
-        assert response.json() == {"detail": "User deleted."}
-        assert pre_accounts_count - Account.objects.count() == 1
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"detail": "User deleted."})
+        self.assertEqual(pre_accounts_count - Account.objects.count(), 1)

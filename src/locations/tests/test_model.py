@@ -9,10 +9,10 @@ class TestLocations(TestLocationFixture):
         region = Region.objects.create(
             name="Свердловская область"
         )
-        assert region.name == "Свердловская область"
+        self.assertEqual(region.name, "Свердловская область")
 
     def test_city_create(self):
         city = City.objects.create(
             name="Екатеринбург", region=self.region1
         )
-        assert city.region == self.region1
+        self.assertEqual(city.region, self.region1)
