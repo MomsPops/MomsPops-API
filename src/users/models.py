@@ -49,9 +49,6 @@ class Account(UUIDModel):
         City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True
     )
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    notifications = models.ManyToManyField(
-        Notification, related_name="account", blank=True
-    )
     tags = models.ManyToManyField("Tag", blank=True, verbose_name="account")
     objects = AccountManager()
 
