@@ -1,4 +1,4 @@
-from math import cos, sin, acos, radians, atan2, sqrt
+from math import cos, sin, acos, atan2, sqrt
 
 
 def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
@@ -18,7 +18,7 @@ def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
 
 
 def distance_formatter(func):
-    """ Можно использывать как @distance_formatter """
+    """ Можно использовать как @distance_formatter """
     def wrapper(lat1, lon1, lat2, lon2):
         distance_in_meters = func(lat1, lon1, lat2, lon2)
 
@@ -35,9 +35,9 @@ def calculate_distance_2(lat1, lon1, lat2, lon2):
     radius = 6371000
 
     # Формула Винсенти
-    a = sin((radians(lat2) - radians(lat1)) / 2) ** 2 + \
-        cos(radians(lat1)) * cos(radians(lat2)) * \
-        sin((radians(lon2) - radians(lon1)) / 2) ** 2
+    a = sin((lat2 - lat1) / 2) / 2 ** 2 + \
+        cos(lat1) * cos(lat2) * \
+        sin((lon2 - lon1) / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     distance = radius * c
 

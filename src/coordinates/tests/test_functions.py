@@ -90,7 +90,3 @@ class CalculateDistanceTestCase(unittest.TestCase):
         expected_result = "1.47 км"
         distance = distance_formatter(calculate_distance_2)(lat1, lon1, lat2, lon2)
         self.assertEqual(distance, expected_result)
-
-
-if __name__ == '__main__':
-    unittest.main()
