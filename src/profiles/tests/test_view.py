@@ -18,14 +18,14 @@ class TestProfileViews(TestProfileFixture, APITestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_profile_list(self):
-        response = self.user_client.get(reverse("profiles_all"))
+        response = self.user_client.get(reverse("profiles"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
 
     def test_profile_update(self):
         data_update = {"bio": "I was born tomorrow."}
         response = self.user_client.patch(
-            reverse("profiles_update", kwargs={'username': self.user_account.user.username}), data=data_update
+            reverse("profiles_detail", kwargs={'username': self.user_account.user.username}), data=data_update
         )
         self.assertEqual(response.status_code, 200)
         self.user_pofile.refresh_from_db()

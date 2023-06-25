@@ -19,7 +19,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
                 "email": "mokky@mail.ru"
             }
         }
-        response = self.client.post(path=reverse("accounts_create"), data=data, format='json')
+        response = self.client.post(path=reverse("accounts"), data=data, format='json')
         self.assertEqual(response.status_code, 201)
         user_data = data['user']
         user_data.pop("password")
@@ -35,7 +35,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
                 "password": "super_mouser9100",
             }
         }
-        response = self.client.post(path=reverse("accounts_create"), data=data, format='json')
+        response = self.client.post(path=reverse("accounts"), data=data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'user': {'first_name': ['This field is required.'],
                                            'last_name': ['This field is required.']}})
@@ -55,7 +55,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
         })
 
     def test_account_deactivate(self):
-        response = self.user_client.delete(reverse("accounts_delete"))
+        response = self.user_client.delete(reverse("accounts_me"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"detail": "User deactivated."})
         self.user.refresh_from_db()
@@ -63,7 +63,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
 
     def test_account_delete(self):
         pre_accounts_count = Account.objects.count()
-        response = self.user_client.delete(reverse("accounts_delete"), {"delete": True})
-        self.assertEqual(response.status_code, 200)
+        response = self.user_client.delete(reverse("accounts_me"), {"delete": True})
         self.assertEqual(response.json(), {"detail": "User deleted."})
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(pre_accounts_count - Account.objects.count(), 1)

@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -6,7 +6,11 @@ from .serializers import AccountCreateSerializer, AccountDetailSerializer
 from .models import Account
 
 
-class AccountViewSet(viewsets.ModelViewSet):
+class AccountViewSet(mixins.RetrieveModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
+                     viewsets.GenericViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountCreateSerializer
 

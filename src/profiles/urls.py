@@ -1,11 +1,14 @@
-from django.urls import path
+from django.urls import path, include
 
+from .routers import ProfileRouter
 from .views import ProfileViewSet
 
 
+router = ProfileRouter()
+router.register("", ProfileViewSet, "profiles")
+
+
 urlpatterns = [
-    path("<str:username>/", ProfileViewSet.as_view({"get": "retrieve"}), name="profiles_detail"),
-    path("<str:username>/update", ProfileViewSet.as_view({"patch": "update"}), name="profiles_update"),
-    path("", ProfileViewSet.as_view({"get": "list"}), name="profiles_all"),
+    path("", include(router.urls)),
 
 ]
