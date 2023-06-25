@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import Reaction, ReactionItem
 from .fields import Base64ImageField
+from .models import Reaction, ReactionItem
 
 
 class ReactionItemSerializer(ModelSerializer):

@@ -1,4 +1,4 @@
-from math import cos, sin, acos
+from math import acos, cos, sin
 
 
 def coordinates_distance(lat1, lat2, lon1, lon2) -> float:

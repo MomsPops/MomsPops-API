@@ -1,8 +1,8 @@
-from django.urls import path, include
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from django.urls import include, path
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 
 from .docs import urlpatterns as docs_urlpatterns
-
 
 urlpatterns = [
     path('docs/', include(docs_urlpatterns)),

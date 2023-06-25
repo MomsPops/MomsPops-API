@@ -1,12 +1,11 @@
-from django.db import models
-from django.contrib.auth.models import User
-from typing import Dict
+from typing import Dict, Union
 
-from service.models import UUIDModel
+from django.contrib.auth.models import User
+from django.db import models
 
 from locations.models import City
 from notifications.models import Notification
-from typing import Union
+from service.models import UUIDModel
 
 
 class AccountManager(models.Manager):

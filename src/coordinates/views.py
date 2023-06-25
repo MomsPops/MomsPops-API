@@ -1,9 +1,9 @@
 from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .serializer import CoordinateCreateSerializer, CoordinateListSerializer
 from .models import Coordinate
+from .serializer import CoordinateCreateSerializer, CoordinateListSerializer
 
 
 class CoordinateCreateAPIView(generics.CreateAPIView):

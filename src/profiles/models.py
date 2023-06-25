@@ -1,6 +1,8 @@
-from django.db import models
 from django.core.files import File
-from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
+from django.db import models
+
+from service.models import (AccountOneToOneModel, TimeCreateUpdateModel,
+                            UUIDModel)
 
 
 def upload_default_photo():  # TODO

@@ -1,7 +1,6 @@
 from django.urls import path
 
-from .views import CoordinateNearAPIView, CoordinateCreateAPIView
-
+from .views import CoordinateCreateAPIView, CoordinateNearAPIView
 
 urlpatterns = [
     path("set/", CoordinateCreateAPIView.as_view(), name='coordinates_set'),

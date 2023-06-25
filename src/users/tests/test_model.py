@@ -1,7 +1,8 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.test import TestCase
-from django.contrib.auth import authenticate
+
 from users.models import Account
 
 

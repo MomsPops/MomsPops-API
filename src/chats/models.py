@@ -1,12 +1,9 @@
 from django.db import models
-from service.models import (
-    UUIDModel,
-    TimeCreateModel,
-    TimeCreateUpdateModel,
-    AccountForeignModel,
-)
-from users.models import Account
+
 from coordinates.models import Coordinate
+from service.models import (AccountForeignModel, TimeCreateModel,
+                            TimeCreateUpdateModel, UUIDModel)
+from users.models import Account
 
 
 # TODO: change folder path

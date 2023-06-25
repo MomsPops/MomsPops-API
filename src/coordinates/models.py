@@ -1,8 +1,10 @@
-from django.db import models
 from datetime import datetime, timedelta
+
+from django.db import models
 
 from service.models import AccountOneToOneModel
 from users.models import Account
+
 from .counter import coordinates_distance
 
 

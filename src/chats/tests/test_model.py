@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.test import TestCase
-from users.models import Account
+
 from chats.models import Chat, ChatType, Message
+from users.models import Account
 
 
 class ChatTest(TestCase):

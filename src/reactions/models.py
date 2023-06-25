@@ -1,6 +1,8 @@
-from django.db import models
-from users.models import Account
 from uuid import uuid4
+
+from django.db import models
+
+from users.models import Account
 
 
 class Reaction(models.Model):

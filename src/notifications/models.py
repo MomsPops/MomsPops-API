@@ -1,6 +1,6 @@
 from django.db import models
 
-from service.models import UUIDModel, TimeCreateModel
+from service.models import TimeCreateModel, UUIDModel
 
 
 class Notification(UUIDModel, TimeCreateModel):

@@ -1,8 +1,8 @@
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
-from .serializers import AccountCreateSerializer, AccountDetailSerializer
 from .models import Account
+from .serializers import AccountCreateSerializer, AccountDetailSerializer
 
 
 class AccountViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
