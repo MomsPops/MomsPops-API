@@ -5,11 +5,12 @@ from .models import Coordinate
 
 
 class CoordinateCreateSerializer(ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lat = serializers.FloatField(max_value=90, min_value=-90)
+    lon = serializers.FloatField(max_value=179.9999999999999999999999999999, min_value=-180)
 
     class Meta:
         model = Coordinate
-        fields = "__all__"
+        fields = ("lat", "lon")
 
 
 class CoordinateListSerializer(ModelSerializer):

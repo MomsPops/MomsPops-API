@@ -5,6 +5,14 @@ from django.conf import settings
 from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
 
 
+SEX_CHOICES = (
+    (0, "Не выбран"),
+    (1, "Мужской"),
+    (2, "Женский"),
+    (3, "Другой")
+)
+
+
 class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     """
     Profile model.
@@ -16,6 +24,7 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
     status = models.CharField(max_length=100, verbose_name="Статус", default="")
     tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
+    sex = models.IntegerField("Пол", choices=SEX_CHOICES, default=0)
 
     objects = models.Manager()
 

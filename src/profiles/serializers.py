@@ -24,4 +24,4 @@ class ProfileDetailSerializer(AbstractProfileSerializer):
 
     class Meta:
         model = Profile
-        fields = ("bio", "get_photo_url", "birthday", "tags", "status", "first_name", "last_name", )
+        fields = ("bio", "sex", "get_photo_url", "birthday", "tags", "status", "first_name", "last_name", )
