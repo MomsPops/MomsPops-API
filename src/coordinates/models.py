@@ -5,11 +5,24 @@ from service.models import AccountOneToOneModel
 from users.models import Account
 from .service.calculations import coordinates_distance
 from .service.google_api import decode_coordinate
+from .validators import validate_latitude, validate_longitude
 
 
 class CoordinateManager(models.Manager):
     distance_needed: float = 3000  # in meters
     delta_limit: timedelta = timedelta(minutes=5)
+
+    def update(self, instance, lat: float, lon: float):
+        instance.lat = validate_latitude(lat)
+        instance.lon = validate_longitude(lon)
+        instance.save()
+
+    def create(self, lat: float, lon: float, account: Account):
+        lat = validate_latitude(lat)
+        lon = validate_longitude(lon)
+        new_coordinate = Coordinate(lat=lat, lon=lon, account=account)
+        new_coordinate.save()
+        return new_coordinate
 
     def filter_time(self) -> filter:
         now_time = datetime.now()
@@ -48,9 +61,9 @@ class Coordinate(AccountOneToOneModel):
     """
     Coordinate model.
     """
-    lat = models.DecimalField("Latitude", decimal_places=6, max_digits=8)
-    lon = models.DecimalField("Longitude", decimal_places=6, max_digits=9)
-    account = models.OneToOneField(Account, related_name="+", on_delete=models.CASCADE, null=True)
+    lat = models.FloatField("Latitude", validators=[validate_latitude])
+    lon = models.FloatField("Longitude", validators=[validate_longitude])
+    account = models.OneToOneField(Account, related_name="coordinate", on_delete=models.CASCADE, null=True)
     last_time = models.DateTimeField("Last time", auto_created=True, auto_now=True)
 
     object = models.Manager()
