@@ -6,7 +6,6 @@ from service.models import (
     AccountForeignModel,
 )
 from users.models import Account
-from coordinates.models import Coordinate
 
 
 # TODO: change folder path
@@ -22,6 +21,8 @@ def get_message_img_file_path(instance, *_, **__):
 class ChatType(models.Model):
     title = models.CharField(max_length=100, verbose_name="Название чата")
 
+    objects = models.Manager()
+
     def __str__(self):
         return self.title
 
@@ -36,13 +37,13 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     """
 
     type = models.ForeignKey(
-        ChatType,
+        "ChatType",
         related_name="chats",
         on_delete=models.PROTECT,
         verbose_name="Тип чата",
     )
     owner = models.ForeignKey(
-        Account,
+        "users.Account",
         on_delete=models.SET_NULL,
         verbose_name="Создатель группы",
         related_name="owner_chat",
@@ -54,14 +55,16 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     meeting_time = models.DateTimeField(
         verbose_name="Время встречи", blank=True, null=True
     )
-    lacations_coordinates = models.ForeignKey(
-        Coordinate,
+    location_coordinate = models.ForeignKey(
+        "coordinates.Coordinate",
         default=None,
         null=True,
         on_delete=models.SET_NULL,
         verbose_name="Координаты",
     )
     img_preview = models.ImageField(upload_to=get_group_preview_file_path, null=True)
+
+    objects = models.Manager()
 
     def __str__(self):
         return f"{self.type.title}:{self.id}"
@@ -77,7 +80,7 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
     """
 
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
-    account = models.ForeignKey(
+    account: Account = models.ForeignKey(
         Account,
         on_delete=models.CASCADE,
         verbose_name="Автор сообщения",
@@ -88,6 +91,8 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
         upload_to=get_message_img_file_path, null=True
     )  # TODO: added extra models FK
     viewed = models.BooleanField(default=False)
+
+    objects = models.Manager()
 
     def __str__(self):
         return f"Account: {self.account.id}, viewed: {self.viewed}"

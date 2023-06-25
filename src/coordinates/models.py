@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 
 from service.models import AccountOneToOneModel
 from users.models import Account
-from .counter import coordinates_distance
+from .service.calculations import coordinates_distance
+from .service.google_api import decode_coordinate
 
 
 class CoordinateManager(models.Manager):
-    distance_needed: float = 3.0  # in kilometers
+    distance_needed: float = 3000  # in meters
     delta_limit: timedelta = timedelta(minutes=5)
 
     def filter_time(self) -> filter:
@@ -17,21 +18,30 @@ class CoordinateManager(models.Manager):
             self.get_queryset()
         )
 
-    def is_near(self, coord, user_coordinate) -> bool:
-        distance = coordinates_distance(
-            lat1=coord.lat,
-            lat2=user_coordinate.lat,
-            lon1=coord.lon,
-            lon2=user_coordinate.lon
-        )
-        return distance <= self.distance_needed
-
     def all_near(self, user_coordinate) -> filter:
+        def is_near(coord) -> bool:
+            distance = coordinates_distance(
+                lat1=coord.lat,
+                lat2=user_coordinate.lat,
+                lon1=coord.lon,
+                lon2=user_coordinate.lon
+            )
+            return distance <= self.distance_needed
+
         filtered_coords = self.filter_time()
         return filter(
-            lambda coord: self.is_near(coord, user_coordinate),
+            is_near,
             filtered_coords
         )
+
+    def decode(self, coord) -> str:
+        """Returns place by coordinate."""
+        return decode_coordinate(lat=coord.lat, lon=coord.lon)
+
+    def deactivate(self, account) -> None:
+        """Sets account coordinate to None"""
+        account.coordinate = None
+        account.save()
 
 
 class Coordinate(AccountOneToOneModel):
