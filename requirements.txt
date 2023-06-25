@@ -38,3 +38,6 @@ tzdata==2023.3
 uritemplate==4.1.1
 urllib3==2.0.3
 uuid==1.30
+googlemaps==4.10
+python-dotenv==1.0.0
+opencage==2.2.0
