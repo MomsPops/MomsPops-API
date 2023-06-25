@@ -1,6 +1,7 @@
 from rest_framework import generics, views, mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ObjectDoesNotExist
 
 from .serializers import CoordinateCreateSerializer, CoordinateListSerializer
 from .models import Coordinate
@@ -19,8 +20,13 @@ class CoordinateViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        request.user.coordinate.object.update(**serializer.validated_data)
-        return Response(serializer.validated_data)
+        try:
+            Coordinate.coordinate_manager.update(request.user.account.coordinate, **serializer.validated_data)
+        except ObjectDoesNotExist:
+            new_coord = Coordinate.coordinate_manager.create(
+                **serializer.validated_data, account=request.user.account
+            )
+        return Response(serializer.validated_data, status=201)
 
     def destroy(self, request, *args, **kwargs):
         request.user.account.coordinate.delete()
