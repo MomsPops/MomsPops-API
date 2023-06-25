@@ -5,7 +5,7 @@ from coordinates.service.city_by_google import get_location_details
 
 
 class GetLocationDetailsTestCase(unittest.TestCase):
-    @patch('city_by_google.googlemaps.Client')
+    @patch('coordinates.service.city_by_google.googlemaps.Client')
     def test_small_city_by_google(self, mock_client):
         mock_geocode_result = [
             {
@@ -22,7 +22,7 @@ class GetLocationDetailsTestCase(unittest.TestCase):
         result = get_location_details(latitude, longitude)
         self.assertEqual(result, expected_result)
 
-    @patch('city_by_google.googlemaps.Client')
+    @patch('coordinates.service.city_by_google.googlemaps.Client')
     def test_big_city_by_google_1(self, mock_client):
         mock_geocode_result = [
             {
@@ -40,7 +40,7 @@ class GetLocationDetailsTestCase(unittest.TestCase):
         result = get_location_details(latitude, longitude)
         self.assertEqual(result, expected_result)
 
-    @patch('city_by_google.googlemaps.Client')
+    @patch('coordinates.service.city_by_google.googlemaps.Client')
     def test_other_city_by_google_2(self, mock_client):
         mock_geocode_result = [
             {
