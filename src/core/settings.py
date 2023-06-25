@@ -4,6 +4,7 @@ Django settings for MomsPops project.
 import os
 from datetime import timedelta
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv(".dev.env")
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "notifications",
     "profiles",
     "chats",
+    "reactions",
 
     # libraries
     "rest_framework",

@@ -1,5 +1,6 @@
-import vk
 import json
+
+import vk
 
 
 class LocationParser:
