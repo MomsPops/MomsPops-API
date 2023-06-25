@@ -16,7 +16,7 @@ class AccountManager(models.Manager):
 
     def create_account(
         self,
-        user_data: Dict[str, str],
+        user: Dict[str, str],
         city_name: Union[str, None] = None,
         region_name: Union[str, None] = None,
     ):
@@ -24,7 +24,7 @@ class AccountManager(models.Manager):
         if city_name and region_name:
             city = City.objects.get_or_create(name=city_name, region__name=region_name)
 
-        new_user = User.objects.create_user(**user_data)
+        new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         return new_account
