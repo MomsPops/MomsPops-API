@@ -22,7 +22,7 @@ class AccountManager(models.Manager):
     ):
         city = None
         if city_name and region_name:
-            city = City.objects.get_or_create(name=city_name, region__name=region_name)
+            city = City.objects.get(name=city_name, region__name=region_name)
 
         new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
