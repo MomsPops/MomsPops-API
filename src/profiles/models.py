@@ -13,7 +13,7 @@ SEX_CHOICES = (
 )
 
 
-class Profile(UUIDModel, AccountOneToOneModel):
+class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     """
     Profile model.
     """
@@ -38,7 +38,7 @@ class Profile(UUIDModel, AccountOneToOneModel):
         return reverse("profiles_detail", kwargs={"username": self.account.user.username})
 
 
-class Post(UUIDModel, TimeCreateUpdateModel):
+class Post(UUIDModel, TimeCreateUpdateModel):   # type: ignore
     """
     Post model.
     """
