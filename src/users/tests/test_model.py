@@ -24,7 +24,7 @@ class AccountTest(TestCase):
 
         user_data = {"username": "created_test_user1", "email": "test@mail.com"}
 
-        account2 = Account.objects.create_account(user_data=user_data)
+        account2 = Account.objects.create_account(user=user_data)
         self.assertTrue(account2 is not None)
         self.assertEqual(Account.objects.count(), 2)
         self.assertEqual(account2.birthday, None)
@@ -35,7 +35,7 @@ class AccountTest(TestCase):
         with transaction.atomic():
             # check create without username
             try:
-                Account.objects.create_account(user_data={"email": "test@mail.com"})
+                Account.objects.create_account(user={"email": "test@mail.com"})
             except Exception:
                 pass
         self.assertEqual(Account.objects.count(), 2)
