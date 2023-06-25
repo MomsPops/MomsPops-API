@@ -38,7 +38,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
         response = self.client.post(path=reverse("accounts_create"), data=data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'user': {'first_name': ['This field is required.'],
-                                            'last_name': ['This field is required.']}})
+                                           'last_name': ['This field is required.']}})
 
     def test_account_retrieve(self):
         response = self.user_client.get(reverse("accounts_me"))

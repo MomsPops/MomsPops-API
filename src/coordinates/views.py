@@ -23,7 +23,7 @@ class CoordinateViewSet(mixins.CreateModelMixin,
         try:
             Coordinate.coordinate_manager.update(request.user.account.coordinate, **serializer.validated_data)
         except ObjectDoesNotExist:
-            new_coord = Coordinate.coordinate_manager.create(
+            Coordinate.coordinate_manager.create(
                 **serializer.validated_data, account=request.user.account
             )
         return Response(serializer.validated_data, status=201)
