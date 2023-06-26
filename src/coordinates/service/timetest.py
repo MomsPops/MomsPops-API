@@ -96,12 +96,7 @@ def test_time_vector(n_samples: int):
         Coordinate(random.uniform(-90, 90), random.uniform(-180, 180)) for _ in range(n_samples)
     ]
     lat2_v, lon2_v = vectorize_queryset(queryset=coords_queryset)
-    distances = calculate_vector_distance(
-            lat1=coord1.lat,
-            lon1=coord1.lon,
-            lat2=lat2_v,
-            lon2=lon2_v
-        )
+    distances = calculate_vector_distance(lat1=coord1.lat, lon1=coord1.lon, lat2=lat2_v, lon2=lon2_v)
     return distances
     # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
