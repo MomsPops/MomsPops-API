@@ -6,10 +6,10 @@ from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneMode
 
 
 SEX_CHOICES = (
-    (0, "Не выбран"),
-    (1, "Мужской"),
-    (2, "Женский"),
-    (3, "Другой")
+    ("Не выбран", "Не выбран"),
+    ("Мужской", "Мужской"),
+    ("Женский", "Женский"),
+    ("Другой", "Другой")
 )
 
 
