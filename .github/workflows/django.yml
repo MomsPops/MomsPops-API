@@ -50,5 +50,14 @@ jobs:
         run: docker compose -f docker-compose.yml run --rm backend python manage.py migrate
       - name:  Run Django Tests
         run: docker compose -f docker-compose.yml run backend python manage.py test
-      - name: Tear down the Stack
-        run:  docker compose -f local.yml down
+    # services:
+    #   db:
+    #     image: postgres:15.3-alpine
+    #     env:
+    #       POSTGRES_USER: postgres
+    #       POSTGRES_PASSWORD: postgres
+    #       POSTGRES_DB: postgres
+    #     ports:
+    #       - 5432:5432
+    #     # needed because the postgres container does not provide a healthcheck
+    #     options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
