@@ -2,7 +2,6 @@ from django.db import models
 
 from service.models import UUIDModel
 from users.models import Account
-from chats.models import Message
 
 
 class Reaction(UUIDModel):
@@ -19,11 +18,6 @@ class Reaction(UUIDModel):
         "ReactionItem",
         on_delete=models.CASCADE,
         verbose_name="Варианты реакций из определенного списка"
-    )
-    message: Message = models.ForeignKey(
-        Message,
-        on_delete=models.CASCADE,
-        verbose_name="Сообщение"
     )
 
     class Meta:

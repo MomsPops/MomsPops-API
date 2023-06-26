@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "locations",
     "notifications",
     "profiles",
+    "reactions",
     "chats",
 
     # libraries

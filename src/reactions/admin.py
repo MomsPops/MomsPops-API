@@ -10,4 +10,4 @@ class ReactionItemAdmin(admin.ModelAdmin):
 
 @admin.register(Reaction)
 class ReactionAdmin(admin.ModelAdmin):
-    list_display = ("owner", "item", "message")
+    list_display = ("owner", "item")

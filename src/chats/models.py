@@ -91,6 +91,7 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
         upload_to=get_message_img_file_path, null=True
     )  # TODO: added extra models FK
     viewed = models.BooleanField(default=False)
+    reactions = models.ManyToManyField("reactions.Reaction", related_name="messages")
 
     objects = models.Manager()
 
