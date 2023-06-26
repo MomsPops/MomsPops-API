@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: db
+    image: postgres:15.3-alpine
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    restart: always
+    networks:
+      - django-nginx
+
+  backend:
+    container_name: backend
+    build:
+      context: ./src
+    command: /start_dev.sh
+    volumes:
+      - ./src:/code
+      - django-static:/code/static
+      - django-media:/code/media
+    restart: always
+    networks:
+      - django-nginx
+    depends_on:
+      - db
+  
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: dev/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+    volumes:
+      - ./nginx/dev/dev.conf:/etc/nginx/nginx.conf:ro
+      - ./src/logs:/srv/app/logs
+      
+      - django-static:/usr/src/app/static
+      - django-media:/usr/src/app/media
+    networks:
+      - django-nginx
+
+volumes:
+  django-static:
+  django-media:
+
+networks:
+  django-nginx:
+    driver: bridge
