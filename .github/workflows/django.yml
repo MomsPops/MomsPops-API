@@ -7,13 +7,13 @@ on:
     branches: ["main", "development"]
 
 jobs:
-  build:
+  linter:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.10", 3.11]
-
+    
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -37,3 +37,14 @@ jobs:
           MYPY_OPTS: "--config=./mypy.ini"  # additional mypy options
           #MYPY_CODE_DIR: "."  # what directory to check, defaults to "."
           #PRECOMMAND_MESSAGE: You have style errors. See them below.
+  django_testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v3
+      - name: Build project
+        run: docker compose -f docker-compose.yml up --build
+      - name: Run Django Tests
+        run: docker compose -f docker-compose.yml run backend python manage.py test
+      - name: Tear down the Stack
+        run:  docker compose -f docker-compose.yml down
