@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "rest_framework_simplejwt",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
 ]
 
 MIDDLEWARE = [
@@ -151,6 +153,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSIONS_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 
@@ -212,4 +215,17 @@ LOGGING = {
         },
     },
     "loggers": {"django": {"handlers": ["console"]}},
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "DHCP server API",
+    "DESCRIPTION": "DHCP server API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
 }
