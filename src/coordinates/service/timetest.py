@@ -1,6 +1,7 @@
 import random
-
-import numpy as np
+from dataclasses import dataclass
+from functools import wraps
+from time import perf_counter
 
 from coordinates.service.calculations import (
     vectorize_queryset,
@@ -8,9 +9,6 @@ from coordinates.service.calculations import (
     calculate_distance_1,
     calculate_distance_2
 )
-from dataclasses import dataclass
-from functools import wraps
-from time import perf_counter
 
 
 def time_measure(func):
@@ -67,8 +65,8 @@ def test_time_1(n_samples: int):
         )
         for c in coords_queryset
     ]
-
-    return list(CoordinateManager().all_near(coord1, coords_queryset))
+    return distances
+    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
 @time_measure
@@ -87,8 +85,8 @@ def test_time_2(n_samples: int):
         )
         for c in coords_queryset
     ]
-
-    return list(CoordinateManager().all_near(coord1, coords_queryset))
+    return distances
+    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
 @time_measure
@@ -104,7 +102,8 @@ def test_time_vector(n_samples: int):
             lat2=lat2_v,
             lon2=lon2_v
         )
-    return list(CoordinateManager().all_near(coord1, coords_queryset))
+    return distances
+    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
 # lst1 = test_time_1(10**6)

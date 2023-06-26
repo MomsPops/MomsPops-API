@@ -18,7 +18,7 @@ def calculate_distance_1(lat1, lat2, lon1, lon2) -> float:
     """
     R = 6371
     cos_d = sin(radians(lat1)) * sin(radians(lat2)) + cos(radians(lat1)) * cos(radians(lat2))\
-            * cos(radians(lon1) - radians(lon2))   # type: ignore # E401
+             * cos(radians(lon1) - radians(lon2))   # noqa: E127
     d = acos(cos_d)
     return d * R * 1000   # return L
 
@@ -39,8 +39,7 @@ def distance_formatter(func):
 
 
 def calculate_distance_2(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    radius = 6371000
-
+    radius = 6_371_000
     # Формула Винсенти
     a = sin((radians(lat2) - radians(lat1)) / 2) ** 2 + \
         cos(radians(lat1)) * cos(radians(lat2)) * \
