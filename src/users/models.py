@@ -5,7 +5,6 @@ from typing import Dict
 from service.models import UUIDModel
 
 from locations.models import City
-from notifications.models import Notification
 from typing import Union
 
 
@@ -16,18 +15,33 @@ class AccountManager(models.Manager):
 
     def create_account(
         self,
-        user_data: Dict[str, str],
+        user: Dict[str, str],
         city_name: Union[str, None] = None,
         region_name: Union[str, None] = None,
     ):
         city = None
         if city_name and region_name:
-            city = City.objects.get_or_create(name=city_name, region__name=region_name)
+            city = City.objects.get(name=city_name, region__name=region_name)
 
-        new_user = User.objects.create_user(**user_data)
+        new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         return new_account
+
+    def deactivate(self, instance):
+        if instance.user.is_active:
+            instance.user.is_active = False
+            instance.user.save()
+            instance.save()
+
+    def activate(self, instance):
+        if not instance.user.is_active:
+            instance.user.is_active = True
+            instance.save()
+
+    def change_is_active(self, instance):
+        instance.user = not instance.user
+        instance.save()
 
 
 class Account(UUIDModel):
@@ -49,9 +63,6 @@ class Account(UUIDModel):
         City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True
     )
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    notifications = models.ManyToManyField(
-        Notification, related_name="account", blank=True
-    )
     tags = models.ManyToManyField("Tag", blank=True, verbose_name="account")
     objects = AccountManager()
 
