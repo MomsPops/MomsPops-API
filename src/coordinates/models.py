@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from service.models import AccountOneToOneModel
 from users.models import Account
 from .validators import validate_latitude, validate_longitude
-from .service.calculations import coordinates_distance_1
+from .service.calculations import calculate_distance_1
 from .service.google_api import get_location_details
 
 
@@ -33,7 +33,7 @@ class CoordinateManager(models.Manager):
 
     def all_near(self, user_coordinate) -> filter:
         def is_near(coord) -> bool:
-            distance = coordinates_distance_1(
+            distance = calculate_distance_1(
                 lat1=coord.lat,
                 lat2=user_coordinate.lat,
                 lon1=coord.lon,

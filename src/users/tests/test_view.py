@@ -67,3 +67,16 @@ class TestAccountView(TestAccountFixture, APITestCase):
         self.assertEqual(response.json(), {"detail": "User deleted."})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(pre_accounts_count - Account.objects.count(), 1)
+
+    def test_account_update(self):
+        partial_data = {
+            "user": {
+                "first_name": "Mick",
+                "last_name": "Jagger"
+            }
+        }
+        response = self.user_client.patch(reverse("accounts_me"), data=partial_data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.last_name, partial_data['user']['last_name'])
+        self.assertEqual(self.user.first_name, partial_data['user']['first_name'])

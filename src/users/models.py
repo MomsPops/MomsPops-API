@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from typing import Dict
 
 from service.models import UUIDModel
-
+from profiles.models import Profile
 from locations.models import City
 from typing import Union
 
@@ -26,6 +26,7 @@ class AccountManager(models.Manager):
         new_user = User.objects.create_user(**user)
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
+        Profile.objects.create(account=new_account)
         return new_account
 
     def deactivate(self, instance):

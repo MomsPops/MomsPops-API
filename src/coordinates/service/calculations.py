@@ -1,7 +1,13 @@
 from math import cos, sin, acos, radians, atan2, sqrt
+from typing import Tuple, Sequence, Any
+from functools import wraps
+
+import numpy as np
 
 
-def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
+# ============================== MATH FUNCTIONS =============================== #
+
+def calculate_distance_1(lat1, lat2, lon1, lon2) -> float:
     """
     cos(d) = sin(φА)·sin(φB) + cos(φА)·cos(φB)·cos(λА − λB),
     где φА и φB — широты, λА, λB — долготы данных пунктов, d — расстояние между пунктами,
@@ -11,15 +17,16 @@ def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
     где R = 6371 км — средний радиус земного шара.
     """
     R = 6371
-    cos_d = sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)
+    cos_d = sin(radians(lat1)) * sin(radians(lat2)) + cos(radians(lat1)) * cos(radians(lat2))\
+             * cos(radians(lon1) - radians(lon2))   # noqa: E127
     d = acos(cos_d)
-
     return d * R * 1000   # return L
 
 
 def distance_formatter(func):
-    """ Можно использывать как @distance_formatter """
-    def wrapper(lat1, lon1, lat2, lon2):
+    """ Можно использовать как @distance_formatter."""
+    @wraps(func)
+    def wrapper(lat1: float, lon1: float, lat2: float, lon2: float) -> str:
         distance_in_meters = func(lat1, lon1, lat2, lon2)
 
         if distance_in_meters >= 1000:
@@ -31,9 +38,8 @@ def distance_formatter(func):
     return wrapper
 
 
-def calculate_distance_2(lat1, lon1, lat2, lon2):
-    radius = 6371000
-
+def calculate_distance_2(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    radius = 6_371_000
     # Формула Винсенти
     a = sin((radians(lat2) - radians(lat1)) / 2) ** 2 + \
         cos(radians(lat1)) * cos(radians(lat2)) * \
@@ -42,3 +48,25 @@ def calculate_distance_2(lat1, lon1, lat2, lon2):
     distance = radius * c
 
     return round(distance)
+
+
+# ============================== NUMPY FUNCTIONS =============================== #
+
+def vectorize_queryset(queryset: Sequence) -> Tuple[np.ndarray, np.ndarray]:
+    """Make latitude vector and longitude vector out of queryset."""
+    return (np.array([q.lat for q in queryset], dtype="float32"),
+            np.array([q.lon for q in queryset], dtype="float32"))
+
+
+def calculate_vector_distance(lat1: float, lat2: np.ndarray, lon1: float, lon2: np.ndarray) -> np.ndarray[Any, Any]:
+    """
+    lat1 and lon1: some user coordinate to compare other coordinate with;
+    lat2 and lon2: vectors of all users coordinates.
+    """
+    R = 6371 * 1000     # Earth radius in meters.
+    lat1 = np.radians(lat1)
+    lon1 = np.radians(lon1)
+    lat2 = np.radians(lat2)
+    lon2 = np.radians(lon2)
+    cos_d = (np.sin(lat1) * np.sin(lat2)) + ((np.sin(lat1) * np.sin(lat2)) * np.cos(lon1 - lon2))
+    return np.arccos(cos_d) * R  # type: ignore

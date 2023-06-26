@@ -9,13 +9,13 @@ from users.models import Account
 
 
 # TODO: change folder path
-def get_group_preview_file_path(instance, *_, **__):
-    return instance.created.strftime("uploads/chat_previews/%Y/%m/%d/") + instance.id
+def get_group_preview_file_path(instance, *_, **__) -> str:
+    return instance.created.strftime("uploads/chat_previews/%Y/%m/%d/") + str(instance.id)  # type: ignore
 
 
 # TODO: change folder path
-def get_message_img_file_path(instance, *_, **__):
-    return instance.created.strftime("uploads/message_img/%Y/%m/%d/") + instance.id
+def get_message_img_file_path(instance, *_, **__) -> str:
+    return instance.created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)    # type: ignore
 
 
 class ChatType(models.Model):
