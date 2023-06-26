@@ -7,7 +7,7 @@ import numpy as np
 
 # ============================== MATH FUNCTIONS =============================== #
 
-def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
+def calculate_distance_1(lat1, lat2, lon1, lon2) -> float:
     """
     cos(d) = sin(φА)·sin(φB) + cos(φА)·cos(φB)·cos(λА − λB),
     где φА и φB — широты, λА, λB — долготы данных пунктов, d — расстояние между пунктами,
@@ -20,7 +20,6 @@ def coordinates_distance_1(lat1, lat2, lon1, lon2) -> float:
     cos_d = sin(radians(lat1)) * sin(radians(lat2)) + cos(radians(lat1)) * cos(radians(lat2))\
             * cos(radians(lon1) - radians(lon2))   # type: ignore # E401
     d = acos(cos_d)
-
     return d * R * 1000   # return L
 
 
@@ -66,7 +65,9 @@ def calculate_vector_distance(lat1: float, lat2: np.ndarray, lon1: float, lon2: 
     lat2 and lon2: vectors of all users coordinates.
     """
     R = 6371 * 1000     # Earth radius in meters.
-    cos_d = np.sin(np.radians(lat1)) * np.sin(np.radians(lat2)) + np.cos(np.radians(lat1))\
-            * np.cos(np.radians(lat2)) + np.cos(np.radians(lon1) - np.radians(lon2))
-    print(sorted(cos_d, reverse=True))
+    lat1 = np.radians(lat1)
+    lon1 = np.radians(lon1)
+    lat2 = np.radians(lat2)
+    lon2 = np.radians(lon2)
+    cos_d = (np.sin(lat1) * np.sin(lat2)) + ((np.sin(lat1) * np.sin(lat2)) * np.cos(lon1 - lon2))
     return np.arccos(cos_d) * R  # type: ignore

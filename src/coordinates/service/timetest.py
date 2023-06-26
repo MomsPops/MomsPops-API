@@ -1,8 +1,11 @@
 import random
+
+import numpy as np
+
 from coordinates.service.calculations import (
     vectorize_queryset,
     calculate_vector_distance,
-    coordinates_distance_1,
+    calculate_distance_1,
     calculate_distance_2
 )
 from dataclasses import dataclass
@@ -28,7 +31,7 @@ class CoordinateManager:
 
     def all_near(self, user_coordinate, queryset) -> filter:
         def is_near(coord) -> bool:
-            distance = coordinates_distance_1(
+            distance = calculate_distance_1(
                 lat1=coord.lat,
                 lat2=user_coordinate.lat,
                 lon1=coord.lon,
@@ -56,7 +59,7 @@ def test_time_1(n_samples: int):
     ]
 
     distances = [
-        coordinates_distance_1(
+        calculate_distance_1(
             lat1=coord1.lat,
             lon1=coord1.lon,
             lat2=c.lat,
@@ -107,6 +110,19 @@ def test_time_vector(n_samples: int):
 # lst1 = test_time_1(10**6)
 # lst2 = test_time_2(10**6)
 # lst_v = test_time_vector(10**6)
+
 # args = [100, 100, 100.123123, 1012]
 # print(coordinates_distance_1(*args))
 # print(calculate_distance_2(*args))
+# print(
+#     calculate_vector_distance(
+#     args[0], np.array([args[1]]),
+#     args[2], np.array([args[3]])
+# )
+# )
+
+lat1 = 43.220012
+lon1 = 76.931694
+lat2 = 43.229381
+lon2 = 76.944408
+print(calculate_distance_1(lat1, lat2, lon1, lon2))

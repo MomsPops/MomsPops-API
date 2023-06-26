@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from coordinates.service.calculations import calculate_distance_2, distance_formatter
+from coordinates.service.calculations import calculate_distance_2, distance_formatter, calculate_distance_1
 from coordinates.service.google_api import get_location_details
 
 
@@ -59,6 +59,9 @@ class GetLocationDetailsTestCase(unittest.TestCase):
 
 
 class CalculateDistanceTestCase(unittest.TestCase):
+    meters_delta: int = 100
+    kilometers_delta: int = 8 * 1000
+
     def test_calculate_distance_2(self):
         lat = 43.237834
         lon = 76.945856
@@ -90,3 +93,40 @@ class CalculateDistanceTestCase(unittest.TestCase):
         expected_result = "1.47 км"
         distance = distance_formatter(calculate_distance_2)(lat1, lon1, lat2, lon2)
         self.assertEqual(distance, expected_result)
+
+    def test_distance_2_places(self):
+        lat1 = 43.220012
+        lon1 = 76.931694
+        lat2 = 43.229381
+        lon2 = 76.944408
+
+        distance1 = calculate_distance_1(lat1=lat1, lat2=lat2, lon1=lon1, lon2=lon2)
+        distance2 = calculate_distance_1(lat1=lat2, lat2=lat1, lon1=lon2, lon2=lon1)
+        self.assertEqual(distance1, distance2)
+
+    def test_distance_2_expect(self):
+        lat1 = 43.220012
+        lon1 = 76.931694
+        lat2 = 43.229381
+        lon2 = 76.944408
+        expected_distance = 1465.102054360464
+        distance = calculate_distance_1(lat1=lat1, lat2=lat2, lon1=lon1, lon2=lon2)
+        self.assertAlmostEquals(distance, expected_distance, delta=self.meters_delta)
+
+    def test_distance_tura_newyork(self):
+        lat1 = 64.28
+        lon1 = 100.22
+        lat2 = 40.71
+        lon2 = -74.01
+        expected_distance = 8_335_000
+        distance = calculate_distance_1(lat1=lat1, lat2=lat2, lon1=lon1, lon2=lon2)
+        self.assertAlmostEquals(distance, expected_distance, delta=self.kilometers_delta)
+
+    def test_distance_tura_sidney(self):
+        lat1 = 64.28
+        lon1 = 100.22
+        lat2 = -33.874
+        lon2 = 151.213
+        expected_distance = 11_780_000
+        distance = calculate_distance_1(lat1=lat1, lat2=lat2, lon1=lon1, lon2=lon2)
+        self.assertAlmostEquals(distance, expected_distance, delta=self.kilometers_delta)
