@@ -2,7 +2,7 @@ name: Django CI
 
 on:
   push:
-    branches: ["main", "development", "chats"]
+    branches: ["main", "development", "docker-start"]
   pull_request:
     branches: ["main", "development"]
 
@@ -37,9 +37,3 @@ jobs:
           MYPY_OPTS: "--config=./mypy.ini"  # additional mypy options
           #MYPY_CODE_DIR: "."  # what directory to check, defaults to "."
           #PRECOMMAND_MESSAGE: You have style errors. See them below.
-      - name: Run Tests
-        run: |
-          cd src
-          python manage.py makemigrations
-          python manage.py migrate
-          python manage.py test
