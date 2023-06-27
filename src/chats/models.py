@@ -37,7 +37,7 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     """
 
     type = models.ForeignKey(
-        "ChatType",
+        ChatType,
         related_name="chats",
         on_delete=models.PROTECT,
         verbose_name="Тип чата",
@@ -58,11 +58,12 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     location_coordinate = models.ForeignKey(
         "coordinates.Coordinate",
         default=None,
+        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         verbose_name="Координаты",
     )
-    img_preview = models.ImageField(upload_to=get_group_preview_file_path, null=True)
+    img_preview = models.ImageField(upload_to=get_group_preview_file_path, null=True, blank=True)
 
     objects = models.Manager()
 
