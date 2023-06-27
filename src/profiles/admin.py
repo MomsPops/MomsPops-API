@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import SocialNetworkLink, Profile, Post, Tag
+from .models import Profile, Post, Tag
 
 
 @admin.register(Profile)
@@ -18,6 +18,6 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
 
 
-@admin.register(SocialNetworkLink)
-class SocialNetworkLinkAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "profile", "link")
+# @admin.register(SocialNetworkLink)
+# class SocialNetworkLinkAdmin(admin.ModelAdmin):
+#     list_display = ("id", "name", "profile", "link")
