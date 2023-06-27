@@ -51,12 +51,12 @@ class ChatTest(TestCase):
         self.assertEqual(chat.owner, None)
 
         chat.members.add(account1)
-        self.assertEqual(chat.members.all().count(), 1)
+        self.assertEqual(chat.members.count(), 1)
         chat.members.add(account2)
-        self.assertEqual(chat.members.all().count(), 2)
+        self.assertEqual(chat.members.count(), 2)
 
         chat.members.add(account2)
-        self.assertEqual(chat.members.all().count(), 2)
+        self.assertEqual(chat.members.count(), 2)
 
     def test_create_messages(self):
         chat_type = ChatType.objects.first()
@@ -72,5 +72,5 @@ class ChatTest(TestCase):
         self.assertEqual(message.viewed, False)
         self.assertEqual(message.account, account)
 
-        self.assertEqual(chat.messages.all().count(), 1)
-        self.assertEqual(chat.messages.all().first(), message)
+        self.assertEqual(chat.messages.count(), 1)
+        self.assertEqual(chat.messages.first(), message)

@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from service.models import AccountOneToOneModel
 from users.models import Account
@@ -24,11 +24,13 @@ class CoordinateManager(models.Manager):
         new_coordinate.save()
         return new_coordinate
 
-    def filter_time(self) -> filter:
-        now_time = datetime.now()
+    def filter_time(self, queryset=None) -> filter:
+        if queryset is None:
+            queryset = self.all()
+        now_time = datetime.now(timezone.utc)
         return filter(
             lambda coord: now_time - coord.last_time <= self.delta_limit,
-            self.get_queryset()
+            queryset
         )
 
     def all_near(self, user_coordinate) -> filter:
@@ -41,7 +43,7 @@ class CoordinateManager(models.Manager):
             )
             return distance <= self.distance_needed
 
-        filtered_coords = self.filter_time()
+        filtered_coords = self.filter_time(queryset=filter(lambda x: x != user_coordinate, self.all()))
         return filter(
             is_near,
             filtered_coords
@@ -70,4 +72,10 @@ class Coordinate(AccountOneToOneModel):
     coordinate_manager = CoordinateManager()
 
     def __str__(self):
-        return f"{self.lat}; {self.lon}"
+        lat_mark = "с.ш." if self.lat >= 0 else "ю.ш."  # при отрицательной широте широта южная
+        lon_mark = "в.д." if self.lon >= 0 else "з.д."  # при отрицательной долготе долгота южная
+        return f"{self.lat} {lat_mark}; {self.lon} {lon_mark}"
+
+    class Meta:
+        verbose_name = "Координата"
+        verbose_name_plural = "Координаты"

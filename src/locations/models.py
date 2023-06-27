@@ -2,6 +2,9 @@ from django.db import models
 
 
 class City(models.Model):
+    """
+    City model.
+    """
     name = models.CharField(max_length=100)
     region = models.ForeignKey(
         to="Region",
@@ -19,12 +22,21 @@ class City(models.Model):
 
     class Meta:
         unique_together = ("name", "region")
+        verbose_name = "Город"
+        verbose_name_plural = "Города"
 
 
 class Region(models.Model):
-    name = models.CharField(max_length=100)
+    """
+    Region model.
+    """
+    name = models.CharField(max_length=100, unique=True)
 
     objects = models.Manager()
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Регион"
+        verbose_name_plural = "Регионы"
