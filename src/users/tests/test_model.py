@@ -23,6 +23,7 @@ class AccountTest(TestCase):
         self.assertEqual(Account.objects.count(), 1)
 
         user_data = {"username": "created_test_user1", "email": "test@mail.com"}
+
         account2 = Account.objects.create_account(user=user_data)
         self.assertTrue(account2 is not None)
         self.assertEqual(Account.objects.count(), 2)
