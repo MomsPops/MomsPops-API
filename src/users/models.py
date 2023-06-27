@@ -50,21 +50,15 @@ class Account(UUIDModel):
     Account model.
     """
 
-    user: User = models.OneToOneField(
-        User, related_name="account", on_delete=models.CASCADE
-    )
+    user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
     bio = models.TextField(blank=True, null=True, verbose_name="Биография")
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
-    photo = models.ImageField(
-        upload_to="uploads/account_img/", verbose_name="Фото", blank=True, null=True
-    )
+    photo = models.ImageField(upload_to="uploads/account_img/", verbose_name="Фото", blank=True, null=True)
     status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
 
-    city = models.ForeignKey(
-        City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True
-    )
+    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    tags = models.ManyToManyField("Tag", blank=True, verbose_name="account")
+    tags = models.ManyToManyField("Tag", blank=True, verbose_name="Теги")
     objects = AccountManager()
 
     def __str__(self):
@@ -91,9 +85,7 @@ class SocialNetworkLink(UUIDModel):
         related_name="social_network_links",
         on_delete=models.CASCADE,
     )
-    name = models.CharField(
-        max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK"
-    )
+    name = models.CharField(max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK")
     links = models.URLField()
 
     def __str__(self):
