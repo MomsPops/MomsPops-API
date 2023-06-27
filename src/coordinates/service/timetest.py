@@ -105,9 +105,9 @@ def test_time_vector(n_samples: int):
 # lst2 = test_time_2(10**6)
 # lst_v = test_time_vector(10**6)
 
-# args = [100, 100, 100.123123, 1012]
-# print(coordinates_distance_1(*args))
-# print(calculate_distance_2(*args))
+args = [100, 100, 100.0123123, 100]
+print(calculate_distance_1(*args))
+print(calculate_distance_2(*args))
 # print(
 #     calculate_vector_distance(
 #     args[0], np.array([args[1]]),
@@ -115,8 +115,8 @@ def test_time_vector(n_samples: int):
 # )
 # )
 
-lat1 = 43.220012
-lon1 = 76.931694
-lat2 = 43.229381
-lon2 = 76.944408
-print(calculate_distance_1(lat1, lat2, lon1, lon2))
+# lat1 = 43.220012
+# lon1 = 76.931694
+# lat2 = 43.229381
+# lon2 = 76.944408
+# print(calculate_distance_1(lat1, lat2, lon1, lon2))
