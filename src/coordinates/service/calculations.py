@@ -7,7 +7,7 @@ import numpy as np
 
 # ============================== MATH FUNCTIONS =============================== #
 
-def calculate_distance_1(lat1, lat2, lon1, lon2) -> float:
+def calculate_distance_1(lat1, lon1, lat2, lon2) -> float:
     """
     cos(d) = sin(φА)·sin(φB) + cos(φА)·cos(φB)·cos(λА − λB),
     где φА и φB — широты, λА, λB — долготы данных пунктов, d — расстояние между пунктами,
@@ -68,5 +68,5 @@ def calculate_vector_distance(lat1: float, lat2: np.ndarray, lon1: float, lon2: 
     lon1 = np.radians(lon1)
     lat2 = np.radians(lat2)
     lon2 = np.radians(lon2)
-    cos_d = (np.sin(lat1) * np.sin(lat2)) + ((np.sin(lat1) * np.sin(lat2)) * np.cos(lon1 - lon2))
+    cos_d = (np.sin(lat1) * np.sin(lat2)) + ((np.cos(lat1) * np.cos(lat2)) * np.cos(lon1 - lon2))
     return np.arccos(cos_d) * R  # type: ignore

@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from functools import wraps
 from time import perf_counter
 
+import numpy as np
+
 from coordinates.service.calculations import (
     vectorize_queryset,
     calculate_vector_distance,
@@ -66,7 +68,6 @@ def test_time_1(n_samples: int):
         for c in coords_queryset
     ]
     return distances
-    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
 @time_measure
@@ -86,7 +87,6 @@ def test_time_2(n_samples: int):
         for c in coords_queryset
     ]
     return distances
-    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
 @time_measure
@@ -98,25 +98,25 @@ def test_time_vector(n_samples: int):
     lat2_v, lon2_v = vectorize_queryset(queryset=coords_queryset)
     distances = calculate_vector_distance(lat1=coord1.lat, lon1=coord1.lon, lat2=lat2_v, lon2=lon2_v)
     return distances
-    # return list(CoordinateManager().all_near(coord1, coords_queryset))
 
 
-# lst1 = test_time_1(10**6)
-# lst2 = test_time_2(10**6)
-# lst_v = test_time_vector(10**6)
+lst1 = test_time_1(10**6)
+lst2 = test_time_2(10**6)
+lst_v = test_time_vector(10**6)
 
-# args = [100, 100, 100.123123, 1012]
-# print(coordinates_distance_1(*args))
-# print(calculate_distance_2(*args))
+# kwargs = {
+#     "lat1": 100,
+#     "lon1": 100,
+#     "lat2": 101,
+#     "lon2": 101
+# }
+# print(calculate_distance_1(**kwargs))
+# print(calculate_distance_2(**kwargs))
 # print(
 #     calculate_vector_distance(
-#     args[0], np.array([args[1]]),
-#     args[2], np.array([args[3]])
+#         lat1=100,
+#         lon1=100,
+#         lat2=np.array([101]),
+#         lon2=np.array([101])
+#     )
 # )
-# )
-
-lat1 = 43.220012
-lon1 = 76.931694
-lat2 = 43.229381
-lon2 = 76.944408
-print(calculate_distance_1(lat1, lat2, lon1, lon2))
