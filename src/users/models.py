@@ -43,6 +43,15 @@ class AccountManager(models.Manager):
         instance.user = not instance.user
         instance.save()
 
+    def get_by_username(self, username: str):
+        account = self.all().get(user__username=username)
+        return account
+
+    def block_user(self, account, username: str) -> None:
+        account_to_block = self.get_by_username(username)
+        account.black_list.add(account_to_block)
+        account.save()
+
 
 class Account(UUIDModel):
     """

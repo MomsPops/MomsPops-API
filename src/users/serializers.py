@@ -40,3 +40,11 @@ class AccountDetailSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ("user", "city_name", "region_name")
+
+
+class BlockUserSerializer(ModelSerializer):
+    username = serializers.CharField(source="account.user.username")
+
+    class Meta:
+        model = Account
+        fields = ("username", )
