@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import wraps
 from time import perf_counter
 
-import numpy as np
+# import numpy as np
 
 from coordinates.service.calculations import (
     vectorize_queryset,

@@ -1,10 +1,15 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Profile
-from .serializers import ProfileListSerializer, ProfileDetailSerializer
-from .permissions import IsProfileOwner
+from .models import Profile, Post
+from .serializers import (
+    ProfileListSerializer, ProfileDetailSerializer,
+    PostDetailSerializer, PostListSerializer, PostCreateSerializer
+
+)
+from .permissions import IsProfileOwner, IsPostOwner
 
 
 class ProfileViewSet(mixins.ListModelMixin,
@@ -18,11 +23,13 @@ class ProfileViewSet(mixins.ListModelMixin,
     def get_serializer(self, *args, **kwargs):
         if self.action == "list":
             return ProfileListSerializer(*args, **kwargs)
+        elif self.action == "posts":
+            return PostListSerializer(*args, **kwargs)
         else:
             return ProfileDetailSerializer(*args, **kwargs)
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "posts"):
             perm_classes = [IsAuthenticated]
         else:
             perm_classes = [IsAuthenticated, IsProfileOwner]
@@ -36,3 +43,43 @@ class ProfileViewSet(mixins.ListModelMixin,
         serializer.save()
         instance.save()
         return Response(serializer.data, status=200)
+
+    @action(methods=['get'], detail=True)
+    def posts(self, request, username):
+        posts = Post.post_manager.all_by_username(username)
+        serializer = self.get_serializer(instance=posts, many=True)
+        return Response(serializer.data)
+
+
+class PostViewSet(mixins.RetrieveModelMixin,
+                  mixins.CreateModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  viewsets.GenericViewSet):
+    queryset = Profile.objects.all()
+    lookup_url_kwarg = "id"
+    lookup_field = "id"
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            perm_classes = [IsAuthenticated]
+        else:
+            perm_classes = [IsAuthenticated, IsPostOwner]
+        return [pc() for pc in perm_classes]
+
+    def get_serializer(self, *args, **kwargs):
+        if self.action == "detail":
+            return PostDetailSerializer(*args, **kwargs)
+        elif self.action == "create":
+            return PostCreateSerializer(*args, **kwargs)
+        else:
+            return PostDetailSerializer(*args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        profile = request.user.account.profile
+        data = dict(**request.data, profile=profile)
+        print(data)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        Post.objects.create(**data)
+        return Response(serializer.validated_data)

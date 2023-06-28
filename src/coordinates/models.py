@@ -34,7 +34,7 @@ class CoordinateManager(models.Manager):
         )
 
     def all_near(self, user_coordinate) -> filter:
-        is_near = lambda coord: calculate_distance_1(
+        is_near = lambda coord: calculate_distance_1(   # noqa: E731
             lat1=coord.lat,
             lat2=user_coordinate.lat,
             lon1=coord.lon,
@@ -48,15 +48,16 @@ class CoordinateManager(models.Manager):
         )
 
     def all_near_fast(self, user_coordinate) -> filter:
-        is_near = lambda coord:  calculate_distance_1(
+        is_near = lambda coord:  calculate_distance_1(   # noqa: E731
                 lat1=coord.lat,
                 lat2=user_coordinate.lat,
                 lon1=coord.lon,
                 lon2=user_coordinate.lon
             ) <= self.distance_needed
         now_time = datetime.now(timezone.utc)
-        time_filtered_coords = filter(
-            lambda coord: now_time - coord.last_time <= self.delta_limit and coord != user_coordinate
+        time_filtered_coords = filter(  # noqa: E731
+            lambda coord: now_time - coord.last_time <= self.delta_limit and coord != user_coordinate,
+            self.all()
         )
         return filter(is_near, time_filtered_coords)
 
