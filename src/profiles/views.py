@@ -7,7 +7,6 @@ from .models import Profile, Post
 from .serializers import (
     ProfileListSerializer, ProfileDetailSerializer,
     PostDetailSerializer, PostListSerializer, PostCreateSerializer
-
 )
 from .permissions import IsProfileOwner, IsPostOwner
 
@@ -78,7 +77,6 @@ class PostViewSet(mixins.RetrieveModelMixin,
     def create(self, request, *args, **kwargs):
         profile = request.user.account.profile
         data = dict(**request.data, profile=profile)
-        print(data)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         Post.objects.create(**data)

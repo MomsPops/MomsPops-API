@@ -13,7 +13,7 @@ SEX_CHOICES = (("Не выбран", "Не выбран"), ("Мужской", "�
 class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     """
     Profile model. It looks like a profile in a social network: VK or Facebook.
-    Profile is an one2one field for Account, which consists of profile information and related
+    Profile is an OneToOne field for Account, which consists of profile information and related
     posts.
     """
     bio = models.TextField(default="", verbose_name="Биография")
@@ -28,17 +28,22 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     objects = models.Manager()
 
     def get_photo_url(self):
+        """Static url to user photo"""
         path_for_default_img = settings.MEDIA_URL + "default_img/user_standart_avatar.png"
         if self.photo:
             return "http://127.0.0.1:8000" + self.photo.url
         return "http://127.0.0.1:8000" + path_for_default_img
 
     def get_absolute_url(self):
+        """Reversed url to single profile."""
         return reverse("profiles_detail", kwargs={"username": self.account.user.username})
 
 
 class PostManager(models.Manager):
     def all_by_username(self, username):
+        """
+        Get all posts on account`s user`s username.
+        """
         posts = self.all().filter(profile__account__user__username=username)
         return posts
 

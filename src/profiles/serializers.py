@@ -38,11 +38,11 @@ class PostListSerializer(ModelSerializer):
 class PostDetailSerializer(ModelSerializer):
     class Meta:
         model = Post
-        fields = ("text", "get_photo_url", "reactions")
+        fields = ("id", "text", "get_photo_url", "reactions")
 
 
 class PostCreateSerializer(ModelSerializer):
-    text = serializers.JSONField(required=False, allow_null=True)
+    text = serializers.JSONField(required=False)
 
     class Meta:
         model = Post
