@@ -21,10 +21,13 @@ class CoordinateViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            Coordinate.coordinate_manager.update(request.user.account.coordinate, **serializer.validated_data)
+            coordinate = Coordinate.coordinate_manager.get(source=request.user.account)
+            coordinate.lat = serializer.validated_data['lat']
+            coordinate.lon = serializer.validated_data['lon']
+            coordinate.save()
         except ObjectDoesNotExist:
-            Coordinate.coordinate_manager.create(
-                **serializer.validated_data, account=request.user.account
+            coordinate = Coordinate.coordinate_manager.create(
+                **serializer.validated_data, source=request.user.account
             )
         return Response(serializer.validated_data, status=201)
 

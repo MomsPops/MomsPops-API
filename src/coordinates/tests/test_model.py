@@ -11,43 +11,43 @@ class TestCoordinate(TestAccountFixture, APITestCase):
 
     def test_coordinate_create1(self):
         user_coord = Coordinate.coordinate_manager.create(
-            lat=60.0, lon=80.0, account=self.user_account
+            lat=60.0, lon=80.0, source=self.user_account
         )
-        self.assertEqual(user_coord.account.city, self.user_account.city)
+        self.assertEqual(user_coord.source.city, self.user_account.city)
         self.assertEqual(user_coord.lat, 60.0)
         self.assertEqual(user_coord.lon, 80.0)
         self.assertEqual(self.user_account.coordinate, user_coord)
 
     def test_coordinate_create2(self):
         user_coord = Coordinate.coordinate_manager.create(
-            lat=90.0, lon=-180, account=self.user_account
+            lat=90.0, lon=-180, source=self.user_account
         )
-        self.assertEqual(user_coord.account.city, self.user_account.city)
+        self.assertEqual(user_coord.source.city, self.user_account.city)
         self.assertEqual(user_coord.lat, 90.0)
         self.assertEqual(user_coord.lon, -180.0)
 
     def test_coordinate_lat_fail1(self):
         with self.assertRaises(ValidationError):
             Coordinate.coordinate_manager.create(
-                lat=-90.011123123112, lon=123, account=self.user_account
+                lat=-90.011123123112, lon=123, source=self.user_account
             )
 
     def test_coordinate_lat_fail2(self):
         with self.assertRaises(ValidationError):
             Coordinate.coordinate_manager.create(
-                lat=191, lon=-100, account=self.user_account
+                lat=191, lon=-100, source=self.user_account
             )
 
     def test_coordinate_lon_fail1(self):
         with self.assertRaises(ValidationError):
             Coordinate.coordinate_manager.create(
-                lat=11.123, lon=-181.0, account=self.user_account
+                lat=11.123, lon=-181.0, source=self.user_account
             )
 
     def test_coordinate_lon_fail2(self):
         with self.assertRaises(ValidationError):
             Coordinate.coordinate_manager.create(
-                lat=.0, lon=180.0, account=self.user_account
+                lat=.0, lon=180.0, source=self.user_account
             )
 
 
@@ -88,10 +88,8 @@ class TestCoordinatesManager(APITestCase):
         all_near_coords = Coordinate_custom.coordinate_manager.all_near(self.account1.coordinate)
         self.assertEqual(len([*all_near_coords]), len(self.accounts) - 1)
 
-    # def test_deactivate(self):
-    #     self.assertIsInstance(self.account1.coordinate, Coordinate)
-    #     Coordinate.coordinate_manager.deactivate(self.account1)
-    #     self.account1.refresh_from_db()
-    #     print(self.account1.coordinate)
-    #     with self.assertRaises(ObjectDoesNotExist):
-    #         print(self.account1.coordinate)
+    def test_deactivate(self):
+        self.assertIsInstance(self.account1.coordinate, Coordinate)
+        Coordinate.coordinate_manager.deactivate(self.account1)
+        self.account1.refresh_from_db()
+        self.assertEqual(self.account1.coordinate, None)

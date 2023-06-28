@@ -1,8 +1,6 @@
 from django.db import models
 from datetime import datetime, timedelta, timezone
 
-from service.models import AccountOneToOneModel
-from users.models import Account
 from .validators import validate_latitude, validate_longitude
 from .service.calculations import calculate_distance_1
 from .service.google_api import get_location_details
@@ -17,11 +15,13 @@ class CoordinateManager(models.Manager):
         instance.lon = validate_longitude(lon)
         instance.save()
 
-    def create(self, lat: float, lon: float, account: Account):
+    def create(self, lat: float, lon: float, source):
         lat = validate_latitude(lat)
         lon = validate_longitude(lon)
-        new_coordinate = Coordinate(lat=lat, lon=lon, account=account)
+        new_coordinate = Coordinate(lat=lat, lon=lon)
         new_coordinate.save()
+        source.coordinate = new_coordinate
+        source.save()
         return new_coordinate
 
     def filter_time(self, queryset=None) -> filter:
@@ -33,30 +33,27 @@ class CoordinateManager(models.Manager):
             queryset
         )
 
-    def all_near(self, user_coordinate) -> filter:
+    def all_near(self, source_coordinate) -> filter:
         is_near = lambda coord: calculate_distance_1(   # noqa: E731
             lat1=coord.lat,
-            lat2=user_coordinate.lat,
+            lat2=source_coordinate.lat,
             lon1=coord.lon,
-            lon2=user_coordinate.lon
+            lon2=source_coordinate.lon
         ) <= self.distance_needed
 
-        time_filtered_coords = self.filter_time(queryset=filter(lambda x: x != user_coordinate, self.all()))
-        return filter(
-            is_near,
-            time_filtered_coords
-        )
+        time_filtered_coords = self.filter_time(queryset=filter(lambda x: x != source_coordinate, self.all()))
+        return filter(is_near, time_filtered_coords)
 
-    def all_near_fast(self, user_coordinate) -> filter:
+    def all_near_fast(self, source_coordinate) -> filter:
         is_near = lambda coord:  calculate_distance_1(   # noqa: E731
                 lat1=coord.lat,
-                lat2=user_coordinate.lat,
+                lat2=source_coordinate.lat,
                 lon1=coord.lon,
-                lon2=user_coordinate.lon
+                lon2=source_coordinate.lon
             ) <= self.distance_needed
         now_time = datetime.now(timezone.utc)
         time_filtered_coords = filter(  # noqa: E731
-            lambda coord: now_time - coord.last_time <= self.delta_limit and coord != user_coordinate,
+            lambda coord: now_time - coord.last_time <= self.delta_limit and coord != source_coordinate,
             self.all()
         )
         return filter(is_near, time_filtered_coords)
@@ -71,13 +68,12 @@ class CoordinateManager(models.Manager):
         account.save()
 
 
-class Coordinate(AccountOneToOneModel):
+class Coordinate(models.Model):
     """
     Coordinate model.
     """
-    lat = models.FloatField("Latitude", validators=[validate_latitude])
-    lon = models.FloatField("Longitude", validators=[validate_longitude])
-    account = models.OneToOneField(Account, related_name="coordinate", on_delete=models.CASCADE, null=True)
+    lat = models.FloatField("Latitude")
+    lon = models.FloatField("Longitude")
     last_time = models.DateTimeField("Last time", auto_created=True, auto_now=True)
 
     object = models.Manager()

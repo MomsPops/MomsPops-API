@@ -51,6 +51,8 @@ class Account(UUIDModel):
     user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
+    coordinate = models.OneToOneField("coordinates.Coordinate", on_delete=models.SET_NULL,
+                                      null=True, related_name="source")
 
     objects = AccountManager()
 
