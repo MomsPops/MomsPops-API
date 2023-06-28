@@ -16,14 +16,14 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     Profile is an OneToOne field for Account, which consists of profile information and related
     posts.
     """
-    bio = models.TextField(default="", verbose_name="Биография")
+    bio = models.TextField(null=True, blank=True, verbose_name="Биография")
     photo = models.ImageField(
         upload_to="uploads/profile_img/", verbose_name="Фото", blank=True, null=True
     )  # default='default_image.jpg'
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
-    status = models.CharField(max_length=100, verbose_name="Статус", default="")
+    status = models.CharField(max_length=100, verbose_name="Статус", blank=True, null=True)
     tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
-    sex = models.IntegerField("Пол", choices=SEX_CHOICES, default=0)
+    sex = models.CharField("Пол", choices=SEX_CHOICES, default="Не выбран", max_length=10)
 
     objects = models.Manager()
 
@@ -53,7 +53,7 @@ class Post(UUIDModel, TimeCreateUpdateModel):  # type: ignore
     Post model. Post is a note pinned on some account`s profile.
     """
     profile: Profile = models.ForeignKey(Profile, related_name="posts", on_delete=models.CASCADE)
-    text = models.TextField(blank=True)
+    text = models.TextField(blank=True, null=True)
     photo = models.ImageField(
         upload_to="uploads/post_img/", verbose_name="Фото", blank=True, null=True
     )  # TODO add table Post Images

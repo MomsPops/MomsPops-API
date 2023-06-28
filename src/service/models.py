@@ -25,7 +25,7 @@ class TimeCreateModel(models.Model):
         abstract = True
 
 
-class TimeCreateUpdateModel(models.Model):
+class TimeCreateUpdateModel(TimeCreateModel):
     """
     Generic model with auto created and updated time.
     """

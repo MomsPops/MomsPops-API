@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from service.fixtues import TestAccountFixture
 
 from users.models import Account
+from profiles.models import Profile
 
 
 class TestAccountModel(TestAccountFixture, APITestCase):
@@ -19,7 +20,7 @@ class TestAccountModel(TestAccountFixture, APITestCase):
             city_name=self.city1.name,
             region_name=self.city1.region.name
         )
-        assert account.city == self.city1
+        self.assertEqual(account.city, self.city1)
 
     def test_account_create_2(self):
         user_data = {
@@ -31,7 +32,8 @@ class TestAccountModel(TestAccountFixture, APITestCase):
             city_name=self.city2.name,
             region_name=self.city2.region.name
         )
-        assert account.city == self.city2
+        self.assertIsInstance(account.profile, Profile)
+        self.assertEqual(account.city, self.city2)
 
     def test_account_create_fail(self):
         user_data = {
@@ -46,17 +48,17 @@ class TestAccountModel(TestAccountFixture, APITestCase):
             )
 
     def test_account_deactivate(self):
-        assert self.user_account.user.is_active
+        self.assertTrue(self.user_account.user.is_active)
         Account.objects.deactivate(self.user_account)
-        assert not self.user_account.user.is_active
+        self.assertFalse(self.user_account.user.is_active)
         Account.objects.deactivate(self.user_account)
-        assert not self.user_account.user.is_active
+        self.assertFalse(self.user_account.user.is_active)
 
     def test_account_activate(self):
-        assert self.superuser_account.user.is_active
+        self.assertTrue(self.superuser_account.user.is_active)
         Account.objects.deactivate(self.superuser_account)
-        assert not self.superuser_account.user.is_active
+        self.assertFalse(self.superuser_account.user.is_active)
         Account.objects.activate(self.superuser_account)
-        assert self.superuser_account.user.is_active
+        self.assertTrue(self.superuser_account.user.is_active)
         Account.objects.activate(self.superuser_account)
-        assert self.user_account.user.is_active
+        self.assertTrue(self.superuser_account.user.is_active)
