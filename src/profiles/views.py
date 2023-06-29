@@ -16,6 +16,7 @@ class ProfileViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     queryset = Profile.objects.all()
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = "username"
     lookup_field = "account__user__username"
 
@@ -29,13 +30,14 @@ class ProfileViewSet(mixins.ListModelMixin,
 
     def get_permissions(self):
         if self.action in ("list", "retrieve", "posts"):
-            perm_classes = [IsAuthenticated]
+            permission_classes = [IsAuthenticated]
         else:
-            perm_classes = [IsAuthenticated, IsProfileOwner]
-        return [pc() for pc in perm_classes]
+            permission_classes = [IsProfileOwner]
+        return [pc() for pc in permission_classes]
 
     def update(self, request, *args, **kwargs):
         instance = Profile.objects.get(account__user__username=kwargs[self.lookup_url_kwarg])
+        self.check_object_permissions(request, obj=instance)
         serializer = self.get_serializer(instance=instance, data=request.data, partial=True)
         serializer.is_valid()
         serializer.update(instance, serializer.validated_data)
@@ -80,4 +82,20 @@ class PostViewSet(mixins.RetrieveModelMixin,
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         Post.objects.create(**data)
-        return Response(serializer.validated_data)
+        return Response(serializer.validated_data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        instance = Post.objects.get(kwargs[self.lookup_url_kwarg])
+        self.check_object_permissions(request, obj=instance)
+        serializer = self.get_serializer(instance=instance, data=request.data, partial=True)
+        serializer.is_valid()
+        serializer.update(instance, serializer.validated_data)
+        serializer.save()
+        instance.save()
+        return Response(serializer.data, status=200)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = Post.objects.get(kwargs[self.lookup_url_kwarg])
+        self.check_object_permissions(request, obj=instance)
+        instance.delete()
+        return Response({"Post was deleted successfully."})
