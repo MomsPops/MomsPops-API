@@ -1,8 +1,6 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
 
-from coordinates.models import Coordinate
 from service.fixtues import TestAccountFixture
 
 
