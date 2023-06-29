@@ -1,8 +1,8 @@
 from django.db import models
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, datetime, timezone
 
 from .validators import validate_latitude, validate_longitude
-from .service.calculations import calculate_distance_1
+from .service.calculations import calculate_distance_1, calculate_vector_distance, vectorize_queryset
 from .service.google_api import get_location_details
 
 
@@ -33,30 +33,34 @@ class CoordinateManager(models.Manager):
             queryset
         )
 
-    def all_near(self, source_coordinate) -> filter:
-        is_near = lambda coord: calculate_distance_1(   # noqa: E731
-            lat1=coord.lat,
-            lat2=source_coordinate.lat,
-            lon1=coord.lon,
-            lon2=source_coordinate.lon
-        ) <= self.distance_needed
-
-        time_filtered_coords = self.filter_time(queryset=filter(lambda x: x != source_coordinate, self.all()))
-        return filter(is_near, time_filtered_coords)
-
-    def all_near_fast(self, source_coordinate) -> filter:
-        is_near = lambda coord:  calculate_distance_1(   # noqa: E731
+    def is_near(self, source_coordinate):
+        def inner(coord):
+            return self.distance_needed >= calculate_distance_1(
                 lat1=coord.lat,
                 lat2=source_coordinate.lat,
                 lon1=coord.lon,
                 lon2=source_coordinate.lon
-            ) <= self.distance_needed
+            )
+        return inner
+
+    def all_near(self, source_coordinate) -> filter:
+        is_near = self.is_near(source_coordinate)
+        time_filtered_coords = self.filter_time(queryset=filter(lambda x: x != source_coordinate, self.all()))
+        return filter(is_near, time_filtered_coords)
+
+    def all_near_fast(self, source_coordinate):
         now_time = datetime.now(timezone.utc)
         time_filtered_coords = filter(  # noqa: E731
             lambda coord: now_time - coord.last_time <= self.delta_limit and coord != source_coordinate,
             self.all()
         )
-        return filter(is_near, time_filtered_coords)
+        lat2, lon2 = vectorize_queryset(time_filtered_coords)
+        for d, instance in zip(
+                calculate_vector_distance(lon1=source_coordinate.lon, lat1=source_coordinate.lat, lon2=lon2, lat2=lat2),
+                time_filtered_coords
+        ):
+            if d <= self.delta_limit:
+                yield instance
 
     def decode(self, coord) -> str:
         """Returns place by coordinate."""

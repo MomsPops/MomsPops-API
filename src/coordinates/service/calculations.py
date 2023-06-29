@@ -1,5 +1,5 @@
 from math import cos, sin, acos, radians, atan2, sqrt
-from typing import Tuple, Sequence, Any
+from typing import Tuple, Iterable, Any
 from functools import wraps
 
 import numpy as np
@@ -52,7 +52,7 @@ def calculate_distance_2(lat1: float, lon1: float, lat2: float, lon2: float) -> 
 
 # ============================== NUMPY FUNCTIONS =============================== #
 
-def vectorize_queryset(queryset: Sequence) -> Tuple[np.ndarray, np.ndarray]:
+def vectorize_queryset(queryset: Iterable) -> Tuple[np.ndarray, np.ndarray]:
     """Make latitude vector and longitude vector out of queryset."""
     return (np.array([q.lat for q in queryset], dtype="float32"),
             np.array([q.lon for q in queryset], dtype="float32"))
