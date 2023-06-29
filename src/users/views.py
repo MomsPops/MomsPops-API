@@ -1,8 +1,11 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from .serializers import AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer
+from .serializers import (
+    AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer,
+    BlockUserSerializer
+)
 from .models import Account
 
 
@@ -62,3 +65,17 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         else:
             Account.objects.deactivate(request.user.account)
             return Response({"detail": "User deactivated."})
+
+
+class BlockUserAPIView(generics.CreateAPIView):
+    serializer_class = BlockUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.validated_data['username'] == request.user.username:
+            return Response({"detail": "You cannot add yourself to a black list"}, status=400)
+
+        Account.objects.block_user(serializer.validated_data['username'])
+        return Response({"detail": "User blocked successfully."})

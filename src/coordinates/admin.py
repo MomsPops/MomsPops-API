@@ -5,4 +5,4 @@ from .models import Coordinate
 
 @admin.register(Coordinate)
 class CoordinateModel(admin.ModelAdmin):
-    list_display = ("id", "lat", "lon", "account", "last_time")
+    list_display = ("id", "lat", "lon", "last_time")

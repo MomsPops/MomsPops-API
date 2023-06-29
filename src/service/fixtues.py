@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIClient
 
 from locations.models import Region, City
-from profiles.models import Profile
+from profiles.models import Profile, Post
 from users.models import Account
 
 
@@ -52,4 +52,20 @@ class TestProfileFixture(TestAccountFixture, APITestCase):
         super().setUpClass()
         cls.user_pofile = Profile.objects.create(
             account=cls.user_account
+        )
+        cls.superuser_pofile = Profile.objects.create(
+            account=cls.superuser_account
+        )
+
+
+class TestPostFixture(TestProfileFixture, APITestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_post = Post.objects.create(
+            profile=cls.user_pofile
+        )
+        cls.superuser_post = Post.objects.create(
+            profile=cls.superuser_pofile
         )

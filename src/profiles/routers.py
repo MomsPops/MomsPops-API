@@ -1,7 +1,7 @@
-from rest_framework.routers import Route, SimpleRouter
+from rest_framework.routers import Route, DefaultRouter, DynamicRoute
 
 
-class ProfileRouter(SimpleRouter):
+class ProfileRouter(DefaultRouter):
     """
     Router for account viewset.
     """
@@ -27,5 +27,11 @@ class ProfileRouter(SimpleRouter):
             name='{basename}_detail',
             detail=False,
             initkwargs={'suffix': 'Me'}
+        ),
+        DynamicRoute(
+            url=r'^{prefix}/{lookup}/{url_path}{trailing_slash}$',
+            name='{basename}_{url_name}',
+            detail=True,
+            initkwargs={}
         ),
     ]

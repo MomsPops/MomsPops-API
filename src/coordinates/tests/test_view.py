@@ -1,6 +1,5 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist
 
 from service.fixtues import TestAccountFixture
 
@@ -43,5 +42,4 @@ class TestCoordinateView(TestAccountFixture, APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'lon': ['Ensure this value is less than or equal to 180.0.']})
         self.user_account.refresh_from_db()
-        with self.assertRaises(ObjectDoesNotExist):
-            print(self.user_account.coordinate)
+        self.assertEqual(self.user_account.coordinate, None)

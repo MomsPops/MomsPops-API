@@ -1,40 +1,64 @@
-from django.contrib.auth.models import User
-from django.db import transaction
-from django.test import TestCase
-from django.contrib.auth import authenticate
+from rest_framework.test import APITestCase
+from django.core.exceptions import ObjectDoesNotExist
+from service.fixtues import TestAccountFixture
+
 from users.models import Account
+from profiles.models import Profile
 
 
-class AccountTest(TestCase):
-    def test_authenticate_user(self):
-        User.objects.create_user(
-            username="test1",
-            password="secret",
+class TestAccountModel(TestAccountFixture, APITestCase):
+
+    def test_account_create(self):
+        user_data = {
+            "username": "harry_potter",
+            "password": "asda-sd3r2io3trn",
+            "first_name": "Snoop",
+            "last_name": "Dogg"
+        }
+        account = Account.objects.create_account(
+            user=user_data,
+            city_name=self.city1.name,
+            region_name=self.city1.region.name
         )
-        user = authenticate(username="test1", password="secret")
-        self.assertTrue((user is not None) and user.is_authenticated)
+        self.assertEqual(account.city, self.city1)
 
-    def test_create_account(self):
-        user1 = User.objects.create(username="test_user1")
-        # user2 = User.objects.create(username="test_user2")
-        account1 = Account.objects.create(user=user1)
+    def test_account_create_2(self):
+        user_data = {
+            "username": "asdad;las;ldkas;ldka",
+            "password": "0a9d000"
+        }
+        account = Account.objects.create_account(
+            user=user_data,
+            city_name=self.city2.name,
+            region_name=self.city2.region.name
+        )
+        self.assertIsInstance(account.profile, Profile)
+        self.assertEqual(account.city, self.city2)
 
-        self.assertTrue(account1 is not None)
-        self.assertEqual(Account.objects.count(), 1)
+    def test_account_create_fail(self):
+        user_data = {
+            "username": "asdad;las;ldkas;ldka",
+            "password": "0a9d000"
+        }
+        with self.assertRaises(ObjectDoesNotExist):
+            Account.objects.create_account(
+                user=user_data,
+                city_name=self.city1.name,
+                region_name=self.region2.name
+            )
 
-        user_data = {"username": "created_test_user1", "email": "test@mail.com"}
-        account2 = Account.objects.create_account(user=user_data)
-        self.assertTrue(account2 is not None)
-        self.assertEqual(Account.objects.count(), 2)
-        self.assertEqual(account2.birthday, None)
-        self.assertEqual(account2.bio, None)
-        self.assertEqual(account2.status, "")
-        self.assertEqual(account2.city, None)
+    def test_account_deactivate(self):
+        self.assertTrue(self.user_account.user.is_active)
+        Account.objects.deactivate(self.user_account)
+        self.assertFalse(self.user_account.user.is_active)
+        Account.objects.deactivate(self.user_account)
+        self.assertFalse(self.user_account.user.is_active)
 
-        with transaction.atomic():
-            # check create without username
-            try:
-                Account.objects.create_account(user={"email": "test@mail.com"})
-            except Exception:
-                pass
-        self.assertEqual(Account.objects.count(), 2)
+    def test_account_activate(self):
+        self.assertTrue(self.superuser_account.user.is_active)
+        Account.objects.deactivate(self.superuser_account)
+        self.assertFalse(self.superuser_account.user.is_active)
+        Account.objects.activate(self.superuser_account)
+        self.assertTrue(self.superuser_account.user.is_active)
+        Account.objects.activate(self.superuser_account)
+        self.assertTrue(self.superuser_account.user.is_active)

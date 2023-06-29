@@ -12,7 +12,6 @@ class AccountManager(models.Manager):
     """
     Custom account manager.
     """
-
     def create_account(
         self,
         user: Dict[str, str],
@@ -44,61 +43,27 @@ class AccountManager(models.Manager):
         instance.user = not instance.user
         instance.save()
 
+    def get_by_username(self, username: str):
+        account = self.all().get(user__username=username)
+        return account
+
+    def block_user(self, account, username: str) -> None:
+        account_to_block = self.get_by_username(username)
+        account.black_list.add(account_to_block)
+        account.save()
+
 
 class Account(UUIDModel):
     """
-    Account model.
+    Account model. It`s User model extension with OneToOne relationship, not more.
     """
-
     user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
-    bio = models.TextField(blank=True, null=True, verbose_name="Биография")
-    birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
-    photo = models.ImageField(upload_to="uploads/account_img/", verbose_name="Фото", blank=True, null=True)
-    status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
-
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    tags = models.ManyToManyField("Tag", blank=True, verbose_name="Теги")
+    coordinate = models.OneToOneField("coordinates.Coordinate", on_delete=models.SET_NULL,
+                                      null=True, related_name="source")
+
     objects = AccountManager()
 
     def __str__(self):
         return self.user.username
-
-
-SOCIAL_NETWORK_LINK_NAME = (  # Choices
-    ("VK", "Вконтакте"),
-    ("INST", "Instagram"),
-    ("FB", "Facebook"),
-    ("WA", "WhatsApp"),
-    ("YT", "YouTube"),
-)
-
-
-class SocialNetworkLink(UUIDModel):
-    """
-    Social network link model.
-    """
-
-    account = models.ForeignKey(
-        Account,
-        verbose_name="Пользователь",
-        related_name="social_network_links",
-        on_delete=models.CASCADE,
-    )
-    name = models.CharField(max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK")
-    links = models.URLField()
-
-    def __str__(self):
-        return f"{self.get_name_display()}:{self.links}"
-
-    class Meta:
-        verbose_name = "Ссылка на социальные сети"
-        verbose_name_plural = "Ссылки на социальные сети"
-
-
-class Tag(UUIDModel):
-    """
-    Tag model.
-    """
-
-    name = models.TextField(max_length=20)
