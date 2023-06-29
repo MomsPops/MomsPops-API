@@ -8,7 +8,6 @@ router = ProfileRouter()
 router.register("posts", PostViewSet, "posts")
 router.register("profiles", ProfileViewSet, "profiles")
 
-
 urlpatterns = [
     path("", include(router.urls)),
 
