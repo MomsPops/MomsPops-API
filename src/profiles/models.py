@@ -67,14 +67,17 @@ class Post(UUIDModel, TimeCreateUpdateModel):  # type: ignore
             return "http://127.0.0.1:8000" + self.photo.url   # type: ignore
         return None
 
-    def get_preview_text(self) -> str:
-        return self.text[:150] + "..."  # type: ignore
+    def get_preview_text(self) -> str:  # type: ignore
+        if self.text is not None:
+            return self.text[:150] + "..."  # type: ignore
 
     def get_absolute_url(self) -> str:
         return reverse("posts_detail", kwargs={'id': self.id})  # type: ignore
 
     def __str__(self):
-        return self.get_preview_text()
+        string = self.get_preview_text()
+        if string is None:
+            return str(self.id)
 
 
 SOCIAL_NETWORK_LINK_NAME = (  # Choices

@@ -77,5 +77,5 @@ class BlockUserAPIView(generics.CreateAPIView):
         if serializer.validated_data['username'] == request.user.username:
             return Response({"detail": "You cannot add yourself to a black list"}, status=400)
 
-        account = Account.objects.block_user(serializer.validated_data['username'])
+        Account.objects.block_user(serializer.validated_data['username'])
         return Response({"detail": "User blocked successfully."})
