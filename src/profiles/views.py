@@ -57,7 +57,7 @@ class PostViewSet(mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
                   viewsets.GenericViewSet):
-    queryset = Profile.objects.all()
+    queryset = Post.objects.all()
     lookup_url_kwarg = "id"
     lookup_field = "id"
 
@@ -84,18 +84,18 @@ class PostViewSet(mixins.RetrieveModelMixin,
         Post.objects.create(**data)
         return Response(serializer.validated_data, status=201)
 
-    def update(self, request, *args, **kwargs):
-        instance = Post.objects.get(kwargs[self.lookup_url_kwarg])
-        self.check_object_permissions(request, obj=instance)
+    def partial_update(self, request, *args, **kwargs):
+        instance = Post.objects.get(id=kwargs[self.lookup_url_kwarg])
+        self.check_object_permissions(request, obj=instance)    # check if request user is owner
         serializer = self.get_serializer(instance=instance, data=request.data, partial=True)
         serializer.is_valid()
         serializer.update(instance, serializer.validated_data)
         serializer.save()
         instance.save()
-        return Response(serializer.data, status=200)
+        return Response({"data": instance.text}, status=200)
 
     def destroy(self, request, *args, **kwargs):
-        instance = Post.objects.get(kwargs[self.lookup_url_kwarg])
-        self.check_object_permissions(request, obj=instance)
+        instance = Post.objects.get(id=kwargs[self.lookup_url_kwarg])
+        self.check_object_permissions(request, obj=instance)    # check if request user is owner
         instance.delete()
         return Response({"Post was deleted successfully."})

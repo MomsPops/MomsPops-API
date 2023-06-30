@@ -68,27 +68,40 @@ class TestPostView(TestPostFixture, APITestCase):
         self.user_pofile.refresh_from_db()
         self.assertEqual(len(Post.post_manager.all_by_username(self.user.username)) - post_count_before, 1)
 
-    # def test_post_retrieve(self):
-    #     response = self.user_client.get(
-    #         reverse("posts_detail", kwargs={'id': self.superuser_post.id})
-    #     )
-    #     self.assertEqual(response.status_code, 200)
+    def test_post_retrieve(self):
+        response = self.user_client.get(
+            reverse("posts_detail", kwargs={'id': self.superuser_post.id})
+        )
+        self.assertEqual(response.status_code, 200)
 
-    # def test_profile_update(self):
-    #     data_update = {"test": "I was born tomorrow."}
-    #     response = self.user_client.get(
-    #         reverse("posts_detail", kwargs={'id': self.user_post.id}), data=data_update
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     self.user_pofile.refresh_from_db()
-    #     self.assertEqual(self.user_pofile.bio, data_update['bio'])
-    #
-    # def test_profile_update_other_fail(self):
-    #     data_update = {"bio": "I was born tomorrow and today."}
-    #     response = self.superuser_client.patch(
-    #         reverse("profiles_detail", kwargs={'username': self.user_account.user.username}), data=data_update
-    #     )
-    #     self.assertEqual(response.status_code, 403)
-    #     self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
-    #     self.user_pofile.refresh_from_db()
-    #
+    def test_post_update(self):
+        data_update = {"text": "I was born tomorrow."}
+        response = self.user_client.patch(
+            reverse("posts_detail", kwargs={'id': self.user_post.id}), data=data_update
+        )
+        self.assertEqual(response.status_code, 200)
+        self.user_post.refresh_from_db()
+        self.assertEqual(self.user_post.text, data_update['text'])
+
+    def test_post_update_other_fail(self):
+        data_update = {"text": "I was born tomorrow and today."}
+        response = self.superuser_client.patch(
+            reverse("posts_detail", kwargs={'id': self.user_post.id}), data=data_update
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
+
+    def test_post_delete(self):
+        post_count_before = len(Post.post_manager.all_by_username(self.user.username))
+        response = self.user_client.delete(
+            reverse("posts_detail", kwargs={"id": self.user_post.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(Post.post_manager.all_by_username(self.user.username)) - post_count_before, -1)
+
+    def test_post_delete_other_fail(self):
+        response = self.superuser_client.delete(
+            reverse("posts_detail", kwargs={"id": self.user_post.id})
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {'detail': 'You do not have permission to perform this action.'})
