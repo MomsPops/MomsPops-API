@@ -18,6 +18,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
+REDIS_HOST = os.getenv("REDIS_HOST", default='127.0.0.1')
+REDIS_PORT = os.getenv("REDIS_PORT", default=6379)
+
 ALLOWED_HOSTS = ["*"]
 
 
@@ -25,6 +28,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     # django utils
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -74,6 +78,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "core.asgi.application"
 WSGI_APPLICATION = "core.wsgi.application"
 
 
@@ -212,4 +217,21 @@ LOGGING = {
         },
     },
     "loggers": {"django": {"handlers": ["console"]}},
+}
+
+# channel layers configuration for server
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [(REDIS_HOST, REDIS_PORT)],
+#         },
+#     },
+# }
+
+# channel layers configuration for testing on local server
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }

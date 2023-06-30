@@ -1,9 +1,12 @@
 asgiref==3.7.2
 backoff==2.2.1
 certifi==2023.5.7
+channels==4.0.0
+channels-redis==4.1.0
 charset-normalizer==3.1.0
 coreapi==2.3.3
 coreschema==0.0.4
+daphne==4.0.0
 Django==4.2.2
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
