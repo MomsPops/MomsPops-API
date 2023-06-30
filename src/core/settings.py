@@ -13,29 +13,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", "very-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
-
-REDIS_HOST = os.getenv("REDIS_HOST", default='127.0.0.1')
-REDIS_PORT = os.getenv("REDIS_PORT", default=6379)
+DEBUG = os.getenv("DEBUG", True)
 
 ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
-
-INSTALLED_APPS = [
-    # django utils
-    "daphne",
+# api users coordinates locations notifications profiles reactions chats
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # apps
+]
+THIRD_PARTY_APPS = [
+    "daphne",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_yasg",
+    # "corsheaders",
+]
+LOCAL_APPS = [
     "api",
     "users",
     "coordinates",
@@ -44,11 +47,10 @@ INSTALLED_APPS = [
     "profiles",
     "reactions",
     "chats",
-    # libraries
-    "rest_framework",
-    "drf_yasg",
-    "rest_framework_simplejwt",
 ]
+
+INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -78,28 +80,25 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = "core.asgi.application"
-WSGI_APPLICATION = "core.wsgi.application"
-
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-    }
-}
-
 # DATABASES = {
 #     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.getenv("DB_NAME"),
+#         "HOST": os.getenv("DB_HOST"),
+#         "PORT": os.getenv("DB_PORT"),
+#         "USER": os.getenv("DB_USER"),
+#         "PASSWORD": os.getenv("DB_PASSWORD"),
 #     }
 # }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 
 # Password validation
@@ -219,19 +218,20 @@ LOGGING = {
     "loggers": {"django": {"handlers": ["console"]}},
 }
 
-# channel layers configuration for server
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [(REDIS_HOST, REDIS_PORT)],
-#         },
-#     },
-# }
 
-# channel layers configuration for testing on local server
+
+WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
+
+
+REDIS_HOST = os.getenv("REDIS_HOST", default="127.0.0.1")
+REDIS_PORT = os.getenv("REDIS_PORT", default=6379)
