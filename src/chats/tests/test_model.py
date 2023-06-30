@@ -1,76 +1,91 @@
-# from django.contrib.auth.models import User
+from django.contrib.auth.models import User
+
 # from django.db import transaction
-# from django.test import TestCase
-# from users.models import Account
-# from chats.models import Chat, Message
+from django.test import TestCase
+from users.models import Account
+from chats.models import Chat, Group, Message
+from coordinates.models import Coordinate
 
 
-# class ChatTest(TestCase):
-#     @classmethod
-#     def setUpTestData(cls):
-#         user1 = User.objects.create_user(
-#             username="test1",
-#             password="secret",
-#         )
-#         user2 = User.objects.create_user(
-#             username="test2",
-#             password="secret",
-#         )
-#         Account.objects.create(user=user1)
-#         Account.objects.create(user=user2)
-#         ChatType.objects.create(title="test_chat_title1")
+class GroupTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user(
+            username="test1",
+            password="secret",
+        )
+        User.objects.create_user(
+            username="test2",
+            password="secret",
+        )
 
-#     def test_create_chat(self):
-#         account = Account.objects.first()
-#         chat_type = ChatType.objects.first()
+    def test_create_group(self):
+        group1 = Group.objects.create_group(title="First Group")
+        self.assertTrue(group1 is not None)
+        self.assertEqual(group1.location_coordinate, None)
 
-#         with transaction.atomic():
-#             # check create without type
-#             try:
-#                 Chat.objects.create(owner=account)
-#             except Exception:
-#                 pass
-#         self.assertEqual(Chat.objects.count(), 0)
+        account_without_coord = Account.objects.create(user=User.objects.last())
+        group2 = Group.objects.create_group(title="Second Group", account=account_without_coord)
+        self.assertTrue(group2 is not None)
+        self.assertEqual(group2.location_coordinate, None)
 
-#         chat = Chat.objects.create(owner=account, type=chat_type)
+        coordinate = Coordinate.object.create(lat=1, lon=2)
+        self.assertTrue(coordinate is not None)
 
-#         self.assertTrue(chat is not None)
-#         self.assertEqual(Chat.objects.count(), 1)
+        account_with_coord = Account.objects.create(user=User.objects.first(), coordinate=coordinate)
+        group3 = Group.objects.create_group(title="Third Group", account=account_with_coord)
 
-#         chat = Chat.objects.create(type=chat_type)
-#         self.assertTrue(chat is not None)
-#         self.assertEqual(Chat.objects.count(), 2)
+        self.assertTrue(group3 is not None)
+        self.assertEqual(account_with_coord.coordinate, coordinate)
+        self.assertEqual(group3.location_coordinate, coordinate)
+        self.assertTrue(group3.members is not None)
+        self.assertEqual(group3.members.first(), account_with_coord)
 
-#     def test_add_members_in_chat(self):
-#         account1 = Account.objects.first()
-#         account2 = Account.objects.last()
-#         chat_type = ChatType.objects.first()
 
-#         chat = Chat.objects.create(type=chat_type)
+class ChatTest(TestCase):
+    def setUp(self):
+        user1 = User.objects.create_user(username="test1")
+        user2 = User.objects.create_user(username="test2")
+        user3 = User.objects.create_user(username="test3")
 
-#         self.assertEqual(chat.owner, None)
+        self.account1 = Account.objects.create(user=user1)
+        self.account2 = Account.objects.create(user=user2)
+        self.account3 = Account.objects.create(user=user3)
 
-#         chat.members.add(account1)
-#         self.assertEqual(chat.members.count(), 1)
-#         chat.members.add(account2)
-#         self.assertEqual(chat.members.count(), 2)
+    def test_create_simple_chat(self):
+        new_chat = Chat.objects.get_or_create_simple_chat(sender=self.account1, reciever=self.account2)
+        self.assertTrue(new_chat is not None)
 
-#         chat.members.add(account2)
-#         self.assertEqual(chat.members.count(), 2)
+        self.assertTrue(self.account1 in new_chat.members.all())
+        self.assertTrue(self.account2 in new_chat.members.all())
+        self.assertEqual(Chat.objects.count(), 1)
 
-#     def test_create_messages(self):
-#         chat_type = ChatType.objects.first()
-#         account = Account.objects.first()
-#         chat = Chat.objects.create(type=chat_type)
+    def test_create_custom_chat(self):
+        list_of_account = [self.account1, self.account2, self.account3]
+        new_chat = Chat.objects.create_custom_chat(account_list=list_of_account)
 
-#         message = Message.objects.create(
-#             chat=chat, account=account, text="test message"
-#         )
+        self.assertTrue(new_chat is not None)
 
-#         self.assertTrue(message is not None)
-#         self.assertEqual(message.text, "test message")
-#         self.assertEqual(message.viewed, False)
-#         self.assertEqual(message.account, account)
+        self.assertTrue(self.account1 in new_chat.members.all())
+        self.assertTrue(self.account2 in new_chat.members.all())
+        self.assertTrue(self.account3 in new_chat.members.all())
 
-#         self.assertEqual(chat.messages.count(), 1)
-#         self.assertEqual(chat.messages.first(), message)
+
+class MessageTest(TestCase):
+    def setUp(self):
+        user1 = User.objects.create_user(username="test1")
+        user2 = User.objects.create_user(username="test2")
+        user3 = User.objects.create_user(username="test3")
+
+        self.account1 = Account.objects.create(user=user1)
+        self.account2 = Account.objects.create(user=user2)
+        self.account3 = Account.objects.create(user=user3)
+
+        self.simmple_chat = Chat.objects.get_or_create_simple_chat(sender=self.account1, reciever=self.account2)
+        self.simmple_chat = Chat.objects.get_or_create_simple_chat(sender=self.account1, reciever=self.account2)
+
+    def test_create_messages(self):
+        message1 = Message.objects.create(account=self.account1, text="Hello world")
+
+        self.assertTrue(message1 is not None)
+        self.assertEqual(Message.objects.count(), 1)
