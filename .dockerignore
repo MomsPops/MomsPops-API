@@ -1,0 +1,7 @@
+.github
+.gitignore
+.idea
+.vscode
+debug.log
+README.md
+venv

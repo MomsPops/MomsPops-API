@@ -12,6 +12,31 @@
 - model managers: custom manager should be extra attributes;
 You can change it in settings.
 
+###  Docker configuration
+- First docker configuration for local development
+- File: docker-compose.yml
+- Run the following command:
+- Ports used (80, 5432, 8000), _Check port availability on local PC_
+```bash
+docker compose -f docker-compose.yml up --build
+```
+
+- Get containers id in another terminal window (IMAGE name - like: _momspops-api-backend_)
+```bash
+docker ps 
+```
+
+- !!! Run test
+```bash
+ docker exec -it <container_id> python manage.py test
+ ```
+- Create superuser 
+```bash
+ docker exec -it <container_id> python manage.py createsuperuser
+ ```
+ - Check in project browser:
+ _http://localhost/admin/_
+ _http://localhost/api/v1/_
 #### Applications:
 - _core_: project root app;
 - _api_: api application;
@@ -34,12 +59,13 @@ You can change it in settings.
 ".dev.env" file in ./src:
 ```dotenv
 SECRET_KEY=secret_SECRET
+DEBUG=True
 
-DB_NAME=mosmpops_example
-DB_HOST=localhost
+DB_NAME=postgres
+DB_HOST=db
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=postgres
+DB_PASSWORD=password
 ```
 #### Linter:
 
@@ -57,19 +83,6 @@ mypy .
 
 #### PRs:
 IMPORTANT! You should check your code by linter and type-checker before making pull-request.
-
-## Installing requirements
-```commandline
-pip install -r requirements.txt
-```
-
-## Running application
-```commandline
-cd src
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
-```
 
 
 ## Database schema
