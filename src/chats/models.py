@@ -3,58 +3,33 @@ from service.models import (
     UUIDModel,
     TimeCreateModel,
     TimeCreateUpdateModel,
-    AccountForeignModel,
 )
 from users.models import Account
 
 
 # TODO: change folder path
 def get_group_preview_file_path(instance, *_, **__) -> str:
-    return instance.created.strftime("uploads/chat_previews/%Y/%m/%d/") + str(instance.id)  # type: ignore
+    return instance.time_created.strftime("uploads/group_previews/%Y/%m/%d/") + str(instance.id)  # type: ignore
 
 
 # TODO: change folder path
 def get_message_img_file_path(instance, *_, **__) -> str:
-    return instance.created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)    # type: ignore
+    return instance.time_created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)  # type: ignore
 
 
-class ChatType(models.Model):
-    title = models.CharField(max_length=100, verbose_name="Название чата")
-
-    objects = models.Manager()
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = "Тип чата"
-        verbose_name_plural = "Тип чата"
-
-
-class Chat(TimeCreateUpdateModel, UUIDModel):
-    """
-    Chat model.
-    """
-
-    type = models.ForeignKey(
-        ChatType,
-        related_name="chats",
-        on_delete=models.PROTECT,
-        verbose_name="Тип чата",
-    )
+class Group(TimeCreateUpdateModel, UUIDModel):
+    title = models.CharField(max_length=100, verbose_name="Название Группы")
     owner = models.ForeignKey(
-        "users.Account",
+        Account,
         on_delete=models.SET_NULL,
         verbose_name="Создатель группы",
-        related_name="owner_chat",
+        related_name="groups_owner",
         null=True,
         blank=True,
     )
-    members = models.ManyToManyField(Account, blank=True)
+    members = models.ManyToManyField(Account, blank=True, related_name="groups")
 
-    meeting_time = models.DateTimeField(
-        verbose_name="Время встречи", blank=True, null=True
-    )
+    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
     location_coordinate = models.ForeignKey(
         "coordinates.Coordinate",
         default=None,
@@ -65,22 +40,59 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     )
     img_preview = models.ImageField(upload_to=get_group_preview_file_path, null=True, blank=True)
 
-    objects = models.Manager()
-
     def __str__(self):
-        return f"{self.type.title}:{self.id}"
+        return f"{self.title}:{self.id}"
 
     class Meta:
+        ordering = ["-time_created"]
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+
+
+class Chat(TimeCreateUpdateModel, UUIDModel):
+    members = models.ManyToManyField("users.Account", blank=True, related_name="chats")
+
+    class Meta:
+        ordering = ["-time_created"]
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
 
 
-class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
-    """
-    Message model. Fields: id, time_created,
-    """
+class ChatMessage(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, verbose_name="Сообщение из чата", related_name="messages")
+    message = models.ForeignKey(
+        "Message",
+        on_delete=models.CASCADE,
+    )
 
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
+    def __str__(self) -> str:
+        return f"Сообщение из чата, автор:{self.message.account.id}"
+
+    class Meta:
+        index_together = [
+            ["chat", "message"],
+        ]
+
+
+class GroupMessage(models.Model):
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, verbose_name="Сообщение из группы", related_name="messages"
+    )
+    message = models.OneToOneField(
+        "Message",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self) -> str:
+        return f"Сообщение из чата, автор:{self.message.account.id}"
+
+    class Meta:
+        index_together = [
+            ["group", "message"],
+        ]
+
+
+class Message(UUIDModel, TimeCreateModel):
     account: Account = models.ForeignKey(
         Account,
         on_delete=models.CASCADE,
@@ -88,17 +100,28 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
         related_name="messages",
     )
     text = models.TextField(max_length=500, verbose_name="Текст сообщения")
-    img = models.ImageField(
-        upload_to=get_message_img_file_path, null=True
-    )  # TODO: added extra models FK
-    viewed = models.BooleanField(default=False)
-    reactions = models.ManyToManyField("reactions.Reaction", related_name="messages")
-
-    objects = models.Manager()
+    imgages = models.ManyToManyField("MessageImages", blank=True, related_name="message")
+    viewed = models.BooleanField(default=False, verbose_name="Просмотрено?")
+    reactions = models.ManyToManyField("reactions.Reaction", blank=True, related_name="messages")
+    available = models.BooleanField(default=True, verbose_name="Доступно к прочтению")
 
     def __str__(self):
-        return f"Account: {self.account.id}, viewed: {self.viewed}"
+        return f"Автор: {self.account.user.username}, текст :{self.text}"
 
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+
+    def hide_message(self):
+        self.available = False
+        self.viewed = True
+        self.save()
+
+
+class MessageImages(UUIDModel, TimeCreateModel):
+    img = models.ImageField(upload_to=get_message_img_file_path, null=True)
+
+    class Meta:
+        ordering = ["-time_created"]
+        verbose_name = "Фотография из сообщения"
+        verbose_name_plural = "Фотографии из сообщений"
