@@ -100,9 +100,9 @@ def test_time_vector(n_samples: int):
     return distances
 
 
-lst1 = test_time_1(10**6)
-lst2 = test_time_2(10**6)
-lst_v = test_time_vector(10**6)
+# lst1 = test_time_1(10**6)
+# lst2 = test_time_2(10**6)
+# lst_v = test_time_vector(10**6)
 
 # kwargs = {
 #     "lat1": 100,
@@ -112,6 +112,7 @@ lst_v = test_time_vector(10**6)
 # }
 # print(calculate_distance_1(**kwargs))
 # print(calculate_distance_2(**kwargs))
+
 # print(
 #     calculate_vector_distance(
 #         lat1=100,
@@ -120,3 +121,8 @@ lst_v = test_time_vector(10**6)
 #         lon2=np.array([101])
 #     )
 # )
+
+# lat1 = 43.220012
+# lon1 = 76.931694
+# lat2 = 43.229381
+# lon2 = 76.944408
