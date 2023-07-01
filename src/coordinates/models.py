@@ -80,7 +80,7 @@ class Coordinate(models.Model):
     lon = models.FloatField("Longitude")
     last_time = models.DateTimeField("Last time", auto_created=True, auto_now=True)
 
-    object = models.Manager()
+    objects = models.Manager()
     coordinate_manager = CoordinateManager()
 
     def __str__(self):

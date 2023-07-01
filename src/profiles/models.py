@@ -102,6 +102,8 @@ class SocialNetworkLink(UUIDModel):
     name = models.CharField(max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK")
     links = models.URLField()
 
+    objects = models.Manager()
+
     def __str__(self):
         return f"{self.get_name_display()}:{self.links}"
 
@@ -116,3 +118,5 @@ class Tag(UUIDModel):
     Like #programming, #cats. Interests and hobbies of a person.
     """
     name = models.TextField(max_length=20, unique=True)
+
+    objects = models.Manager()

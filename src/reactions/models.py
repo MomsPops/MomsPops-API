@@ -19,6 +19,8 @@ class Reaction(models.Model):
         verbose_name="Варианты реакций из определенного списка",
     )
 
+    objects = models.Manager()
+
     class Meta:
         verbose_name = "Реакция пользователя на пост/сообщение"
         verbose_name_plural = "Реакции пользователя на пост/сообщение"
@@ -27,6 +29,8 @@ class Reaction(models.Model):
 class ReactionItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     image = models.ImageField(upload_to="uploads/reaction_images/")
+
+    objects = models.Manager()
 
     class Meta:
         verbose_name = "Изображение реакции"
