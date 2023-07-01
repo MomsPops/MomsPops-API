@@ -2,7 +2,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from .models import Reaction, ReactionItem
-from .serializer import ReactionItemSerializer, ReactionSerializer
+from .serializers import ReactionItemSerializer, ReactionSerializer
 
 
 class ReactionItemViewSet(viewsets.ModelViewSet):
