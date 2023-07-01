@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from .models import Region
-from .serializer import LocationListSerializer
+from .serializers import LocationListSerializer
 from .service.dump_data import dump_locations, dump_regions, dump_cities
 
 

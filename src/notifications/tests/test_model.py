@@ -1,10 +1,14 @@
-
 from datetime import datetime
 from uuid import UUID
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Notification
+from users.models import Account
+
+from ..models import Notification, NotificationAccount
+
+User = get_user_model()
 
 
 class NotificationModelTest(TestCase):
@@ -16,10 +20,21 @@ class NotificationModelTest(TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
 
+        cls.user1 = User.objects.create_user(
+            username='test_user_1',
+            password='password_1'
+        )
+        cls.user2 = User.objects.create_user(
+            username='test_user_2',
+            password='password_2'
+        )
+        cls.account1 = Account.objects.create(user=cls.user1)
+        cls.account2 = Account.objects.create(user=cls.user2)
         cls.notifctn = Notification.objects.create(
             text='some text',
             links='https://example.com'
         )
+        cls.notifctn.account.add(cls.account1,)
 
     def test_notification_fields_types(self):
         """
@@ -29,7 +44,6 @@ class NotificationModelTest(TestCase):
         self.assertIsInstance(self.notifctn.text, str)
         self.assertIsInstance(self.notifctn.links, str)
         self.assertIsInstance(self.notifctn.time_created, datetime)
-        self.assertIsInstance(self.notifctn.is_active, bool)
         self.assertIsInstance(self.notifctn.id, UUID)
 
     def test_notification_object_cretation(self):
@@ -41,20 +55,24 @@ class NotificationModelTest(TestCase):
             text='text',
             links='https://youtube.com',
         )
+        note.account.add(self.account1, self.account2)
         notifications = Notification.objects.all()
         self.assertEqual(len(notifications), 2)
-        self.assertIs(note.is_active, True)
+        self.assertTrue(self.account1.notifications.filter(pk=note.pk).exists())
+        self.assertTrue(self.account2.notifications.filter(pk=note.pk).exists())
         self.assertIsNotNone(note.time_created)
 
-    def test_deactivate_method(self):
+    def test_is_viewed_method(self):
         """
-        Deactivate method test.
+        Is_viewed method test.
         """
 
         note_2 = Notification.objects.create(
             text='another text',
             links='https://yandex.ru',
         )
-        self.assertEqual(note_2.is_active, True)
-        note_2.deactivate()
-        self.assertEqual(note_2.is_active, False)
+        note_2.account.add(self.account1)
+        notification_account = NotificationAccount.objects.get(notification=note_2, account=self.account1)
+        self.assertEqual(notification_account.viewed, False)
+        notification_account.is_viewed()
+        self.assertEqual(notification_account.viewed, True)
