@@ -54,8 +54,18 @@ def calculate_distance_2(lat1: float, lon1: float, lat2: float, lon2: float) -> 
 
 def vectorize_queryset(queryset: Iterable) -> Tuple[np.ndarray, np.ndarray]:
     """Make latitude vector and longitude vector out of queryset."""
-    return (np.array([q.lat for q in queryset], dtype="float32"),
-            np.array([q.lon for q in queryset], dtype="float32"))
+    return (
+        np.array([q.lat for q in queryset], dtype="float32"),
+        np.array([q.lon for q in queryset], dtype="float32")
+    )
+
+
+def vectorize_queryset_dict(queryset: Iterable):
+    """Make latitude vector and longitude vector out of a mapping obj."""
+    return (
+        np.array([q['lat'] for q in queryset], dtype="float32"),
+        np.array([q['lon'] for q in queryset], dtype="float32")
+    )
 
 
 def calculate_vector_distance(lat1: float, lat2: np.ndarray, lon1: float, lon2: np.ndarray) -> np.ndarray[Any, Any]:
