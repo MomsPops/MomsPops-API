@@ -13,7 +13,7 @@ class CoordinateViewSet(mixins.CreateModelMixin,
     """
     Create and destroy current user coordinate.
     """
-    queryset = Coordinate.object.all()
+    queryset = Coordinate.objects.all()
     serializer_class = CoordinateCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -53,7 +53,7 @@ class CoordinateNearAPIView(generics.ListAPIView):
     """
     Get all near user for the current_user
     """
-    queryset = Coordinate.object.all()
+    queryset = Coordinate.objects.all()
     serializer_class = CoordinateListSerializer
     permission_classes = [IsAuthenticated]
 
