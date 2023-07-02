@@ -193,27 +193,49 @@ SIMPLE_JWT = {
 
 
 # Logging
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "rich": {"datefmt": "[%X]"},
+#         "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "rich.logging.RichHandler",
+#             "formatter": "rich",
+#             "level": "DEBUG",
+#         },
+#         "file": {
+#             "level": "DEBUG",
+#             "class": "logging.FileHandler",
+#             "formatter": "file",
+#             "filename": "../debug.log",
+#         },
+#     },
+#     "loggers": {"django": {"handlers": ["console"]}},
+# }
+
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "rich": {"datefmt": "[%X]"},
-        "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
+    'version': 1,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
     },
-    "handlers": {
-        "console": {
-            "class": "rich.logging.RichHandler",
-            "formatter": "rich",
-            "level": "DEBUG",
-        },
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "formatter": "file",
-            "filename": "../debug.log",
-        },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        }
     },
-    "loggers": {"django": {"handlers": ["console"]}},
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
+    }
 }
 
 # Redis and cache
@@ -231,3 +253,6 @@ CACHES = {
 }
 
 TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
+
+
+AUTH_USER_MODEL = "users.User"

@@ -1,9 +1,8 @@
-from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIClient
 
 from locations.models import Region, City
 from profiles.models import Profile, Post
-from users.models import Account
+from users.models import Account, User
 
 
 class TestUserFixture(APITestCase):
