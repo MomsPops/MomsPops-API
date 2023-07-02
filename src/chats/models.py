@@ -76,6 +76,8 @@ class ChatManager(models.Manager):
         return new_chat
 
     def create_custom_chat(self, account_list: List[Account]):
+        """Chat for 1-all persons"""
+
         chat = Chat.objects.create(type="CSTM")
         chat.members.add(*account_list)
         return chat
