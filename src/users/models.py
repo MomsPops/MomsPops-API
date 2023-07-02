@@ -1,11 +1,21 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, UserManager
+# from django.contrib.auth.models import User
 from typing import Dict
 
 from service.models import UUIDModel
 from profiles.models import Profile
 from locations.models import City
 from typing import Union
+
+
+class CustomUserManager(UserManager):
+    def get(self, *args, **kwargs):
+        return super().select_related('account').get(*args, **kwargs)
+
+
+class User(AbstractUser):
+    objects = CustomUserManager()
 
 
 class AccountManager(models.Manager):
@@ -44,7 +54,7 @@ class AccountManager(models.Manager):
         instance.save()
 
     def get_by_username(self, username: str):
-        account = self.all().get(user__username=username)
+        account = self.all().select_related('profile').get(user__username=username)
         return account
 
     def block_user(self, account, username: str) -> None:

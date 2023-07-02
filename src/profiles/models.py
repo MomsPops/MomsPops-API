@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.db import models
+from django.db.models import Prefetch
 from django.urls import reverse
 from django.conf import settings
 
@@ -8,6 +9,22 @@ from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneMode
 
 # choices for Profile.sex field
 SEX_CHOICES = (("Не выбран", "Не выбран"), ("Мужской", "Мужской"), ("Женский", "Женский"), ("Другой", "Другой"))
+
+
+class ProfileManager(models.Manager):
+    def all(self):
+        return (
+            super()
+            .select_related("account", "account__user")
+            .all()
+        )
+
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("account", "account__user")
+            .get(*args, **kwargs)
+        )
 
 
 class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
@@ -25,7 +42,7 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
     sex = models.CharField("Пол", choices=SEX_CHOICES, default="Не выбран", max_length=10)
 
-    objects = models.Manager()
+    objects = ProfileManager()
 
     def get_photo_url(self):
         """Static url to user photo"""
