@@ -2,7 +2,7 @@ from locations.models import City, Region
 import json
 
 
-def dump_regions() -> None:
+def load_regions() -> None:
     with open("locations/data/russia_regions.json") as file:
         regions = json.load(file)
 
@@ -13,7 +13,7 @@ def dump_regions() -> None:
             pass
 
 
-def dump_cities() -> None:
+def load_cities() -> None:
     with open("locations/data/russia_cities.json") as file:
         cities = json.load(file)
 
@@ -28,6 +28,6 @@ def dump_cities() -> None:
             pass
 
 
-def dump_locations() -> None:
-    dump_regions()
-    dump_cities()
+def load_locations() -> None:
+    load_regions()
+    load_cities()
