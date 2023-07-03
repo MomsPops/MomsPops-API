@@ -1,7 +1,6 @@
 from typing import Optional
 
 from django.db import models
-from django.db.models import Prefetch
 from django.urls import reverse
 from django.conf import settings
 

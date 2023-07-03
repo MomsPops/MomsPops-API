@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from .models import Region
 from .serializers import LocationListSerializer
 from .service.load_data import load_locations, load_cities, load_regions
-from .tasks import load_regions_task, load_cities_task, load_locations_task
+from .tasks import load_regions_task, load_cities_task
 
 
 class LocationListAPIView(generics.ListAPIView):
