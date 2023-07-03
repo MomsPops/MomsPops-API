@@ -112,6 +112,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "users.User"
+
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -253,6 +255,3 @@ CACHES = {
 }
 
 TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
-
-
-AUTH_USER_MODEL = "users.User"

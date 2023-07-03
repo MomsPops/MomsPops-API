@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from django.conf import settings
+from typing import List
 
 from .calculations import calculate_vector_distance, vectorize_queryset_dict
 
@@ -28,7 +29,7 @@ def filter_distance(coord, queryset, distance_limit: int):
 
 def filter_coordinates(
         coord: dict,
-        queryset: list[dict],
+        queryset: List[dict],
         time_delta_limit=timedelta(minutes=10),
         distance_limit: int = 3000
 ):
