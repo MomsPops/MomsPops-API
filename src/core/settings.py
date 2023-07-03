@@ -255,3 +255,8 @@ CACHES = {
 }
 
 TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
+
+
+# Celery settings
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
