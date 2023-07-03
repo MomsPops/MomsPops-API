@@ -1,10 +1,13 @@
 asgiref==3.7.2
+async-timeout==4.0.2
 backoff==2.2.1
 certifi==2023.5.7
 charset-normalizer==3.1.0
 coreapi==2.3.3
 coreschema==0.0.4
 Django==4.2.2
+django-debug-toolbar==4.1.0
+django-redis==5.3.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 drf-yasg==1.21.5
@@ -25,6 +28,7 @@ opencage==2.2.0
 packaging==23.1
 passlib==1.7.4
 Pillow==9.5.0
+psycopg2==2.9.6
 psycopg2-binary==2.9.6
 pycodestyle==2.10.0
 pyflakes==3.0.1
@@ -32,10 +36,12 @@ Pygments==2.15.1
 PyJWT==2.7.0
 python-dotenv==1.0.0
 pytz==2023.3
+redis==4.6.0
 requests==2.31.0
 rich==13.4.2
 ruamel.yaml==0.17.31
 ruamel.yaml.clib==0.2.7
+six==1.16.0
 sqlparse==0.4.4
 typing_extensions==4.6.3
 tzdata==2023.3
