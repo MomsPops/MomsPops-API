@@ -55,7 +55,8 @@ class NotificationAccount(models.Model):
 
     viewed = models.BooleanField("Прочитано", default=False)
 
-    objects = NotificationAccountManager()
+    objects = models.Manager()
+    notification_account_manager = NotificationAccountManager()
 
     def is_viewed(self):
         """Sets viewed to `True`."""

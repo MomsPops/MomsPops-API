@@ -41,7 +41,8 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
     sex = models.CharField("Пол", choices=SEX_CHOICES, default="Не выбран", max_length=10)
 
-    objects = ProfileManager()
+    objects = models.Manager()
+    profile_manager = ProfileManager()
 
     def get_photo_url(self):
         """Static url to user photo"""

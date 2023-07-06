@@ -31,7 +31,8 @@ class City(models.Model):
         null=True
     )
 
-    objects = CityManager()
+    objects = models.Manager()
+    city_manager = CityManager()
 
     def get_full_name(self):
         return f"{self.name}, {self.region.name}"
@@ -51,7 +52,8 @@ class Region(models.Model):
     """
     name = models.CharField(max_length=100, unique=True)
 
-    objects = RegionManager()
+    objects = models.Manager()
+    region_manager = RegionManager()
 
     def __str__(self):
         return self.name

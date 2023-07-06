@@ -1,12 +1,10 @@
-from uuid import uuid4
-
 from django.db import models
 
 from users.models import Account
+from service.models import UUIDModel
 
 
-class Reaction(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
+class Reaction(UUIDModel):
     owner = models.ForeignKey(
         Account,
         on_delete=models.PROTECT,
@@ -26,8 +24,7 @@ class Reaction(models.Model):
         verbose_name_plural = "Реакции пользователя на пост/сообщение"
 
 
-class ReactionItem(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
+class ReactionItem(UUIDModel):
     image = models.ImageField(upload_to="uploads/reaction_images/")
 
     objects = models.Manager()
