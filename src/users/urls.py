@@ -1,12 +1,11 @@
 from django.urls import path, include
 
-from .views import AccountViewSet, BlockUserViewSet
+from .views import AccountViewSet
 from .routers import AccountRouter
 
 
 router = AccountRouter()
 router.register("accounts", AccountViewSet, "accounts")
-router.register("black-list", BlockUserViewSet, "black_list")
 
 
 urlpatterns = [
