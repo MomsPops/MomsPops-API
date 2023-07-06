@@ -74,7 +74,7 @@ class BlockUserViewSet(mixins.ListModelMixin,
     queryset = Account.objects.all()
 
     def get_serializer(self, *args, **kwargs):
-        match self.action:
+        match self.action:  # type: ignore
             case "list":
                 return BlockUserListSerializer(*args, **kwargs)
             case "create":
