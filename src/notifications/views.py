@@ -1,4 +1,4 @@
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,7 +14,13 @@ class PersonalNotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMix
     """
 
     serializer_class = NotificationAccountSerializer
-    queryset = NotificationAccount.objects.all()
+    queryset = NotificationAccount.objects.all().select_related(
+        'notification',
+        'account',
+        'account__user',
+        'account__city',
+        'account__city__region'
+    )
 
     @action(
         detail=True,
@@ -28,6 +34,15 @@ class PersonalNotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMix
         Mark notification as viewed.
         """
 
-        notification = get_list_or_404(NotificationAccount, id=kwargs['pk'])
-        notification[0].is_viewed()
+        notification = get_object_or_404(
+            NotificationAccount.objects.select_related(
+                'notification',
+                'account',
+                'account__user',
+                'account__city',
+                'account__city__region'
+            ),
+            id=kwargs['pk']
+        )
+        notification.is_viewed()
         return Response(NotificationAccountSerializer(notification).data)

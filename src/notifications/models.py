@@ -1,6 +1,6 @@
 from django.db import models
 
-from service.models import UUIDModel, TimeCreateModel
+from service.models import TimeCreateModel, UUIDModel
 
 
 class Notification(UUIDModel, TimeCreateModel):
@@ -8,9 +8,10 @@ class Notification(UUIDModel, TimeCreateModel):
     Notification model.
     """
 
-    text = models.TextField(max_length=300)
-    links = models.URLField(blank=True)
+    text = models.TextField("Текст", max_length=300)
+    links = models.URLField("Ссылка", blank=True)
     account = models.ManyToManyField(
+        verbose_name="Аккаунт",
         to="users.Account",
         related_name="notifications",
         through='NotificationAccount'
@@ -32,16 +33,18 @@ class NotificationAccount(models.Model):
     """
 
     account = models.ForeignKey(
+        verbose_name="Аккаунт",
         to="users.Account",
         on_delete=models.CASCADE
     )
 
     notification = models.ForeignKey(
+        verbose_name="Уведомление",
         to=Notification,
         on_delete=models.CASCADE
     )
 
-    viewed = models.BooleanField(default=False)
+    viewed = models.BooleanField("Прочитано", default=False)
 
     def is_viewed(self):
         """Sets viewed to `True`."""
