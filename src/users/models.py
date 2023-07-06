@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from typing import Dict
 
+from django.http import Http404
+
 from service.models import UUIDModel
 from profiles.models import Profile
 from locations.models import City
@@ -55,13 +57,24 @@ class AccountManager(models.Manager):
         instance.save()
 
     def get_by_username(self, username: str):
-        account = self.all().select_related('profile').get(user__username=username)
-        return account
+        try:
+            account = self.all().select_related('profile').get(user__username=username)
+            return account
+        except self.model.DoesNotExist:
+            raise Http404("User with such username is not found.")
 
     def block_user(self, account, username: str) -> None:
         account_to_block = self.get_by_username(username)
         account.black_list.add(account_to_block)
         account.save()
+
+    def unblock_user(self, account, username: str) -> None:
+        if account.black_list.filter(user__username=username).exists():
+            account_to_block = self.get_by_username(username)
+            account.black_list.remove(account_to_block)
+            account.save()
+        else:
+            raise Http404("User was not blocked.")
 
 
 class Account(UUIDModel):
