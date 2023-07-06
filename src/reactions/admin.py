@@ -4,5 +4,5 @@ from .models import ReactionItem
 
 
 @admin.register(ReactionItem)
-class ReactionItemeModel(admin.ModelAdmin):
+class ReactionItemModel(admin.ModelAdmin):
     list_display = ("id",)
