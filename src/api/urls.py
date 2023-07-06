@@ -9,7 +9,6 @@ urlpatterns = [
 
     path('auth/', include(
         [
-            path("", include("users.urls")),    # `users` application is connected with auth (account operations)
             path('token/', TokenObtainPairView.as_view(), name="token_obtain"),
             path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh")
         ]
@@ -23,5 +22,6 @@ urlpatterns = [
     # `include()` through root url means that we are to register several viewsets at the same application,
     # but make their urls not relative ones
     path("", include("profiles.urls")),
+    path("", include("users.urls")),
 
 ]
