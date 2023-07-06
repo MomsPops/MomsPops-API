@@ -79,7 +79,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #         'NAME': os.getenv("DB_NAME"),
 #         "HOST": os.getenv("DB_HOST"),
 #         "PORT": os.getenv("DB_PORT"),
@@ -207,12 +207,6 @@ SIMPLE_JWT = {
 #             "class": "rich.logging.RichHandler",
 #             "formatter": "rich",
 #             "level": "DEBUG",
-#         },
-#         "file": {
-#             "level": "DEBUG",
-#             "class": "logging.FileHandler",
-#             "formatter": "file",
-#             "filename": "../debug.log",
 #         },
 #     },
 #     "loggers": {"django": {"handlers": ["console"]}},
