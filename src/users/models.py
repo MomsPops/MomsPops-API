@@ -1,18 +1,26 @@
 from django.db import models
-from django.contrib.auth.models import User
-from typing import Dict
+from django.contrib.auth.models import AbstractUser, UserManager
+from django.http import Http404
+from typing import Dict, Union
 
 from service.models import UUIDModel
 from profiles.models import Profile
 from locations.models import City
-from typing import Union
+
+
+class CustomUserManager(UserManager):
+    def get(self, *args, **kwargs):
+        return super().select_related('account').get(*args, **kwargs)
+
+
+class User(AbstractUser):
+    objects = CustomUserManager()
 
 
 class AccountManager(models.Manager):
     """
     Custom account manager.
     """
-
     def create_account(
         self,
         user: Dict[str, str],
@@ -24,6 +32,8 @@ class AccountManager(models.Manager):
             city = City.objects.get(name=city_name, region__name=region_name)
 
         new_user = User.objects.create_user(**user)
+        # new_user.is_active = False    # for email validation
+        # new_user.save()
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         Profile.objects.create(account=new_account)
@@ -44,69 +54,38 @@ class AccountManager(models.Manager):
         instance.user = not instance.user
         instance.save()
 
+    def get_by_username(self, username: str):
+        try:
+            account = self.all().select_related('profile').get(user__username=username)
+            return account
+        except self.model.DoesNotExist:
+            raise Http404("User with such username is not found.")
+
+    # def block_user(self, account, username: str) -> None:
+    #     account_to_block = self.get_by_username(username)
+    #     account.black_list.add(account_to_block)
+    #     account.save()
+    #
+    # def unblock_user(self, account, username: str) -> None:
+    #     if account.black_list.filter(user__username=username).exists():
+    #         account_to_block = self.get_by_username(username)
+    #         account.black_list.remove(account_to_block)
+    #         account.save()
+    #     else:
+    #         raise Http404("User was not blocked.")
+
 
 class Account(UUIDModel):
     """
-    Account model.
+    Account model. It`s User model extension with OneToOne relationship, not more.
     """
-
-    user: User = models.OneToOneField(
-        User, related_name="account", on_delete=models.CASCADE
-    )
-    bio = models.TextField(blank=True, null=True, verbose_name="Биография")
-    birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
-    photo = models.ImageField(
-        upload_to="uploads/account_img/", verbose_name="Фото", blank=True, null=True
-    )
-    status = models.CharField(max_length=100, verbose_name="Статус", blank=True)
-
-    city = models.ForeignKey(
-        City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True
-    )
+    user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    tags = models.ManyToManyField("Tag", blank=True, verbose_name="account")
+    coordinate = models.OneToOneField("coordinates.Coordinate", on_delete=models.SET_NULL,
+                                      null=True, related_name="source")
+
     objects = AccountManager()
 
     def __str__(self):
         return self.user.username
-
-
-SOCIAL_NETWORK_LINK_NAME = (  # Choices
-    ("VK", "Вконтакте"),
-    ("INST", "Instagram"),
-    ("FB", "Facebook"),
-    ("WA", "WhatsApp"),
-    ("YT", "YouTube"),
-)
-
-
-class SocialNetworkLink(UUIDModel):
-    """
-    Social network link model.
-    """
-
-    account = models.ForeignKey(
-        Account,
-        verbose_name="Пользователь",
-        related_name="social_network_links",
-        on_delete=models.CASCADE,
-    )
-    name = models.CharField(
-        max_length=4, choices=SOCIAL_NETWORK_LINK_NAME, default="VK"
-    )
-    links = models.URLField()
-
-    def __str__(self):
-        return f"{self.get_name_display()}:{self.links}"
-
-    class Meta:
-        verbose_name = "Ссылка на социальные сети"
-        verbose_name_plural = "Ссылки на социальные сети"
-
-
-class Tag(UUIDModel):
-    """
-    Tag model.
-    """
-
-    name = models.TextField(max_length=20)

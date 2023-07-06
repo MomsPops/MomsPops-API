@@ -1,5 +1,5 @@
 """
-Django settings for MomsPops project.
+Django settings for MomsPops_API project.
 """
 import os
 from datetime import timedelta
@@ -12,17 +12,13 @@ load_dotenv(".dev.env")
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
+# Server config
 DEBUG = True
-
 ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 # Application definition
-
 INSTALLED_APPS = [
     # django utils
     "django.contrib.admin",
@@ -32,7 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # apps
+    # django applications
     "api",
     "users",
     "coordinates",
@@ -46,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "rest_framework_simplejwt",
+
 ]
 
 MIDDLEWARE = [
@@ -82,7 +79,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #         'NAME': os.getenv("DB_NAME"),
 #         "HOST": os.getenv("DB_HOST"),
 #         "PORT": os.getenv("DB_PORT"),
@@ -115,6 +112,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "users.User"
+
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
@@ -128,11 +127,13 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "static/"
+
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 # Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 MEDIA_URL = "media/"
 
 
@@ -140,6 +141,7 @@ MEDIA_URL = "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+# DRF default settings
 REST_FRAMEWORK = {
     "DEFAULT_RENDERERS_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
@@ -193,25 +195,62 @@ SIMPLE_JWT = {
 
 
 # Logging
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "rich": {"datefmt": "[%X]"},
+#         "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "rich.logging.RichHandler",
+#             "formatter": "rich",
+#             "level": "DEBUG",
+#         },
+#     },
+#     "loggers": {"django": {"handlers": ["console"]}},
+# }
+
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "rich": {"datefmt": "[%X]"},
-        "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
+    'version': 1,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
     },
-    "handlers": {
-        "console": {
-            "class": "rich.logging.RichHandler",
-            "formatter": "rich",
-            "level": "DEBUG",
-        },
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "formatter": "file",
-            "filename": "../debug.log",
-        },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        }
     },
-    "loggers": {"django": {"handlers": ["console"]}},
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
+    }
 }
+
+# Redis and cache
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
+
+
+# Celery settings
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"

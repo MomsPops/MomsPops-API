@@ -169,3 +169,5 @@ cython_debug/
 src/service/files/
 # *_initial.py
 migrations/
+media/
+src/media

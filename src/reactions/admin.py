@@ -1,13 +1,8 @@
 from django.contrib import admin
 
-from .models import ReactionItem, Reaction
+from .models import ReactionItem
 
 
 @admin.register(ReactionItem)
-class ReactionItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "image")
-
-
-@admin.register(Reaction)
-class ReactionAdmin(admin.ModelAdmin):
-    list_display = ("owner", "item")
+class ReactionItemModel(admin.ModelAdmin):
+    list_display = ("id",)

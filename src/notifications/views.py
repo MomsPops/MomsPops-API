@@ -7,12 +7,13 @@ from .models import NotificationAccount
 from .serializers import NotificationAccountSerializer
 
 
-class PersonalNotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                                  mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class PersonalNotificationViewSet(mixins.ListModelMixin,
+                                  mixins.RetrieveModelMixin,
+                                  mixins.UpdateModelMixin,
+                                  viewsets.GenericViewSet):
     """
     View set for notifications.
     """
-
     serializer_class = NotificationAccountSerializer
     queryset = NotificationAccount.objects.all().select_related(
         'notification',
@@ -22,27 +23,9 @@ class PersonalNotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMix
         'account__city__region'
     )
 
-    @action(
-        detail=True,
-        methods=[
-            'post',
-        ],
-        url_path='viewed',
-    )
+    @action(detail=True, methods=['post'], url_path='viewed')
     def viewed(self, request, **kwargs):
-        """
-        Mark notification as viewed.
-        """
-
-        notification = get_object_or_404(
-            NotificationAccount.objects.select_related(
-                'notification',
-                'account',
-                'account__user',
-                'account__city',
-                'account__city__region'
-            ),
-            id=kwargs['pk']
-        )
+        """Mark notification as viewed."""
+        notification = get_object_or_404(NotificationAccount, id=kwargs['pk'])
         notification.is_viewed()
         return Response(NotificationAccountSerializer(notification).data)

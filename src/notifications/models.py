@@ -27,6 +27,15 @@ class Notification(UUIDModel, TimeCreateModel):
         verbose_name_plural = "Уведомления"
 
 
+class NotificationAccountManager(models.Manager):
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("notification", "account", "account__user")
+            .get(*args, **kwargs)
+        )
+
+
 class NotificationAccount(models.Model):
     """
     Model for notification and account relation.
@@ -46,9 +55,11 @@ class NotificationAccount(models.Model):
 
     viewed = models.BooleanField("Прочитано", default=False)
 
+    objects = models.Manager()
+    notification_account_manager = NotificationAccountManager()
+
     def is_viewed(self):
         """Sets viewed to `True`."""
-
         self.viewed = True
         self.save()
 

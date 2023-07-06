@@ -13,7 +13,7 @@ class CoordinateViewSet(mixins.CreateModelMixin,
     """
     Create and destroy current user coordinate.
     """
-    queryset = Coordinate.object.all()
+    queryset = Coordinate.objects.all()
     serializer_class = CoordinateCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -21,10 +21,13 @@ class CoordinateViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            Coordinate.coordinate_manager.update(request.user.account.coordinate, **serializer.validated_data)
+            coordinate = Coordinate.coordinate_manager.get(source=request.user.account)
+            coordinate.lat = serializer.validated_data['lat']
+            coordinate.lon = serializer.validated_data['lon']
+            coordinate.save()
         except ObjectDoesNotExist:
-            Coordinate.coordinate_manager.create(
-                **serializer.validated_data, account=request.user.account
+            coordinate = Coordinate.coordinate_manager.create(
+                **serializer.validated_data, source=request.user.account
             )
         return Response(serializer.validated_data, status=201)
 
@@ -50,7 +53,7 @@ class CoordinateNearAPIView(generics.ListAPIView):
     """
     Get all near user for the current_user
     """
-    queryset = Coordinate.object.all()
+    queryset = Coordinate.objects.all()
     serializer_class = CoordinateListSerializer
     permission_classes = [IsAuthenticated]
 
