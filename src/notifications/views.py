@@ -23,7 +23,7 @@ class PersonalNotificationViewSet(mixins.ListModelMixin,
         'account__city__region'
     )
 
-    @action(detail=True, methods=['post'], url_path='viewed')
+    @action(detail=True, methods=['post'])
     def viewed(self, request, **kwargs):
         """Mark notification as viewed."""
         notification = get_object_or_404(NotificationAccount, id=kwargs['pk'])
