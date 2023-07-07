@@ -1,0 +1,16 @@
+asgiref==3.7.2
+celery==5.3.1
+Django==4.2.2
+django-redis==5.3.0
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
+drf-yasg==1.21.5
+flake8==6.0.0
+googlemaps==4.10.0
+mypy==1.4.0
+numpy==1.25.0
+Pillow==9.5.0
+python-dotenv==1.0.0
+redis==4.6.0
+rich
+vk

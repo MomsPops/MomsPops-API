@@ -195,44 +195,44 @@ SIMPLE_JWT = {
 
 
 # Logging
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "rich": {"datefmt": "[%X]"},
-#         "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
-#     },
-#     "handlers": {
-#         "console": {
-#             "class": "rich.logging.RichHandler",
-#             "formatter": "rich",
-#             "level": "DEBUG",
-#         },
-#     },
-#     "loggers": {"django": {"handlers": ["console"]}},
-# }
-
 LOGGING = {
-    'version': 1,
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        }
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "rich": {"datefmt": "[%X]"},
+        "file": {"format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"},
     },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        }
+    "handlers": {
+        "console": {
+            "class": "rich.logging.RichHandler",
+            "formatter": "rich",
+            "level": "DEBUG",
+        },
     },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        }
-    }
+    "loggers": {"django": {"handlers": ["console"]}},
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'filters': {
+#         'require_debug_true': {
+#             '()': 'django.utils.log.RequireDebugTrue',
+#         }
+#     },
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'filters': ['require_debug_true'],
+#             'class': 'logging.StreamHandler',
+#         }
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         }
+#     }
+# }
 
 # Redis and cache
 REDIS_HOST = os.getenv("REDIS_HOST")
@@ -254,3 +254,18 @@ TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
 # Celery settings
 CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
+
+# Email backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_FROM = os.getenv("EMAIL_FROM")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_USE_TLS = bool(os.getenv("EMAIL_USE_TLS", False))
+
+try:
+    PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT"))        # type: ignore
+except ValueError:
+    PASSWORD_RESET_TIMEOUT = 14400
