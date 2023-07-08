@@ -122,4 +122,3 @@ class BlackListViewSet(mixins.ListModelMixin,
             {"detail": "User unblocked successfully."},
             status=HTTPStatus.OK
         )
-
