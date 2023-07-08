@@ -5,7 +5,6 @@ from service.models import (
     TimeCreateUpdateModel,
     AccountForeignModel,
 )
-from users.models import Account
 
 
 # TODO: change folder path
@@ -31,11 +30,28 @@ class ChatType(models.Model):
         verbose_name_plural = "Тип чата"
 
 
+class ChatManager(models.Manager):
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("owner", "owner__user", "location_coordinate", "type")
+            .prefetch_related("messages")
+            .get(*args, **kwargs)
+        )
+
+    def all(self):
+        return (
+            super()
+            .select_related("owner", "owner__user", "location_coordinate", "type")
+            .prefetch_related("messages")
+            .all()
+        )
+
+
 class Chat(TimeCreateUpdateModel, UUIDModel):
     """
     Chat model.
     """
-
     type = models.ForeignKey(
         ChatType,
         related_name="chats",
@@ -50,8 +66,7 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
         null=True,
         blank=True,
     )
-    members = models.ManyToManyField(Account, blank=True)
-
+    members = models.ManyToManyField("users.Account", blank=True)
     meeting_time = models.DateTimeField(
         verbose_name="Время встречи", blank=True, null=True
     )
@@ -66,6 +81,7 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     img_preview = models.ImageField(upload_to=get_group_preview_file_path, null=True, blank=True)
 
     objects = models.Manager()
+    chat_manager = ChatManager()
 
     def __str__(self):
         return f"{self.type.title}:{self.id}"
@@ -75,14 +91,31 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
         verbose_name_plural = "Чаты"
 
 
+class MessageManager(models.Manager):
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("chat", "account")
+            .prefetch_related("reactions")
+            .get(*args, **kwargs)
+        )
+
+    def all(self):
+        return (
+            super()
+            .select_related("chat", "account")
+            .prefetch_related("reactions")
+            .all()
+        )
+
+
 class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
     """
     Message model. Fields: id, time_created,
     """
-
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
-    account: Account = models.ForeignKey(
-        Account,
+    account = models.ForeignKey(
+        "users.Account",
         on_delete=models.CASCADE,
         verbose_name="Автор сообщения",
         related_name="messages",
@@ -95,6 +128,7 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
     reactions = models.ManyToManyField("reactions.Reaction", related_name="messages")
 
     objects = models.Manager()
+    message_manager = MessageManager()
 
     def __str__(self):
         return f"Account: {self.account.id}, viewed: {self.viewed}"
