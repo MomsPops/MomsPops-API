@@ -76,13 +76,14 @@ class BlackListViewSet(mixins.ListModelMixin,
     queryset = Account.objects.all()
 
     def get_serializer(self, *args, **kwargs):
-        match self.action:  # type: ignore
-            case "list":
-                return AccountDetailSerializer(*args, **kwargs)
-            case "create":
-                return BlockUserCreateSerializer(*args, **kwargs)
-            case "destroy":
-                return BlockUserCreateSerializer(*args, **kwargs)
+        if self.action == "list":
+            return AccountDetailSerializer(*args, **kwargs)
+        elif self.action == "create":
+            return BlockUserCreateSerializer(*args, **kwargs)
+        elif self.action == "destroy":
+            return BlockUserCreateSerializer(*args, **kwargs)
+        else:
+            assert True
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
