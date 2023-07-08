@@ -47,11 +47,3 @@ class BlockUserCreateSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ("username", )
-
-
-class BlockUserListSerializer(ModelSerializer):
-    account = AccountDetailSerializer()
-
-    class Meta:
-        model = Account
-        fields = ("username", )
