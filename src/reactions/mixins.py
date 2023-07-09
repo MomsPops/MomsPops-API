@@ -27,7 +27,7 @@ class ReactionsdMixin:
         return Response()
 
     @action(detail=True, methods=['get'], )
-    def get_fans(self, request, pk=None, reaction_pk=None,  permission_classes=[AllowAny]):
+    def get_fans(self, request, pk=None, reaction_pk=None, permission_classes=[AllowAny]):
         obj = self.get_object()
         fans = get_fans(obj, request.user)
         serializer = FanSerializer(fans, many=True)
