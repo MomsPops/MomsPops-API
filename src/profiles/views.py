@@ -9,7 +9,6 @@ from .serializers import (
     PostDetailSerializer, PostListSerializer, PostCreateSerializer
 )
 from .permissions import IsProfileOwner, IsPostOwner
-from reactions.mixins import ReactionsdMixin
 
 
 class ProfileViewSet(mixins.ListModelMixin,
@@ -53,12 +52,11 @@ class ProfileViewSet(mixins.ListModelMixin,
         return Response(serializer.data)
 
 
-class PostViewSet(ReactionsdMixin,
-                  mixins.RetrieveModelMixin,
+class PostViewSet(mixins.RetrieveModelMixin,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):
+                  viewsets.GenericViewSet):   
     queryset = Post.objects.all()
     lookup_url_kwarg = "id"
     lookup_field = "id"
