@@ -128,6 +128,7 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
     )  # TODO: added extra models FK
     viewed = models.BooleanField(default=False)
     reactions = GenericRelation("reactions.ReactionLike")
+    like = GenericRelation("reactions.ReactionLike")
     objects = models.Manager()
     message_manager = MessageManager()
 
