@@ -16,7 +16,7 @@ def remove_like(obj, user, reaction_id=None):
                                 user=user, reaction=reaction_id).delete()
 
 
-def is_fan(obj, user) -> bool:
+def is_fan(obj, user):
     obj_type = ContentType.objects.get_for_model(obj)
     likes = ReactionLike.objects.filter(content_type=obj_type,
                                         object_id=obj.id, user=user)
