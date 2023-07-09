@@ -56,7 +56,7 @@ class PostViewSet(mixins.RetrieveModelMixin,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):   
+                  viewsets.GenericViewSet):
     queryset = Post.objects.all()
     lookup_url_kwarg = "id"
     lookup_field = "id"
