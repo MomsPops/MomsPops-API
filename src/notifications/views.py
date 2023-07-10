@@ -1,10 +1,10 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import NotificationAccount
 from .serializers import NotificationAccountSerializer
+from .permissions import RecepientOnlyPermission
 
 
 class PersonalNotificationViewSet(mixins.ListModelMixin,
@@ -14,18 +14,18 @@ class PersonalNotificationViewSet(mixins.ListModelMixin,
     """
     View set for notifications.
     """
-    serializer_class = NotificationAccountSerializer
-    queryset = NotificationAccount.objects.all().select_related(
-        'notification',
-        'account',
-        'account__user',
-        'account__city',
-        'account__city__region'
-    )
 
-    @action(detail=True, methods=['post'])
+    serializer_class = NotificationAccountSerializer
+    permission_classes = (RecepientOnlyPermission,)
+
+    def get_queryset(self):
+        account = self.request.user.account
+        return NotificationAccount.objects.filter(account=account)
+
+    @action(detail=True, methods=['post'], permission_classes=[RecepientOnlyPermission])
     def viewed(self, request, **kwargs):
         """Mark notification as viewed."""
-        notification = get_object_or_404(NotificationAccount, id=kwargs['pk'])
+
+        notification = self.get_object()
         notification.is_viewed()
         return Response(NotificationAccountSerializer(notification).data)
