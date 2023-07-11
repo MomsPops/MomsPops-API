@@ -6,7 +6,6 @@ from rest_framework.test import APIClient, APITestCase
 
 from notifications.models import Notification, NotificationAccount
 from service.fixtues import TestAccountFixture
-from users.models import Account
 
 User = get_user_model()
 
@@ -25,15 +24,6 @@ class TestNotifications(TestAccountFixture, APITestCase):
         )
         cls.ntfctn_1.account.add(cls.user_account)
         cls.anonym = APIClient()
-        cls.user_2 = User(username='vasya', password='vasya123')
-        cls.user_2.set_password('rammqueen123')
-        cls.user_2.save()
-        cls.user_client_2 = APIClient()
-        cls.user_client_2.force_login(cls.user_2)
-        cls.user_2_account = Account.objects.create(
-            city=cls.city2,
-            user=cls.user_2
-        )
 
     def test_get_all_notifications(self):
         """All notifications receiving test."""
@@ -58,7 +48,7 @@ class TestNotifications(TestAccountFixture, APITestCase):
         self.assertEqual(response_1.json()['viewed'], False)
 
         # User can't view other user's notifications test
-        response_2 = self.user_client_2.get(
+        response_2 = self.user2_client.get(
             reverse("get_notification", kwargs={'pk': prsnl_ntfct.id})
         )
         self.assertEqual(response_2.status_code, HTTPStatus.NOT_FOUND)
@@ -81,7 +71,7 @@ class TestNotifications(TestAccountFixture, APITestCase):
         self.assertEqual(response_2.json()['viewed'], True)
 
         # User can't change other user's notifications test
-        response_3 = self.user_client_2.post(
+        response_3 = self.user2_client.post(
             reverse("change_notification", kwargs={'pk': prsnl_ntfct.id})
         )
         self.assertEqual(response_3.status_code, HTTPStatus.NOT_FOUND)

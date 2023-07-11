@@ -20,6 +20,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     # django utils
     "django.contrib.admin",
     "django.contrib.auth",
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     "chats",
 
     # libraries
+    "channels",
     "rest_framework",
     "drf_yasg",
     "rest_framework_simplejwt",
@@ -73,6 +75,8 @@ TEMPLATES = [
     },
 ]
 
+
+ASGI_APPLICATION = "core.asgi.application"
 WSGI_APPLICATION = "core.wsgi.application"
 
 
@@ -254,3 +258,13 @@ TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
 # Celery settings
 CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
+# Channels settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
