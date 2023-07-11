@@ -1,10 +1,11 @@
 from django.db import models
-
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from users.models import Account
 from service.models import UUIDModel
 
 
-class Reaction(UUIDModel):
+class ReactionLike(UUIDModel):
     owner = models.ForeignKey(
         Account,
         on_delete=models.PROTECT,
@@ -16,8 +17,9 @@ class Reaction(UUIDModel):
         on_delete=models.CASCADE,
         verbose_name="Варианты реакций из определенного списка",
     )
-
-    objects = models.Manager()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         verbose_name = "Реакция пользователя на пост/сообщение"

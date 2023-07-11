@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .fields import Base64ImageField
-from .models import Reaction, ReactionItem
+from reactions.fields import Base64ImageField
+from reactions.models import ReactionLike, ReactionItem
 
 
 class ReactionItemSerializer(ModelSerializer):
@@ -18,5 +18,20 @@ class ReactionSerializer(ModelSerializer):
     owner = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = Reaction
+        model = ReactionLike
         fields = ('id', 'reaction_option', 'owner')
+
+
+class FanSerializer(serializers.ModelSerializer):
+    content_type = serializers.CharField(source="content_type.name")
+    content_object = serializers.CharField(source="content_object.id")
+
+    class Meta:
+        model = ReactionLike
+        fields = (
+            'id',
+            'owner ',
+            'content_type',
+            'content_object',
+            'ReactionItem'
+        )

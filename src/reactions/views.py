@@ -1,8 +1,8 @@
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
-from .models import Reaction, ReactionItem
-from .serializers import ReactionItemSerializer, ReactionSerializer
+from reactions.models import ReactionLike, ReactionItem
+from reactions.serializers import ReactionItemSerializer, ReactionSerializer
 
 
 class ReactionItemViewSet(viewsets.ModelViewSet):
@@ -13,6 +13,6 @@ class ReactionItemViewSet(viewsets.ModelViewSet):
 
 class ReactionViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    queryset = Reaction.objects.all()
+    queryset = ReactionLike.objects.all()
     serializer_class = ReactionSerializer
     permission_classes = [IsAuthenticated]

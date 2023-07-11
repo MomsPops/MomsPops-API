@@ -1,11 +1,9 @@
 from typing import Optional
-
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
 
 from service.models import UUIDModel, TimeCreateUpdateModel, AccountOneToOneModel
-
 # choices for Profile.sex field
 SEX_CHOICES = (("Не выбран", "Не выбран"), ("Мужской", "Мужской"), ("Женский", "Женский"), ("Другой", "Другой"))
 
@@ -74,8 +72,7 @@ class Post(UUIDModel, TimeCreateUpdateModel):  # type: ignore
     photo = models.ImageField(
         upload_to="uploads/post_img/", verbose_name="Фото", blank=True, null=True
     )  # TODO add table Post Images
-    reactions = models.ManyToManyField("reactions.Reaction", related_name="posts")
-
+    reactions = models.ManyToManyField("reactions.ReactionLike", related_name="posts")
     objects = models.Manager()
     post_manager = PostManager()
 
