@@ -28,3 +28,22 @@ class AccountRouter(SimpleRouter):
             initkwargs={'suffix': 'Me'}
         ),
     ]
+
+
+class BlackListRouter(SimpleRouter):
+    """
+    Router for blocking user viewset.
+    """
+    routes = [
+        Route(
+            url=r'^{prefix}{trailing_slash}$',
+            mapping={
+                'post': 'create',
+                'delete': 'destroy',
+                'get': 'list',
+            },
+            name='{basename}',
+            detail=False,
+            initkwargs={'suffix': 'List'}
+        ),
+    ]

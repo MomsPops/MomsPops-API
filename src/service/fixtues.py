@@ -15,10 +15,22 @@ class TestUserFixture(APITestCase):
         cls.superuser = User.objects.create_superuser(username='admin12', password='password12')
         cls.superuser.set_password('password12')
         cls.superuser.save()
+
+        cls.user2 = User(username='mi123achael7123', password='rammqsfasgueen123')
+        cls.user2.set_password('mi123achael7123')
+        cls.user2.save()
+        cls.user3 = User(username='a0sdiami123achael7123', password='rammqsfasgueen123')
+        cls.user3.set_password('a0sdiami123achael7123')
+        cls.user3.save()
+
         cls.user_client = APIClient()
         cls.user_client.force_login(cls.user)
         cls.superuser_client = APIClient()
         cls.superuser_client.force_login(cls.superuser)
+        cls.user2_client = APIClient()
+        cls.user2_client.force_login(cls.user2)
+        cls.user3_client = APIClient()
+        cls.user3_client.force_login(cls.user3)
 
 
 class TestLocationFixture(APITestCase):
@@ -43,6 +55,9 @@ class TestAccountFixture(TestUserFixture, TestLocationFixture, APITestCase):
             city=cls.city2,
             user=cls.superuser
         )
+
+        cls.user2_account = Account.objects.create(user=cls.user2)
+        cls.user3_account = Account.objects.create(user=cls.user3)
 
 
 class TestProfileFixture(TestAccountFixture, APITestCase):
