@@ -10,7 +10,7 @@ from ..tasks import send_email_task
 class ActivationUserTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
-                str(user.pk) + str(timestamp) + str(user.username)
+            str(user.pk) + str(timestamp) + str(user.username)
         )
 
 
