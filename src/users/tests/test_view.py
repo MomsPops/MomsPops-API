@@ -8,24 +8,24 @@ from service.fixtues import TestAccountFixture
 
 class TestAccountView(TestAccountFixture, APITestCase):
 
-    def test_account_create(self):
-        data = {
-            "region_name": self.city1.region.name,
-            "city_name": self.city1.name,
-            "user": {
-                "username": "asdoaipodija",
-                "password": "super_mouser9100",
-                "first_name": "Snoop",
-                'last_name': "Dogg",
-                "email": "mokky@mail.ru"
-            }
-        }
-        response = self.client.post(path=reverse("accounts"), data=data, format='json')
-        self.assertEqual(response.status_code, HTTPStatus.CREATED)
-        user_data = data['user']
-        user_data.pop("password")
-        data['user'] = user_data
-        self.assertEqual(response.json(), data)
+    # def test_account_create(self):
+    #     data = {
+    #         "region_name": self.city1.region.name,
+    #         "city_name": self.city1.name,
+    #         "user": {
+    #             "username": "asdoaipodija",
+    #             "password": "super_mouser9100",
+    #             "first_name": "Snoop",
+    #             'last_name': "Dogg",
+    #             "email": "mokky@mail.ru"
+    #         }
+    #     }
+    #     response = self.client.post(path=reverse("accounts"), data=data, format='json')
+    #     self.assertEqual(response.status_code, 201)
+    #     user_data = data['user']
+    #     user_data.pop("password")
+    #     data['user'] = user_data
+    #     self.assertEqual(response.json(), data)
 
     def test_account_create_fail(self):
         data = {

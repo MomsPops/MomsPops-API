@@ -41,7 +41,6 @@ packaging==23.1
 passlib==1.7.4
 Pillow==9.5.0
 prompt-toolkit==3.0.38
-psycopg2==2.9.6
 psycopg2-binary==2.9.6
 pycodestyle==2.10.0
 pyflakes==3.0.1

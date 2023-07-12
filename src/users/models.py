@@ -32,8 +32,8 @@ class AccountManager(models.Manager):
             city = City.objects.get(name=city_name, region__name=region_name)
 
         new_user = User.objects.create_user(**user)
-        # new_user.is_active = False    # for email validation
-        # new_user.save()
+        new_user.is_active = False    # for email validation
+        new_user.save()
         new_account = self.model(user=new_user, city=city)
         new_account.save(using=self._db)
         Profile.objects.create(account=new_account)

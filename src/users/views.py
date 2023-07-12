@@ -1,6 +1,9 @@
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view
 from http import HTTPStatus
 
 from .serializers import (
@@ -8,7 +11,8 @@ from .serializers import (
     BlockUserCreateSerializer,
 
 )
-from .models import Account
+from .models import Account, User
+from .service.email import send_email, decode_uid, check_activation_token
 
 
 class AccountViewSet(mixins.RetrieveModelMixin,
@@ -31,7 +35,11 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_account = Account.objects.create_account(**request.data)
-        return Response(AccountDetailSerializer(new_account).data, status=HTTPStatus.CREATED)
+        send_email(
+            request=request,
+            user=new_account.user
+        )
+        return Response(f"Activation link is send to {new_account.user.email}", status=201)
 
     def retrieve(self, request, *args, **kwargs):
         """Return current user account data."""
@@ -67,6 +75,14 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         else:
             Account.objects.deactivate(request.user.account)
             return Response({"detail": "User deactivated."})
+
+
+@api_view(['GET'])
+def user_activation_api_view(request, uid, token):
+    user = get_object_or_404(User, pk=decode_uid(uid))
+    if check_activation_token(user=user, token=token):
+        Account.objects.activate(instance=user.account)
+    return redirect(reverse("token_obtain"))
 
 
 class BlackListViewSet(mixins.ListModelMixin,
