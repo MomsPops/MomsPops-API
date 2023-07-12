@@ -84,7 +84,7 @@ def user_activation_api_view(request, uid, token):
         Account.objects.activate(instance=user.account)
     return redirect(reverse("token_obtain"))
 
-  
+
 class BlackListViewSet(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
                        mixins.DestroyModelMixin,
