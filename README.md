@@ -33,13 +33,34 @@ You can change it in settings.
 #### Environ variables example:
 ".dev.env" file in ./src:
 ```dotenv
+# Django settings
 SECRET_KEY=secret_SECRET
 
-DB_NAME=mosmpops_example
+# Database settings
+DB_NAME=mosmpops.sqlite3
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
+DB_USER=admin
+DB_PASSWORD=password
+
+# Services keys
+OPENCAGE_API_KET=b8fcasdasd228862e4ee9b8efd5817fac44ea
+GOOGLE_MAPS_API_KEY=AIzaSyDU48asgfasf3kKemLgrFn78M1Rd_kV9kTH34XvA
+
+# redis settings
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Emailing settings
+EMAIL_HOST=smtp.gmail.com
+EMAIL_FROM=suslanchikmop123l@gmail.com
+EMAIL_HOST_USER=suslanchikmop123l@gmail.com
+EMAIL_HOST_PASSWORD=pbkkmpsbfkhpyimz
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+
+PASSWORD_RESET_TIMEOUT=14400
+
 ```
 #### Linter:
 
@@ -58,19 +79,12 @@ mypy .
 #### PRs:
 IMPORTANT! You should check your code by linter and type-checker before making pull-request.
 
-## Installing requirements
-```commandline
-pip install -r requirements.txt
-```
-
 ## Running application
-```commandline
-cd src
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
-```
+Application is running using `Docker`. Install and activate WSL2 if you user Windows (https://docs.docker.com/desktop/wsl/).
 
+```commandline
+docker-compose up
+```
 
 ## Database schema
 https://lucid.app/lucidchart/736ac949-7e84-4be3-96b2-25e91ec53ec8/edit?beaconFlowId=C39989B530A6D57F&invitationId=inv_c894ff77-5e97-4e8d-823f-0ffeb53dc3c7&page=0_0#
