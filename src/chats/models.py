@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 from django.db import models
 from service.models import (
@@ -106,22 +106,6 @@ class ChatManager(models.Manager):
             .prefetch_related("messages", "members")
             .all()
         )
-
-    def get_or_create_simple_chat(self, sender: Account, reciever: Account):
-        """Chat for 2 persons."""
-        chat = sender.chats.filter(type="STND", members__in=[reciever])
-        if chat:
-            return chat
-        new_chat = Chat.objects.create()
-        new_chat.members.add(sender, reciever)
-        return new_chat
-
-    def create_custom_chat(self, account_list: List[Account]):
-        """Chat for 1-all persons."""
-
-        chat = Chat.objects.create(type="CSTM")
-        chat.members.add(*account_list)
-        return chat
 
 
 CHAT_TYPE = (

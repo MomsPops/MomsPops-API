@@ -61,7 +61,8 @@ class ChatTest(TestAccountFixture):
 
     def test_create_simple_chat(self):
         """Simple chat creation test."""
-        new_chat = Chat.chat_manager.get_or_create_simple_chat(sender=self.user_account, reciever=self.user2_account)
+        new_chat = Chat.objects.create(type='STND')
+        new_chat.members.add(self.user_account, self.user2_account)
         self.assertTrue(new_chat is not None)
         self.assertTrue(self.user_account in new_chat.members.all())
         self.assertTrue(self.user2_account in new_chat.members.all())
@@ -70,7 +71,8 @@ class ChatTest(TestAccountFixture):
     def test_create_custom_chat(self):
         """Custom chat creation test."""
         list_of_account = [self.user_account, self.user2_account, self.user3_account]
-        new_chat = Chat.chat_manager.create_custom_chat(account_list=list_of_account)
+        new_chat = Chat.objects.create(type='CSTM')
+        new_chat.members.add(*list_of_account)
         self.assertTrue(new_chat is not None)
         self.assertTrue(self.user_account in new_chat.members.all())
         self.assertTrue(self.user2_account in new_chat.members.all())
@@ -83,9 +85,8 @@ class MessageTest(TestAccountFixture):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.simple_chat = Chat.chat_manager.get_or_create_simple_chat(
-            sender=cls.user_account, reciever=cls.user2_account
-        )
+        cls.simple_chat = Chat.objects.create(type='STND')
+        cls.simple_chat.members.add(cls.user_account, cls.user2_account)
         cls.group1 = Group.group_manager.create_group(title="First Group")
         cls.group2 = Group.group_manager.create_group(title="Second Group")
         small_gif = (
