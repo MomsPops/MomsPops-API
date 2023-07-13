@@ -15,7 +15,6 @@ class NotificationModelTest(TestCase):
     """
     Notification model tests.
     """
-
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
