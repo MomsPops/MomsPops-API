@@ -42,14 +42,14 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         sender = None
         if content.get('sender') is not None:
             try:
-                sender = sync_to_async(Account.objects.get)(id=content['sender'])
+                sender = await Account.objects.aget(id=content['sender'])
             except Account.DoesNotExist as e:
                 print(e)
                 return
         notification = Notification(text=content["text"], sender=sender)
         serializer = NotificationDetailSerializer(instance=notification)
         for account_id in content['accounts']:
-            account = sync_to_async(Account.objects.get)(account_id)
+            account = await Account.objects.get(account_id)
             await self.channel_layer.group_send(
                 account_id, {"type": "send_notification", "message": serializer.data}
             )
