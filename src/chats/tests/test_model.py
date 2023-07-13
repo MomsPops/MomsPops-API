@@ -1,75 +1,130 @@
-from django.db import transaction
-from django.test import TestCase
-from users.models import Account, User
-from chats.models import Chat, ChatType, Message
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from chats.models import Chat, ChatMessage, Group, GroupMessage, Message, MessageMediaFile
+from coordinates.models import Coordinate
+from service.fixtues import TestAccountFixture
 
 
-class ChatTest(TestCase):
+class GroupTest(TestAccountFixture):
     @classmethod
-    def setUpTestData(cls):
-        user1 = User.objects.create_user(
-            username="test1",
-            password="secret",
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
         )
-        user2 = User.objects.create_user(
-            username="test2",
-            password="secret",
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
         )
-        Account.objects.create(user=user1)
-        Account.objects.create(user=user2)
-        ChatType.objects.create(title="test_chat_title1")
 
-    def test_create_chat(self):
-        account = Account.objects.first()
-        chat_type = ChatType.objects.first()
+    def test_create_group(self):
+        """Group creation test."""
 
-        with transaction.atomic():
-            # check create without type
-            try:
-                Chat.objects.create(owner=account)
-            except Exception:
-                pass
-        self.assertEqual(Chat.objects.count(), 0)
+        # Group creation without account test
+        group1 = Group.group_manager.create_group(title="First Group")
+        self.assertTrue(group1 is not None)
+        self.assertEqual(group1.location_coordinate, None)
 
-        chat = Chat.objects.create(owner=account, type=chat_type)
+        # Group creation without coordinates test
+        account_without_coord = self.user_account
+        group2 = Group.group_manager.create_group(title="Second Group", account=account_without_coord)
+        self.assertTrue(group2 is not None)
+        self.assertEqual(group2.location_coordinate, None)
 
-        self.assertTrue(chat is not None)
+        coordinate = Coordinate.objects.create(lat=1, lon=2)
+        self.assertTrue(coordinate is not None)
+
+        # Group creation with coordinates and members test
+        account_with_coord = self.user_account
+        account_with_coord.coordinate = coordinate
+        group3 = Group.group_manager.create_group(title="Third Group", account=account_with_coord)
+        self.assertTrue(group3 is not None)
+        self.assertEqual(account_with_coord.coordinate, coordinate)
+        self.assertEqual(group3.location_coordinate, coordinate)
+        self.assertTrue(group3.members is not None)
+        self.assertEqual(group3.members.first(), account_with_coord)
+
+        # Group image test
+        self.assertFalse(group3.img_preview)
+        group3.img_preview = self.uploaded
+        self.assertTrue(group3.img_preview is not None)
+
+
+class ChatTest(TestAccountFixture):
+    """Chat creation test."""
+
+    def test_create_simple_chat(self):
+        """Simple chat creation test."""
+        new_chat = Chat.chat_manager.get_or_create_simple_chat(sender=self.user_account, reciever=self.user2_account)
+        self.assertTrue(new_chat is not None)
+        self.assertTrue(self.user_account in new_chat.members.all())
+        self.assertTrue(self.user2_account in new_chat.members.all())
         self.assertEqual(Chat.objects.count(), 1)
 
-        chat = Chat.objects.create(type=chat_type)
-        self.assertTrue(chat is not None)
-        self.assertEqual(Chat.objects.count(), 2)
+    def test_create_custom_chat(self):
+        """Custom chat creation test."""
+        list_of_account = [self.user_account, self.user2_account, self.user3_account]
+        new_chat = Chat.chat_manager.create_custom_chat(account_list=list_of_account)
+        self.assertTrue(new_chat is not None)
+        self.assertTrue(self.user_account in new_chat.members.all())
+        self.assertTrue(self.user2_account in new_chat.members.all())
+        self.assertTrue(self.user3_account in new_chat.members.all())
 
-    def test_add_members_in_chat(self):
-        account1 = Account.objects.first()
-        account2 = Account.objects.last()
-        chat_type = ChatType.objects.first()
 
-        chat = Chat.objects.create(type=chat_type)
+class MessageTest(TestAccountFixture):
+    """Message creation test."""
 
-        self.assertEqual(chat.owner, None)
-
-        chat.members.add(account1)
-        self.assertEqual(chat.members.count(), 1)
-        chat.members.add(account2)
-        self.assertEqual(chat.members.count(), 2)
-
-        chat.members.add(account2)
-        self.assertEqual(chat.members.count(), 2)
-
-    def test_create_messages(self):
-        chat_type = ChatType.objects.first()
-        account = Account.objects.first()
-        chat = Chat.objects.create(type=chat_type)
-
-        message = Message.objects.create(
-            chat=chat, account=account, text="test message"
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.simple_chat = Chat.chat_manager.get_or_create_simple_chat(
+            sender=cls.user_account, reciever=cls.user2_account
+        )
+        cls.group1 = Group.group_manager.create_group(title="First Group")
+        cls.group2 = Group.group_manager.create_group(title="Second Group")
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
         )
 
-        self.assertTrue(message is not None)
-        self.assertEqual(message.text, "test message")
-        self.assertEqual(message.viewed, False)
-        self.assertEqual(message.account, account)
+    def test_create_messages(self):
+        """Message creation test."""
+        message1 = Message.objects.create(account=self.user_account, text="Hello world")
+        self.assertTrue(message1 is not None)
+        self.assertEqual(Message.objects.count(), 1)
 
-        self.assertEqual(chat.messages.count(), 1)
-        self.assertEqual(chat.messages.first(), message)
+    def test_add_message_to_group(self):
+        """Message relation witt groups and chats test."""
+        message1 = Message.objects.create(account=self.user_account, text="Hello world")
+        message2 = Message.objects.create(account=self.user_account, text="Foo Bar")
+
+        # Message addition to group test
+        message_for_group = GroupMessage.objects.create(group=self.group1, message=message1)
+        self.assertTrue(message_for_group in self.group1.messages.all())
+
+        # Message addition to group test
+        message_for_chat = ChatMessage.objects.create(chat=self.simple_chat, message=message2)
+        self.assertTrue(message_for_chat in self.simple_chat.messages.all())
+
+    def test_create_message_with_media(self):
+        """Media file for message creation test."""
+        message = Message.objects.create(account=self.user_account, text="Hello world")
+        self.assertFalse(message.media_files.exists())
+        image = MessageMediaFile.objects.create(img=self.uploaded)
+        message.media_files.add(image)
+        self.assertTrue(image in message.media_files.all())
