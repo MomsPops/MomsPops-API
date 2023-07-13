@@ -1,6 +1,8 @@
 asgiref==3.7.2
 celery==5.3.1
 Django==4.2.2
+dapne
+django-channels
 django-redis==5.3.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
