@@ -139,7 +139,7 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
         max_length=4,
         choices=CHAT_TYPE,
         default="STND"
-        )
+    )
 
     members = models.ManyToManyField(
         verbose_name='Участники чата',
