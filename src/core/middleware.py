@@ -16,7 +16,7 @@ def get_user_from_db(user_id: str) -> str | User:
     """Get user by its user_id."""
     try:
         return User.objects.get(user_id)
-    except User.DoNotExists:
+    except User.DoesNotExist:
         return None
 
 
