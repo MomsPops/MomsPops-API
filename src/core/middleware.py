@@ -1,21 +1,18 @@
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from jwt import decode
 from urllib.parse import parse_qs
+from users.models import User
 
 from channels.db import database_sync_to_async
 
 
-User = get_user_model()
-
-
 @database_sync_to_async
-def get_user_from_db(user_id: str) -> str | User:
+def get_user_from_db(user_id: str) -> None | User:
     """Get user by its user_id."""
     try:
-        return User.objects.get(user_id)
+        return User.objects.get(pk=user_id)
     except User.DoesNotExist:
         return None
 
@@ -42,7 +39,7 @@ class TokenAuthMiddleware:
                 key=settings.SIMPLE_JWT['SIGNING_KEY'],
                 algorithms=[settings.SIMPLE_JWT['ALGORITHM']]
             )
-            user = get_user_from_db(user_data['user_id'])
+            user = await get_user_from_db(user_data['user_id'])
             scope['user'] = user
 
         return await self.app(scope, receive, send)
