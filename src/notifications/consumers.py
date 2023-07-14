@@ -23,17 +23,23 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self) -> None:
         """On socket connection. Allowed only for authorized users."""
+        await self.accept()
         if self.scope['user'] is None:
             await self.close()
         self.user = self.scope['user']
         self.account = self.user.account
         self.account_id = str(self.account.id)
-        await self.accept()
-        await self.channel_layer.group_add(self.account_id, self.channel_name)
+        await self.channel_layer.group_add(
+            self.account_id,
+            self.channel_name
+        )
 
     async def disconnect(self, code) -> None:
         """On disconnect socket."""
-        await self.channel_layer.group_discard(self.account_id, self.channel_name)
+        await self.channel_layer.group_discard(
+            self.account_id,
+            self.channel_name
+        )
         await self.close(code)
 
     async def receive_json(self, content, *args, **kwargs) -> None:
@@ -70,7 +76,6 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 account_id, {"type": "send_notification", "message": notification_data}
             )
-            await self.send_json(notification_data)
 
     async def send_notification(self, event) -> None:
         """Receive notification by a single account websocket."""
