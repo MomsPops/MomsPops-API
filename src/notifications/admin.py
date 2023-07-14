@@ -8,5 +8,5 @@ class NotificationAdmin(admin.ModelAdmin):
     """
     Representation of notifications in admin interface.
     """
-    list_display = ('text', 'links', "sender")
+    list_display = ('text', 'link', "sender")
     search_fields = ('text', 'account__user__username')
