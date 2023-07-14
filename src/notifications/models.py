@@ -10,11 +10,10 @@ class Notification(UUIDModel, TimeCreateModel):
 
     text = models.TextField("Текст", max_length=300)
     link = models.URLField("Ссылка", blank=True)
-    accounts = models.ManyToManyField(
+    notification_accounts = models.ManyToManyField(
         verbose_name="Аккаунт",
-        to="users.Account",
-        related_name="notifications",
-        through="NotificationAccount",
+        to="NotificationAccount",
+        related_name="notification_accounts",
     )
     sender = models.ForeignKey(
         verbose_name="sender",
