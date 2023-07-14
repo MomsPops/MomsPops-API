@@ -10,4 +10,4 @@ class NotificationDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ('id', 'text', 'link', 'time_created', "sender", "viewed")
+        fields = ('text', 'link', 'time_created', "sender")
