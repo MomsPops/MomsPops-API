@@ -32,9 +32,9 @@ class NotificationModelTest(TestCase):
         cls.account2 = Account.objects.create(user=cls.user2)
         cls.notifctn = Notification.objects.create(
             text='some text',
-            links='https://example.com'
+            link='https://example.com'
         )
-        cls.notifctn.account.add(cls.account1,)
+        cls.notifctn.accounts.add(cls.account1,)
 
     def test_notification_fields_types(self):
         """
@@ -42,7 +42,7 @@ class NotificationModelTest(TestCase):
         """
 
         self.assertIsInstance(self.notifctn.text, str)
-        self.assertIsInstance(self.notifctn.links, str)
+        self.assertIsInstance(self.notifctn.link, str)
         self.assertIsInstance(self.notifctn.time_created, datetime)
         self.assertIsInstance(self.notifctn.id, UUID)
 
@@ -53,9 +53,9 @@ class NotificationModelTest(TestCase):
 
         note = Notification.objects.create(
             text='text',
-            links='https://youtube.com',
+            link='https://youtube.com',
         )
-        note.account.add(self.account1, self.account2)
+        note.accounts.add(self.account1, self.account2)
         notifications = Notification.objects.all()
         self.assertEqual(len(notifications), 2)
         self.assertTrue(self.account1.notifications.filter(pk=note.pk).exists())
@@ -69,9 +69,9 @@ class NotificationModelTest(TestCase):
 
         note_2 = Notification.objects.create(
             text='another text',
-            links='https://yandex.ru',
+            link='https://yandex.ru',
         )
-        note_2.account.add(self.account1)
+        note_2.accounts.add(self.account1)
         notification_account = NotificationAccount.objects.get(notification=note_2, account=self.account1)
         self.assertEqual(notification_account.viewed, False)
         notification_account.is_viewed()
