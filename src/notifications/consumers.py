@@ -26,7 +26,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         if self.scope['user'] is None:
             await self.close()
         self.user = self.scope['user']
-        self.account = await sync_to_async(getattr)(self.user, "account")
+        self.account = self.user.account
         self.account_id = str(self.account.id)
         await self.accept()
         await self.channel_layer.group_add(self.account_id, self.channel_name)
@@ -36,7 +36,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard(self.account_id, self.channel_name)
         await self.close(code)
 
-    async def receive_json(self, content, **kwargs) -> None:
+    async def receive_json(self, content, *args, **kwargs) -> None:
         """
         Send notification to all account. First N.instance and its serializer are created.
         Then serializer data to all account groups.
@@ -52,21 +52,25 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             try:
                 sender = await get_account_by_id(content['sender'])
             except Account.DoesNotExist as e:
-                print(e)
                 return
-        notification = Notification(text=content["text"], sender=sender)
+        notification = await Notification.objects.acreate(
+            text=content["text"],
+            sender=sender
+        )
         serializer = NotificationDetailSerializer(instance=notification)
         for account_id in content['accounts']:
             account_id = str(account_id)
             account = await get_account_by_id(account_id)
+            await notification.notification_accounts.acreate(
+                notification=notification,
+                account=account
+            )
             notification_data = serializer.data
             notification_data.update(sender=str(notification_data['sender']))
             await self.channel_layer.group_send(
                 account_id, {"type": "send_notification", "message": notification_data}
             )
-            sync_to_async(notification.accounts.add)(account)
-
-        sync_to_async(notification.save)()
+            await self.send_json(notification_data)
 
     async def send_notification(self, event) -> None:
         """Receive notification by a single account websocket."""
