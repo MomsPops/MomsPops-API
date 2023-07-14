@@ -1,4 +1,5 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 import json
 
@@ -7,11 +8,17 @@ from .models import Notification
 from .serializers import NotificationDetailSerializer
 
 
+@database_sync_to_async
+def get_account_by_id(account_id: str):
+    return Account.objects.get(id=account_id)
+
+
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         """Redefine model to define custom instance attributes."""
         super().__init__(*args, **kwargs)
         self.user = None
+        self.account = None
         self.account_id = None
 
     async def connect(self) -> None:
@@ -19,7 +26,8 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         if self.scope['user'] is None:
             await self.close()
         self.user = self.scope['user']
-        self.account_id = str(self.user.account.id)
+        self.account = await sync_to_async(getattr)(self.user, "account")
+        self.account_id = str(self.account.id)
         await self.accept()
         await self.channel_layer.group_add(self.account_id, self.channel_name)
 
@@ -42,16 +50,19 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         sender = None
         if content.get('sender') is not None:
             try:
-                sender = await Account.objects.aget(id=content['sender'])
+                sender = await get_account_by_id(content['sender'])
             except Account.DoesNotExist as e:
                 print(e)
                 return
         notification = Notification(text=content["text"], sender=sender)
         serializer = NotificationDetailSerializer(instance=notification)
         for account_id in content['accounts']:
-            account = await Account.objects.get(account_id)
+            account_id = str(account_id)
+            account = await get_account_by_id(account_id)
+            notification_data = serializer.data
+            notification_data.update(sender=str(notification_data['sender']))
             await self.channel_layer.group_send(
-                account_id, {"type": "send_notification", "message": serializer.data}
+                account_id, {"type": "send_notification", "message": notification_data}
             )
             sync_to_async(notification.accounts.add)(account)
 
