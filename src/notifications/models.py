@@ -1,4 +1,6 @@
 from django.db import models
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 
 from service.models import TimeCreateModel, UUIDModel
 
@@ -10,10 +12,11 @@ class Notification(UUIDModel, TimeCreateModel):
 
     text = models.TextField("Текст", max_length=300)
     link = models.URLField("Ссылка", blank=True)
-    notification_accounts = models.ManyToManyField(
+    accounts = models.ManyToManyField(
         verbose_name="Аккаунт",
-        to="NotificationAccount",
-        related_name="notification_accounts",
+        to="users.Account",
+        related_name="notifications",
+        through="NotificationAccount"
     )
     sender = models.ForeignKey(
         verbose_name="sender",
@@ -32,11 +35,27 @@ class Notification(UUIDModel, TimeCreateModel):
         verbose_name_plural = "Уведомления"
 
 
+class NotificationAccountManager(models.Manager):
+    """
+    Notification account manager all. Optimizes orm-queries.
+    """
+    def get(self, *args, **kwargs):
+        return self.select_related().get(*args, **kwargs)
+
+    def all(self):
+        return self.select_related().all()
+
+    def get_all_by_account(self, account):
+        return self.select_related().filter(account=account)
+
+    def select_related(self):
+        return super().select_related("account", "notification")
+
+
 class NotificationAccount(models.Model):
     """
     Model for notification and account relation.
     """
-
     account = models.ForeignKey(
         verbose_name="Аккаунт",
         to="users.Account",
@@ -51,17 +70,22 @@ class NotificationAccount(models.Model):
     viewed = models.BooleanField("Viewed", default=False, null=True)
 
     objects = models.Manager()
-    # notification_account_manager = NotificationAccountManager()
+    notification_account_manager = NotificationAccountManager()
 
-    def is_viewed(self):
+    def view(self):
         """Sets viewed to `True`."""
         self.viewed = True
         self.save()
+
+    def get_view_url(self):
+        """Get url for view notification account."""
+        return reverse('notifications_view', kwargs={'notification_account_id': self.pk})
 
     def __str__(self):
         return f'{self.account}: {self.notification}'
 
     class Meta:
+        ordering = ('viewed', "notification__time_created")
         unique_together = ('account', 'notification')
         verbose_name = 'Уведомление для пользователя'
         verbose_name_plural = 'Уведомления для пользователей'

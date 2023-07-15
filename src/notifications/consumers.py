@@ -67,12 +67,10 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         for account_id in content['accounts']:
             account_id = str(account_id)
             account = await get_account_by_id(account_id)
-            await notification.notification_accounts.acreate(
-                notification=notification,
-                account=account
-            )
+            await sync_to_async(notification.accounts.add)(account)
             notification_data = serializer.data
             notification_data.update(sender=str(notification_data['sender']))
+            notification_data.update(id=str(notification_data['id']))
             await self.channel_layer.group_send(
                 account_id, {"type": "send_notification", "message": notification_data}
             )
