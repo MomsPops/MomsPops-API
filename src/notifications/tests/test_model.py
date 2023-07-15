@@ -34,7 +34,7 @@ class NotificationModelTest(TestCase):
             text='some text',
             link='https://example.com'
         )
-        cls.notifctn.accounts.add(cls.account1,)
+        cls.notifctn.accounts.add(cls.account1)
 
     def test_notification_fields_types(self):
         """
@@ -74,5 +74,5 @@ class NotificationModelTest(TestCase):
         note_2.accounts.add(self.account1)
         notification_account = NotificationAccount.objects.get(notification=note_2, account=self.account1)
         self.assertEqual(notification_account.viewed, False)
-        notification_account.is_viewed()
+        notification_account.view()
         self.assertEqual(notification_account.viewed, True)
