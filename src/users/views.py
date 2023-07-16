@@ -8,7 +8,7 @@ from http import HTTPStatus
 
 from .serializers import (
     AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer,
-    BlockUserCreateSerializer,
+    BlockUserCreateSerializer, PasswordResetSerializer
 
 )
 from .models import Account, User
@@ -24,7 +24,7 @@ class AccountViewSet(mixins.RetrieveModelMixin,
     serializer_class = AccountCreateSerializer
 
     def get_permissions(self):
-        if self.action == "create":
+        if self.action == "create" or self.action == "password_reset":
             perm_classes = [AllowAny]
         else:
             perm_classes = [IsAuthenticated]
@@ -75,6 +75,26 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         else:
             Account.objects.deactivate(request.user.account)
             return Response({"detail": "User deactivated."})
+
+    def reset_password(self, request, *args, **kwargs):
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        username = request.data.get('username')
+        password = request.data.get('password')
+        new_password = request.data.get('new_password')
+
+        if not (username and password and new_password):
+            return Response({'message': 'Please provide username, password, and new_password'}, status=400)
+
+        user = get_object_or_404(User, username=username)
+        if not user.check_password(password):
+            return Response({'message': 'Incorrect username or password'}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'message': 'Password reset successfully'}, status=200)
 
 
 @api_view(['GET'])
