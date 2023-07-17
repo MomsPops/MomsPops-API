@@ -85,6 +85,6 @@ Application is running using `Docker`. Install and activate WSL2 if you user Win
 ```commandline
 docker-compose up
 ```
-
+http://localhost:8000/api/v1/docs/swagger/
 ## Database schema
 https://lucid.app/lucidchart/736ac949-7e84-4be3-96b2-25e91ec53ec8/edit?beaconFlowId=C39989B530A6D57F&invitationId=inv_c894ff77-5e97-4e8d-823f-0ffeb53dc3c7&page=0_0#

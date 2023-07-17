@@ -48,6 +48,7 @@ class AccountManager(models.Manager):
     def activate(self, instance):
         if not instance.user.is_active:
             instance.user.is_active = True
+            instance.user.save()
             instance.save()
 
     def change_is_active(self, instance):
