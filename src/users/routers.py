@@ -28,12 +28,12 @@ class AccountRouter(SimpleRouter):
             initkwargs={'suffix': 'Me'}
         ),
         DynamicRoute(
-            url=r'^{prefix}/reset_password{trailing_slash}$',
-            name='{basename}_reset_password',
-            detail=False,
-            initkwargs={}
-        ),
-    ]
+                     url=r'^{prefix}/{url_path}{trailing_slash}$',
+                     name='{basename}_{url_name}',
+                     detail=False,
+                     initkwargs={}
+                 ),
+     ]
 
 
 class BlackListRouter(SimpleRouter):

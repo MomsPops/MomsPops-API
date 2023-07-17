@@ -88,21 +88,14 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         password = validated_data.get('password')
         new_password = validated_data.get('new_password')
 
-        if not all(key in validated_data for key in ['username', 'password', 'new_password']):
-            return Response({'message': 'Please provide username, password, and new_password'},
-                            status=HTTPStatus.BAD_REQUEST)
-
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return Response({'message': 'User not found'}, status=HTTPStatus.BAD_REQUEST)
-
         if not user.check_password(password):
             return Response({'message': 'Incorrect username or password'}, status=HTTPStatus.BAD_REQUEST)
-
         user.set_password(new_password)
         user.save()
-
         return Response({'message': 'Password reset successfully'}, status=HTTPStatus.OK)
 
 
