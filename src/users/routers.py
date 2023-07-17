@@ -1,4 +1,4 @@
-from rest_framework.routers import Route, SimpleRouter
+from rest_framework.routers import Route, SimpleRouter, DynamicRoute
 
 
 class AccountRouter(SimpleRouter):
@@ -27,14 +27,11 @@ class AccountRouter(SimpleRouter):
             detail=False,
             initkwargs={'suffix': 'Me'}
         ),
-        Route(
+        DynamicRoute(
             url=r'^{prefix}/reset_password{trailing_slash}$',
-            mapping={
-                'post': 'reset_password',
-            },
             name='{basename}_reset_password',
             detail=False,
-            initkwargs={'suffix': 'ResetPassword'}
+            initkwargs={}
         ),
     ]
 
