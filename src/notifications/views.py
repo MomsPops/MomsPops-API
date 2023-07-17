@@ -1,4 +1,4 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, views, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from .serializers import NotificationAccountDetailSerializer
 
 
 class NotificationAccountViewSet(mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
                                  viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     queryset = NotificationAccount.notification_account_manager.all()

@@ -15,7 +15,7 @@ class NotificationAccountRouter(DefaultRouter):
             initkwargs={'suffix': 'List'}
         ),
         DynamicRoute(
-            url=r'^{prefix}/{lookup}/{url_path}{trailing_slash}$',
+            url=r'^{prefix}/{url_path}/{lookup}{trailing_slash}$',
             name='{basename}_{url_name}',
             detail=True,
             initkwargs={}
