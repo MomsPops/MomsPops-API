@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase, APIClient
 
 from locations.models import Region, City
+from notifications.models import NotificationAccount, Notification
 from profiles.models import Profile, Post
 from users.models import Account, User
 
@@ -82,4 +83,25 @@ class TestPostFixture(TestProfileFixture, APITestCase):
         )
         cls.superuser_post = Post.objects.create(
             profile=cls.superuser_pofile
+        )
+
+
+class TestNotificationAccountFixture(TestAccountFixture, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.notification_1 = Notification.objects.create(text="hello everybody!")
+        cls.notification_account_1_user_2 = NotificationAccount.objects.create(
+            account=cls.user2_account,
+            notification=cls.notification_1
+        )
+        cls.notification_account_1_user_3 = NotificationAccount.objects.create(
+            account=cls.user3_account,
+            notification=cls.notification_1
+        )
+
+        cls.notification_2 = Notification.objects.create(text="New court is opened!")
+        cls.notification_account_2_user_1 = NotificationAccount.objects.create(
+            account=cls.user_account,
+            notification=cls.notification_2
         )
