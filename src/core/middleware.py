@@ -28,7 +28,7 @@ class TokenAuthMiddleware:
         token = query_string_parse['token'][0]
 
         try:
-            is_valid = UntypedToken(token)
+            UntypedToken(token)
         except (InvalidToken, TokenError):
             scope["user"] = None
             return

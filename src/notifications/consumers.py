@@ -57,7 +57,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         if content.get('sender') is not None:
             try:
                 sender = await get_account_by_id(content['sender'])
-            except Account.DoesNotExist as e:
+            except Account.DoesNotExist:
                 return
         notification = await Notification.objects.acreate(
             text=content["text"],
