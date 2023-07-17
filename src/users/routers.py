@@ -1,4 +1,4 @@
-from rest_framework.routers import Route, SimpleRouter
+from rest_framework.routers import Route, SimpleRouter, DynamicRoute
 
 
 class AccountRouter(SimpleRouter):
@@ -26,6 +26,12 @@ class AccountRouter(SimpleRouter):
             name='{basename}_me',
             detail=False,
             initkwargs={'suffix': 'Me'}
+        ),
+        DynamicRoute(
+            url=r'^{prefix}/{url_path}{trailing_slash}$',
+            name='{basename}_{url_name}',
+            detail=False,
+            initkwargs={}
         ),
     ]
 

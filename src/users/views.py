@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets, mixins
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view
@@ -8,11 +9,12 @@ from http import HTTPStatus
 
 from .serializers import (
     AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer,
-    BlockUserCreateSerializer,
+    BlockUserCreateSerializer, PasswordResetSerializer
 
 )
 from .models import Account, User
 from .service.email import send_email, decode_uid, check_activation_token
+from rest_framework.decorators import action
 
 
 class AccountViewSet(mixins.RetrieveModelMixin,
@@ -24,7 +26,7 @@ class AccountViewSet(mixins.RetrieveModelMixin,
     serializer_class = AccountCreateSerializer
 
     def get_permissions(self):
-        if self.action == "create":
+        if self.action == "create" or self.action == "password_reset":
             perm_classes = [AllowAny]
         else:
             perm_classes = [IsAuthenticated]
@@ -75,6 +77,26 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         else:
             Account.objects.deactivate(request.user.account)
             return Response({"detail": "User deactivated."})
+
+    @action(detail=False, methods=['post'], serializer_class=PasswordResetSerializer)
+    def reset_password(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        username = validated_data.get('username')
+        password = validated_data.get('password')
+        new_password = validated_data.get('new_password')
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=HTTPStatus.BAD_REQUEST)
+        if not user.check_password(password):
+            return Response({'message': 'Incorrect username or password'}, status=HTTPStatus.BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password reset successfully'}, status=HTTPStatus.OK)
 
 
 @api_view(['GET'])
