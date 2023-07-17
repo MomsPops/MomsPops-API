@@ -28,11 +28,11 @@ class AccountRouter(SimpleRouter):
             initkwargs={'suffix': 'Me'}
         ),
         DynamicRoute(
-                     url=r'^{prefix}/{url_path}{trailing_slash}$',
-                     name='{basename}_{url_name}',
-                     detail=False,
-                     initkwargs={}
-                 ),
+            url=r'^{prefix}/{url_path}{trailing_slash}$',
+            name='{basename}_{url_name}',
+            detail=False,
+            initkwargs={}
+        ),
      ]
 
 
