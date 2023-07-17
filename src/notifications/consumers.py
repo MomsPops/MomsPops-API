@@ -26,8 +26,9 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
         if self.scope['user'] is None:
             await self.close()
+            return
         self.user = self.scope['user']
-        self.account = self.user.account
+        self.account = self.user.account    # type: ignore
         self.account_id = str(self.account.id)
         await self.channel_layer.group_add(
             self.account_id,
