@@ -3,13 +3,14 @@ from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from jwt import decode
 from urllib.parse import parse_qs
-from users.models import User
+from typing import Optional
 
+from users.models import User
 from channels.db import database_sync_to_async
 
 
 @database_sync_to_async
-def get_user_from_db(user_id: str) -> None | User:
+def get_user_from_db(user_id: str) -> Optional[User]:
     """Get user by its user_id."""
     try:
         return User.objects.get(pk=user_id)
