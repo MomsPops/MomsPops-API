@@ -33,7 +33,7 @@ class AccountRouter(SimpleRouter):
             detail=False,
             initkwargs={}
         ),
-     ]
+    ]
 
 
 class BlackListRouter(SimpleRouter):
