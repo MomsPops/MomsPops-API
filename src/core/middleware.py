@@ -13,7 +13,7 @@ from channels.db import database_sync_to_async
 def get_user_from_db(user_id: str) -> Optional[User]:
     """Get user by its user_id."""
     try:
-        return User.objects.get(pk=user_id)
+        return User.objects.get(pk=user_id)    # type: ignore
     except User.DoesNotExist:
         return None
 
