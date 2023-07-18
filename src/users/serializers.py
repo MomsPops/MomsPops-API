@@ -47,3 +47,9 @@ class BlockUserCreateSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ("username", )
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(max_length=128)
+    new_password = serializers.CharField(max_length=128)

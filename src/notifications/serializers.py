@@ -3,23 +3,19 @@ from rest_framework.serializers import ModelSerializer
 from .models import Notification, NotificationAccount
 
 
-class NotificationSerializer(ModelSerializer):
+class NotificationDetailSerializer(ModelSerializer):
     """
     Serializer for notifications.
     """
 
     class Meta:
         model = Notification
-        fields = ('id', 'text', 'links', 'time_created')
+        fields = ("id", 'text', 'link', 'time_created', "sender")
 
 
-class NotificationAccountSerializer(ModelSerializer):
-    """
-    Serializer for personal notifications.
-    """
-
-    notification = NotificationSerializer(read_only=True)
+class NotificationAccountDetailSerializer(ModelSerializer):
+    notification = NotificationDetailSerializer(read_only=True)
 
     class Meta:
         model = NotificationAccount
-        fields = ('id', 'notification', 'viewed')
+        fields = ("notification", "viewed", "get_view_url")

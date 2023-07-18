@@ -4,6 +4,7 @@ Django settings for MomsPops_API project.
 import os
 from datetime import timedelta
 from pathlib import Path
+from socket import gethostbyname
 from dotenv import load_dotenv
 
 load_dotenv(".dev.env")
@@ -81,27 +82,25 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.getenv("DB_NAME"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT"),
-#         "USER": os.getenv("DB_USER"),
-#         "PASSWORD": os.getenv("DB_PASSWORD")
-#     }
-# }
 
-DATABASES = {
-    "default": {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv("DB_NAME"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD")
+if os.getenv("DOCKER"):
+    DATABASES = {
+        "default": {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.getenv("DB_NAME"),
+            "HOST": gethostbyname(os.getenv("DB_HOST")),
+            "PORT": os.getenv("DB_PORT"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD")
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': "momspops.sqlite3"
+        }
+    }
 
 
 # Password validation
