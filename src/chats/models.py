@@ -152,7 +152,8 @@ class ChatMessage(models.Model):
     message = models.ForeignKey(
         to="Message",
         on_delete=models.CASCADE,
-        verbose_name="Содержание сообщения"
+        verbose_name="Содержание сообщения",
+        related_name='chats'
     )
 
     def __str__(self) -> str:

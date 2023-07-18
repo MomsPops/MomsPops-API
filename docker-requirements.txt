@@ -1,5 +1,8 @@
 asgiref==3.7.2
 celery==5.3.1
+channels==4.0.0
+channels_redis==4.1.0
+daphne==4.0.0
 Django==4.2.2
 django-redis==5.3.0
 daphne==4.0.0
