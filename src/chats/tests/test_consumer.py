@@ -56,7 +56,7 @@ class ChatConsumerTest(TestAccountFixture):
         # Adding headers for authenticate user
         headers = [(b'origin', b'...'), (b'cookie', self.user_client.cookies.output(header='', sep='; ').encode())]
         communicator = WebsocketCommunicator(application, f"ws/chats/{self.chat_id}/", headers)
-        
+
         # TODO How to authenticate user correctly in channels testing?
         communicator.scope['user'] = self.user
         connected, _ = await communicator.connect()
