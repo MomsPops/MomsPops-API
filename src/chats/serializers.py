@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 from reactions.serializers import ReactionSerializer
 from users.serializers import AccountDetailSerializer
-
-from .models import Chat, ChatMessage, Message, MessageMediaFile
+from profiles.serializers import ProfileListSerializer
+from .models import Chat, ChatMessage, Message, MessageMediaFile, Group
 
 
 class MessageMediaFileSerializer(serializers.ModelSerializer):
@@ -51,3 +51,11 @@ class ChatMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatMessage
         fields = ('chat', 'message')
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    owner = ProfileListSerializer(source="owner.profile")
+
+    class Meta:
+        model = Group
+        fields = ("title", "owner", "get_image_preview_url", "get_members_count")
