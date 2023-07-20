@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter, DynamicRoute, Route
 
 
 class GroupRouter(DefaultRouter):
-    """Router class for notification account viewset."""
+    """Router class for group viewset."""
     routes = [
         Route(
             url=r'^{prefix}{trailing_slash}$',
