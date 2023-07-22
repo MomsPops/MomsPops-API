@@ -1,11 +1,12 @@
-from typing import Union
+from typing import List, Union
 
 from django.db import models
+
 from service.models import (
-    UUIDModel,
+    AccountForeignModel,
     TimeCreateModel,
     TimeCreateUpdateModel,
-    AccountForeignModel,
+    UUIDModel,
 )
 from users.models import Account
 
@@ -22,20 +23,16 @@ def get_message_img_file_path(instance, *_, **__) -> str:
 
 class GroupManager(models.Manager):
     def get(self, *args, **kwargs):
-        return (
-            super()
-            .select_related("owner", "owner__user", "location_coordinate")
-            .prefetch_related("messages", "members")
-            .get(*args, **kwargs)
-        )
+        return super().select_related().prefetch_related().get(*args, **kwargs)
 
     def all(self):
-        return (
-            super()
-            .select_related("owner", "owner__user", "location_coordinate")
-            .prefetch_related("messages", "members")
-            .all()
-        )
+        return super().select_related().prefetch_related().all()
+
+    def select_related(self):
+        return super().select_related("owner", "owner__user", "location_coordinate")
+
+    def prefetch_related(self):
+        return super().prefetch_related("messages", "members")
 
     def create_group(self, title, account: Union[Account, None] = None):
         new_group = self.model(title=title)
@@ -94,18 +91,28 @@ class Group(TimeCreateUpdateModel, UUIDModel):
 
 class ChatManager(models.Manager):
     def get(self, *args, **kwargs):
-        return (
-            super()
-            .prefetch_related("messages", "members")
-            .get(*args, **kwargs)
-        )
+        return super().prefetch_related().get(*args, **kwargs)
 
     def all(self):
-        return (
-            super()
-            .prefetch_related("messages", "members")
-            .all()
-        )
+        return super().prefetch_related().all()
+
+    def prefetch_related(self):
+        return super().prefetch_related(("messages", "members"))
+
+    def create_standart_chat(self, sender: Account, reciever: Account):
+        """Chat for 2 persons creation."""
+        standart_chat = Chat.objects.create(type="STND")
+        standart_chat.members.add(sender, reciever)
+        return standart_chat
+
+    def create_custom_chat(self, account_list: List[Account]):
+        """Chat for many persons creation."""
+        custom_chat = Chat.objects.create(type="CSTM")
+        custom_chat.members.add(*account_list)
+        return custom_chat
+
+    def get_all_chats_by_account(self, account: Account):
+        return account.chats.all()
 
 
 CHAT_TYPE = (
@@ -132,11 +139,20 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
         related_name='chats'
     )
 
+    messages = models.ManyToManyField(
+        to='Message',
+        verbose_name='Сообщения чата',
+        through='ChatMessage'
+    )
+
     objects = models.Manager()
     chat_manager = ChatManager()
 
     def __str__(self):
         return f"{self.type.title}:{self.id}"
+
+    def leave_chat(self, account):
+        return self.members.remove(account)
 
     class Meta:
         ordering = ["-time_created"]
@@ -148,7 +164,7 @@ class ChatMessage(models.Model):
     """
     Model for chat and message relation.
     """
-    chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE, verbose_name="Чат", related_name="messages")
+    chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE, verbose_name="Чат", related_name="chat_messages")
     message = models.ForeignKey(
         to="Message",
         on_delete=models.CASCADE,
@@ -189,20 +205,16 @@ class GroupMessage(models.Model):
 
 class MessageManager(models.Manager):
     def get(self, *args, **kwargs):
-        return (
-            super()
-            .select_related("account")
-            .prefetch_related("reactions", "media_files")
-            .get(*args, **kwargs)
-        )
+        return super().select_related().prefetch_related().get(*args, **kwargs)
 
     def all(self):
-        return (
-            super()
-            .select_related("account")
-            .prefetch_related("reactions", "media_files")
-            .all()
-        )
+        return super().select_related().prefetch_related().all()
+
+    def select_related(self):
+        return super().select_related("account")
+
+    def prefetch_related(self):
+        return super().prefetch_related("reactions", "media_files")
 
 
 class Message(UUIDModel, TimeCreateModel, AccountForeignModel):

@@ -35,10 +35,11 @@ class ChatSerializer(serializers.ModelSerializer):
     Serializer for chats.
     """
     members = AccountDetailSerializer(many=True)
+    messages = MessageSerializer(many=True)
 
     class Meta:
         model = Chat
-        fields = ('type', 'members', 'time_created', 'time_updated')
+        fields = ('type', 'members', 'time_created', 'time_updated', 'messages')
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):

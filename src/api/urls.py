@@ -19,6 +19,7 @@ urlpatterns = [
     path("locations/", include("locations.urls")),
     path("reactions/", include("reactions.urls")),
     path("notifications/", include("notifications.urls")),
+    path("chats", include("chats.urls")),
 
     # `include()` through root url means that we are to register several viewsets at the same application,
     # but make their urls not relative ones

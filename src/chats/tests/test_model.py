@@ -1,28 +1,10 @@
-from django.core.files.uploadedfile import SimpleUploadedFile
-
 from chats.models import Chat, ChatMessage, Group, GroupMessage, Message, MessageMediaFile
 from coordinates.models import Coordinate
-from service.fixtues import TestAccountFixture
+from service.fixtues import TestChatGroupFixture
 
 
-class GroupTest(TestAccountFixture):
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
-
+class GroupTest(TestChatGroupFixture):
+    """Group model test."""
     def test_create_group(self):
         """Group creation test."""
 
@@ -56,58 +38,45 @@ class GroupTest(TestAccountFixture):
         self.assertTrue(group3.img_preview is not None)
 
 
-class ChatTest(TestAccountFixture):
+class ChatTest(TestChatGroupFixture):
     """Chat creation test."""
 
     def test_create_simple_chat(self):
         """Simple chat creation test."""
-        new_chat = Chat.objects.create(type='STND')
-        new_chat.members.add(self.user_account, self.user2_account)
+        new_chat = Chat.chat_manager.create_standart_chat(self.user_account, self.user2_account)
         self.assertTrue(new_chat is not None)
+        self.assertEqual(new_chat.type, 'STND')
         self.assertTrue(self.user_account in new_chat.members.all())
         self.assertTrue(self.user2_account in new_chat.members.all())
-        self.assertEqual(Chat.objects.count(), 1)
+        self.assertEqual(Chat.objects.count(), 3)
 
     def test_create_custom_chat(self):
         """Custom chat creation test."""
         list_of_account = [self.user_account, self.user2_account, self.user3_account]
-        new_chat = Chat.objects.create(type='CSTM')
-        new_chat.members.add(*list_of_account)
+        new_chat = Chat.chat_manager.create_custom_chat(list_of_account)
         self.assertTrue(new_chat is not None)
+        self.assertEqual(new_chat.type, 'CSTM')
         self.assertTrue(self.user_account in new_chat.members.all())
         self.assertTrue(self.user2_account in new_chat.members.all())
         self.assertTrue(self.user3_account in new_chat.members.all())
 
+    def test_get_all_chats_by_account(self):
+        chats = Chat.chat_manager.get_all_chats_by_account(self.user3_account)
+        self.assertEqual(len(chats), 1)
 
-class MessageTest(TestAccountFixture):
+    def test_leave_chat(self):
+        self.simple_chat.leave_chat(self.user2_account)
+        self.assertEqual(self.simple_chat.members.count(), 1)
+
+
+class MessageTest(TestChatGroupFixture):
     """Message creation test."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        cls.simple_chat = Chat.objects.create(type='STND')
-        cls.simple_chat.members.add(cls.user_account, cls.user2_account)
-        cls.group1 = Group.group_manager.create_group(title="First Group")
-        cls.group2 = Group.group_manager.create_group(title="Second Group")
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
 
     def test_create_messages(self):
         """Message creation test."""
         message1 = Message.objects.create(account=self.user_account, text="Hello world")
         self.assertTrue(message1 is not None)
-        self.assertEqual(Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 2)
 
     def test_add_message_to_group(self):
         """Message relation witt groups and chats test."""
@@ -119,8 +88,9 @@ class MessageTest(TestAccountFixture):
         self.assertTrue(message_for_group in self.group1.messages.all())
 
         # Message addition to group test
-        message_for_chat = ChatMessage.objects.create(chat=self.simple_chat, message=message2)
-        self.assertTrue(message_for_chat in self.simple_chat.messages.all())
+        self.simple_chat.messages.add(message2)
+        self.assertTrue(message2 in self.simple_chat.messages.all())
+        self.assertTrue(ChatMessage.objects.filter(chat=self.simple_chat, message=message2).exists())
 
     def test_create_message_with_media(self):
         """Media file for message creation test."""

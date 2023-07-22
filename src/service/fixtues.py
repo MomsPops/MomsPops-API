@@ -1,5 +1,7 @@
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase, APIClient
 
+from chats.models import Chat, Group, Message
 from locations.models import Region, City
 from notifications.models import NotificationAccount, Notification
 from profiles.models import Profile, Post
@@ -104,4 +106,30 @@ class TestNotificationAccountFixture(TestAccountFixture, APITestCase):
         cls.notification_account_2_user_1 = NotificationAccount.objects.create(
             account=cls.user_account,
             notification=cls.notification_2
+        )
+
+
+class TestChatGroupFixture(TestAccountFixture, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.message = Message.objects.create(text='Test', account=cls.user_account)
+        cls.simple_chat = Chat.objects.create(type="STND")
+        cls.simple_chat.members.add(cls.user_account, cls.user2_account)
+        cls.simple_chat_2 = Chat.objects.create(type="STND")
+        cls.simple_chat_2.members.add(cls.user_account, cls.user3_account)
+        cls.group1 = Group.group_manager.create_group(title="First Group")
+        cls.group2 = Group.group_manager.create_group(title="Second Group")
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
         )

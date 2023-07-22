@@ -1,7 +1,7 @@
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from .models import Chat, ChatMessage, Message
+from .models import Chat, Message
 from .serializers import MessageSerializer
 
 
@@ -14,6 +14,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     def serialize_message(self, message):
         return MessageSerializer(message).data
 
+    @database_sync_to_async
+    def add_message(self, chat: Chat, message: Message):
+        return chat.messages.add(message)
+
     async def connect(self):
         """Сonnection to websocket."""
         if self.scope.get('user', None) is not None:
@@ -21,7 +25,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 await self.close()
             self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
             self.account = self.scope['user'].account
-            self.chat, _ = await Chat.objects.aget_or_create(id=self.chat_id)
+            self.chat = await Chat.objects.aget(id=self.chat_id)
             self.room_group_name = "chat_%s" % self.chat_id
             await self.accept()
             await self.channel_layer.group_add(
@@ -41,7 +45,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         message_type = content["type"]
         if message_type == "chat_message":
             message = await Message.objects.acreate(text=content['message'], account=self.account)
-            await ChatMessage.objects.acreate(chat=self.chat, message=message)
+            await self.add_message(chat=self.chat, message=message)
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
