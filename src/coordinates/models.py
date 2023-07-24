@@ -1,8 +1,10 @@
 from django.db import models
 from datetime import timedelta, datetime, timezone
+from typing import Callable, Optional, Sequence, Generator
 
 from .validators import validate_latitude, validate_longitude
-from .service.calculations import calculate_distance_1, calculate_vector_distance, vectorize_queryset
+from .service.calculations import calculate_distance_1, calculate_vector_distance, vectorize_queryset, \
+    vectorize_queryset_related
 from .service.google_api import get_location_details
 
 
@@ -24,43 +26,117 @@ class CoordinateManager(models.Manager):
         source.save()
         return new_coordinate
 
-    def filter_time(self, queryset=None) -> filter:
-        if queryset is None:
-            queryset = self.all()
-        now_time = datetime.now(timezone.utc)
-        return filter(
-            lambda coord: now_time - coord.last_time <= self.delta_limit,
-            queryset
-        )
+    def create(self, lat: float, lon: float, user):
+        lat = validate_latitude(lat)    # returns value if valid else raises an ValidationError
+        lon = validate_longitude(lon)
+        new_coordinate = Coordinate(lat=lat, lon=lon, user=user)
+        new_coordinate.save()
+        user.save()
+        return new_coordinate
 
-    def is_near(self, source_coordinate):
-        def inner(coord):
-            return self.distance_needed >= calculate_distance_1(
-                lat1=coord.lat,
+    @staticmethod
+    def is_near(source_coordinate, distance) -> Callable:
+        """Simple decorator to create namespace with given arguments."""
+        def inner(source_) -> bool:
+            return distance >= calculate_distance_1(
+                lat1=source_.coordinate.lat,
                 lat2=source_coordinate.lat,
-                lon1=coord.lon,
+                lon1=source_.coordinate.lon,
                 lon2=source_coordinate.lon
             )
         return inner
 
-    def all_near(self, source_coordinate) -> filter:
-        is_near = self.is_near(source_coordinate)
-        time_filtered_coords = self.filter_time(queryset=filter(lambda x: x != source_coordinate, self.all()))
-        return filter(is_near, time_filtered_coords)
+    def all_near(
+            self,
+            source,
+            distance: int = 5000,
+            queryset: Optional[Sequence] = None,
+            sort: bool = True
+    ) -> filter | list | Generator:
+        """Return all new users on given radius about `source_user`."""
+        if source.coordinate is None:
+            return []
 
-    def all_near_fast(self, source_coordinate):
-        now_time = datetime.now(timezone.utc)
-        time_filtered_coords = filter(  # noqa: E731
-            lambda coord: now_time - coord.last_time <= self.delta_limit and coord != source_coordinate,
-            self.all()
-        )
-        lat2, lon2 = vectorize_queryset(time_filtered_coords)
-        for d, instance in zip(
-                calculate_vector_distance(lon1=source_coordinate.lon, lat1=source_coordinate.lat, lon2=lon2, lat2=lat2),
-                time_filtered_coords
-        ):
-            if d <= self.delta_limit:
-                yield instance
+        elif queryset is None:
+            queryset = source.__class__.objects.all().filter(coordinate__isnull=False)
+        else:
+            queryset = (q for q in queryset if q.coordinate is not None)
+        is_near = self.is_near(source.coordinate, distance)
+        if not sort:
+            return filter(
+                lambda instance: is_near(instance) and instance != source,
+                queryset
+            )
+        def filter_gen():
+            """Inner complex generator."""
+            nonlocal source, queryset
+            for instance in queryset:
+                dist = calculate_distance_1(
+                    lat1=instance.coordinate.lat,
+                    lat2=source.coordinate.lat,
+                    lon1=instance.coordinate.lon,
+                    lon2=source.coordinate.lon
+                )
+                if dist <= distance and instance != source:
+                    yield instance, dist
+
+        return (i[0] for i in sorted(filter_gen(), key=lambda el: el[1]))
+
+    def all_near_fast(
+            self,
+            source,
+            distance: int = 5000,
+            queryset: Optional[Sequence] = None,
+            sort: bool = True
+    ) -> filter | list | Generator:
+        """
+        Return all new users on given radius about `source_user`, but faster.
+        The idea is to reduce CPU time for taking over data and give the vector data to
+        calculate for processor. Generator function is to reduce memory usage.
+        """
+        if source.coordinate is None:
+            yield from []
+            return
+
+        elif queryset is None:
+            queryset = source.__class__.objects.all().filter(coordinate__isnull=False)
+            lat2, lon2 = vectorize_queryset_related(queryset)
+        else:
+            def gen(queryset_=queryset):
+                for q in queryset_:
+                    if q.coordinate is not None:
+                        yield q
+            queryset = gen
+            lat2, lon2 = vectorize_queryset_related(queryset)
+            queryset = queryset()
+        if not sort:
+            for d, instance in zip(
+                    calculate_vector_distance(
+                        lon1=source.coordinate.lon,
+                        lat1=source.coordinate.lat,
+                        lon2=lon2,
+                        lat2=lat2
+                    ),
+                    queryset
+            ):
+                if d <= distance and instance != source:
+                    yield instance
+        else:
+            def filter_gen():
+                """Inner complex generator."""
+                nonlocal source, queryset
+                for d, instance in zip(
+                        calculate_vector_distance(
+                            lon1=source.coordinate.lon,
+                            lat1=source.coordinate.lat,
+                            lon2=lon2,
+                            lat2=lat2
+                        ),
+                        queryset
+                ):
+                    if d <= distance and instance != source:
+                        yield instance, d
+            yield from (i[0] for i in sorted(filter_gen(), key=lambda el: el[1]))
 
     def decode(self, coord) -> str:
         """Returns place by coordinate."""

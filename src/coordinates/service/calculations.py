@@ -1,5 +1,5 @@
 from math import cos, sin, acos, radians, atan2, sqrt
-from typing import Tuple, Iterable, Any
+from typing import Tuple, Iterable, Any, Generator, Callable
 from functools import wraps
 
 import numpy as np
@@ -57,6 +57,19 @@ def vectorize_queryset(queryset: Iterable) -> Tuple[np.ndarray, np.ndarray]:
     return (
         np.array([q.lat for q in queryset], dtype="float32"),
         np.array([q.lon for q in queryset], dtype="float32")
+    )
+
+
+def vectorize_queryset_related(queryset: Iterable | Callable) -> Tuple[np.ndarray, np.ndarray]:
+    """Make latitude vector and longitude vector out of queryset."""
+    if isinstance(queryset, Callable):
+        return (
+            np.array([q.coordinate.lat for q in queryset()], dtype="float32"),
+            np.array([q.coordinate.lon for q in queryset()], dtype="float32")
+        )
+    return (
+        np.array([q.coordinate.lat for q in queryset], dtype="float32"),
+        np.array([q.coordinate.lon for q in queryset], dtype="float32")
     )
 
 
