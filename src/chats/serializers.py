@@ -58,4 +58,19 @@ class GroupListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ("title", "owner", "get_image_preview_url", "get_members_count")
+        fields = ("title", "owner", "get_image_preview_url", )
+
+
+class GroupCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Group
+        fields = ('title', "img_preview", "coordinate")
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    owner = ProfileListSerializer(source="owner.profile")
+
+    class Meta:
+        model = Group
+        fields = ("title", "owner", "get_image_preview_url", )

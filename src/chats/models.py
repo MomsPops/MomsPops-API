@@ -24,16 +24,16 @@ class GroupManager(models.Manager):
     def get(self, *args, **kwargs):
         return (
             super()
-            .select_related("owner", "owner__user", "coordinate")
-            .prefetch_related("messages", "members")
+            .select_related("owner", "owner__user", "coordinate", "owner__profile")
+            # .prefetch_related("messages", "members")
             .get(*args, **kwargs)
         )
 
     def all(self):
         return (
             super()
-            .select_related("owner", "owner__user", "coordinate")
-            .prefetch_related("messages", "members")
+            .select_related("owner", "owner__user", "coordinate", "owner__profile")
+            # .prefetch_related("messages", "members")
             .all()
         )
 
@@ -50,7 +50,7 @@ class GroupManager(models.Manager):
         return new_group
 
 
-class Group(TimeCreateUpdateModel, UUIDModel):
+class   Group(TimeCreateUpdateModel, UUIDModel):
     """
     Group model.
     """
@@ -85,16 +85,14 @@ class Group(TimeCreateUpdateModel, UUIDModel):
         blank=True
     )
 
-    objects = models.Manager()
+    objects = GroupManager()
+    # objects = models.Manager()
     group_manager = GroupManager()
 
     def get_image_preview_url(self) -> str:
         if not self.img_preview:
             return "..."  # default image url
         return self.img_preview.url
-
-    def get_members_count(self) -> int:
-        return self.members.count()
 
     def __str__(self):
         return f"{self.title}:{self.id}"
