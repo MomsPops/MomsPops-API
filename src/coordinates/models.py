@@ -1,9 +1,9 @@
 from django.db import models
-from datetime import timedelta, datetime, timezone
-from typing import Callable, Optional, Sequence, Generator
+from datetime import timedelta
+from typing import Callable, Optional, Sequence, Generator, Iterable
 
 from .validators import validate_latitude, validate_longitude
-from .service.calculations import calculate_distance_1, calculate_vector_distance, vectorize_queryset, \
+from .service.calculations import calculate_distance_1, calculate_vector_distance, \
     vectorize_queryset_related
 from .service.google_api import get_location_details
 
@@ -26,19 +26,11 @@ class CoordinateManager(models.Manager):
         source.save()
         return new_coordinate
 
-    def create(self, lat: float, lon: float, user):
-        lat = validate_latitude(lat)    # returns value if valid else raises an ValidationError
-        lon = validate_longitude(lon)
-        new_coordinate = Coordinate(lat=lat, lon=lon, user=user)
-        new_coordinate.save()
-        user.save()
-        return new_coordinate
-
     @staticmethod
     def is_near(source_coordinate, distance) -> Callable:
         """Simple decorator to create namespace with given arguments."""
         def inner(source_) -> bool:
-            return distance >= calculate_distance_1(
+            return distance >= calculate_distance_1(  # type: ignore
                 lat1=source_.coordinate.lat,
                 lat2=source_coordinate.lat,
                 lon1=source_.coordinate.lon,
@@ -60,13 +52,14 @@ class CoordinateManager(models.Manager):
         elif queryset is None:
             queryset = source.__class__.objects.all().filter(coordinate__isnull=False)
         else:
-            queryset = (q for q in queryset if q.coordinate is not None)
+            queryset = (q for q in queryset if q.coordinate is not None)   # type: ignore
         is_near = self.is_near(source.coordinate, distance)
         if not sort:
             return filter(
                 lambda instance: is_near(instance) and instance != source,
                 queryset
             )
+
         def filter_gen():
             """Inner complex generator."""
             nonlocal source, queryset
@@ -82,11 +75,11 @@ class CoordinateManager(models.Manager):
 
         return (i[0] for i in sorted(filter_gen(), key=lambda el: el[1]))
 
-    def all_near_fast(
+    def all_near_fast(  # noqa: C901
             self,
             source,
             distance: int = 5000,
-            queryset: Optional[Sequence] = None,
+            queryset: Optional[Iterable] = None,
             sort: bool = True
     ) -> filter | list | Generator:
         """
@@ -106,9 +99,9 @@ class CoordinateManager(models.Manager):
                 for q in queryset_:
                     if q.coordinate is not None:
                         yield q
-            queryset = gen
+            queryset = gen   # type: ignore
             lat2, lon2 = vectorize_queryset_related(queryset)
-            queryset = queryset()
+            queryset = queryset()   # type: ignore
         if not sort:
             for d, instance in zip(
                     calculate_vector_distance(
@@ -117,7 +110,7 @@ class CoordinateManager(models.Manager):
                         lon2=lon2,
                         lat2=lat2
                     ),
-                    queryset
+                    queryset   # type: ignore
             ):
                 if d <= distance and instance != source:
                     yield instance

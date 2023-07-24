@@ -1,5 +1,3 @@
-from typing import Union
-
 from django.db import models
 from service.models import (
     UUIDModel,
@@ -50,7 +48,7 @@ class GroupManager(models.Manager):
         return new_group
 
 
-class   Group(TimeCreateUpdateModel, UUIDModel):
+class Group(TimeCreateUpdateModel, UUIDModel):
     """
     Group model.
     """
@@ -92,7 +90,7 @@ class   Group(TimeCreateUpdateModel, UUIDModel):
     def get_image_preview_url(self) -> str:
         if not self.img_preview:
             return "..."  # default image url
-        return self.img_preview.url
+        return self.img_preview.url    # type: ignore
 
     def __str__(self):
         return f"{self.title}:{self.id}"

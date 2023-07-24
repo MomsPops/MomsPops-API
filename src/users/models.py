@@ -10,7 +10,7 @@ from locations.models import City
 
 class CustomUserManager(UserManager):
     def get(self, *args, **kwargs):
-        return super().select_related('account').get(*args, **kwargs)
+        return super().select_related('account', "account__coordinate").get(*args, **kwargs)
 
 
 class User(AbstractUser):
@@ -21,6 +21,12 @@ class AccountManager(models.Manager):
     """
     Custom account manager.
     """
+    def all(self):
+        return (
+            super()
+            .select_related("user", "coordinate", "profile")
+        )
+
     def create_account(
         self,
         user: Dict[str, str],
@@ -89,7 +95,7 @@ class Account(UUIDModel):
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
     coordinate = models.OneToOneField("coordinates.Coordinate", on_delete=models.SET_NULL,
-                                      null=True, related_name="source")
+                                      null=True, related_name="source", blank=True)
 
     objects = AccountManager()
 
