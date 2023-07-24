@@ -35,10 +35,10 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     bio = models.TextField(null=True, blank=True, verbose_name="Биография")
     photo = models.ImageField(
         upload_to="uploads/profile_img/", verbose_name="Фото", blank=True, null=True
-    )  # default='default_image.jpg'
+    )
     birthday = models.DateTimeField(null=True, blank=True, verbose_name="День рождения")
     status = models.CharField(max_length=100, verbose_name="Статус", blank=True, null=True)
-    tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="profiles")
+    tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="tags", blank=True)
     sex = models.CharField("Пол", choices=SEX_CHOICES, default="Не выбран", max_length=10)
 
     objects = models.Manager()
