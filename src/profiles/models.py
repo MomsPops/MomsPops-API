@@ -47,12 +47,12 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     def get_photo_url(self) -> str:
         """Static url to user photo"""
         if not self.photo:
-            return settings.MEDIA_URL + "uploads/profile_img/default_avatar.png"
-        return self.photo.url
+            return settings.MEDIA_URL + "uploads/profile_img/default_avatar.png"       # type: ignore
+        return self.photo.url   # type: ignore
 
     def get_absolute_url(self) -> str:
         """Reversed url to single profile."""
-        return reverse("profiles_detail", kwargs={"username": self.account.user.username})
+        return reverse("profiles_detail", kwargs={"username": self.account.user.username})     # type: ignore
 
 
 class PostManager(models.Manager):

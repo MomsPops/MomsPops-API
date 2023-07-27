@@ -84,8 +84,8 @@ class Group(TimeCreateUpdateModel, UUIDModel):
 
     def get_image_preview_url(self) -> str:
         if not self.img_preview:
-            return settings.MEDIA_URL + "uploads/group_img/default_image_preview.png"
-        return self.img_preview.url
+            return settings.MEDIA_URL + "uploads/group_img/default_image_preview.png"      # type: ignore
+        return self.img_preview.url    # type: ignore
 
     def __str__(self):
         return f"{self.title}:{self.id}"
