@@ -9,22 +9,22 @@ from .serializers import MessageSerializer
 
 
 @database_sync_to_async
-def is_in_chat_members(account: Account, chat: Chat) -> bool:
+def is_in_chat_members(account: Account, chat: Chat):
     return account.chats.filter(pk=chat.id).exists()
 
 
 @database_sync_to_async
-def message_is_viewed(message: Message) -> None:
+def message_is_viewed(message: Message):
     return message.view()
 
 
 @database_sync_to_async
-def message_get_account(message: Message) -> Account:
+def message_get_account(message: Message):
     return message.account
 
 
 @database_sync_to_async
-def add_message(chat: Chat, message: Message) -> None:
+def add_message(chat: Chat, message: Message):
     return chat.messages.add(message)
 
 
