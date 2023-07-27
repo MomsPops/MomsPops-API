@@ -7,8 +7,7 @@ class ChatAdmin(admin.ModelAdmin):
     """
     Representation of chats in admin interface.
     """
-    list_display = ('type', 'time_created')
-    list_filter = ('type',)
+    list_display = ('time_created',)
 
 
 @admin.register(Group)

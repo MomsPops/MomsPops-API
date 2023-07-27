@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 from django.db import models
 
@@ -100,16 +100,9 @@ class ChatManager(models.Manager):
         return super().prefetch_related(("messages", "members"))
 
     def create_standart_chat(self, sender: Account, reciever: Account):
-        """Chat for 2 persons creation."""
-        standart_chat = Chat.objects.create(type="STND")
+        standart_chat = Chat.objects.create()
         standart_chat.members.add(sender, reciever)
         return standart_chat
-
-    def create_custom_chat(self, account_list: List[Account]):
-        """Chat for many persons creation."""
-        custom_chat = Chat.objects.create(type="CSTM")
-        custom_chat.members.add(*account_list)
-        return custom_chat
 
     def get_all_chats_by_account(self, account: Account):
         return account.chats.all()
@@ -125,13 +118,6 @@ class Chat(TimeCreateUpdateModel, UUIDModel):
     """
     Chat model.
     """
-    type = models.CharField(
-        verbose_name="Тип чата",
-        max_length=4,
-        choices=CHAT_TYPE,
-        default="STND"
-    )
-
     members = models.ManyToManyField(
         verbose_name='Участники чата',
         to="users.Account",
@@ -241,6 +227,10 @@ class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
 
     def __str__(self):
         return f"Account: {self.account.id}, viewed: {self.viewed}"
+
+    def view(self):
+        self.viewed = True
+        self.save()
 
     class Meta:
         verbose_name = "Сообщение"

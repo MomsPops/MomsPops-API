@@ -114,9 +114,9 @@ class TestChatGroupFixture(TestAccountFixture, APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.message = Message.objects.create(text='Test', account=cls.user_account)
-        cls.simple_chat = Chat.objects.create(type="STND")
+        cls.simple_chat = Chat.objects.create()
         cls.simple_chat.members.add(cls.user_account, cls.user2_account)
-        cls.simple_chat_2 = Chat.objects.create(type="STND")
+        cls.simple_chat_2 = Chat.objects.create()
         cls.simple_chat_2.members.add(cls.user_account, cls.user3_account)
         cls.group1 = Group.group_manager.create_group(title="First Group")
         cls.group2 = Group.group_manager.create_group(title="Second Group")

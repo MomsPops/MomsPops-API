@@ -30,27 +30,9 @@ class TestChatView(TestChatGroupFixture, APITestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_standart_chat_creates(self):
+    def test_chat_creates(self):
         response = self.user3_client.post(
-            reverse("chats-create_stnd_chat", kwargs={"account_id": self.user2_account.id})
+            reverse("chats-create_chat", kwargs={"account_id": self.user2_account.id})
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(Chat.objects.filter(members__in=[self.user2_account, self.user3_account]))
-
-    def test_leave_chat(self):
-        response = self.user_client.post(
-            reverse("chats-leave_chat", kwargs={"pk": self.simple_chat.id})
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(response.data, "You can't leave personal chat.")
-
-    def test_create_custom_chat(self):
-        response = self.user_client.post(
-            reverse("chats-create_custom_chat",
-                    kwargs={"account_ids": [str(self.user2_account.id), str(self.user3_account.id)]})
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTrue(Chat.chat_manager.filter(
-            type="CSTM",
-            members__in=[self.user2_account, self.user_account, self.user3_account]).exists()
-        )

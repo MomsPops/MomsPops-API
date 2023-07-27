@@ -14,6 +14,12 @@ class ChatConsumerTest(TestChatGroupFixture):
     """
     Tests for Cchat consumer.
     """
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.json_message = {
+            "text": "Hello World!!"
+        }
 
     @database_sync_to_async
     def chat_exists(self, chat_id):
@@ -48,6 +54,12 @@ class ChatConsumerTest(TestChatGroupFixture):
         connected_anon, _ = await communicator_anon.connect()
         self.assertFalse(connected_anon)
 
+        # Not authenticated user can't connect to channel test
+        communicator_not_member = WebsocketCommunicator(application, f"ws/chats/{self.simple_chat.id}/")
+        communicator_not_member.scope['user'] = self.user3
+        communicator_not_member, _ = await communicator_not_member.connect()
+        self.assertFalse(communicator_not_member)
+
         # Adding headers for authenticate user
         headers = [(b'origin', b'...'), (b'cookie', self.user_client.cookies.output(header='', sep='; ').encode())]
         communicator = WebsocketCommunicator(application, f"ws/chats/{self.simple_chat.id}/", headers)
@@ -56,16 +68,31 @@ class ChatConsumerTest(TestChatGroupFixture):
         communicator.scope['user'] = self.user
         connected, _ = await communicator.connect()
         self.assertTrue(connected)
-        self.assertEquals(await self.messages_count(), 1)
+        self.assertEqual(await self.messages_count(), 1)
 
         # Message sending test
         await communicator.send_json_to({
-            "type": "chat_message",
-            "message": await self.serialize_message(),
+            "type": "send_message",
+            "message": self.json_message,
         })
         response = await communicator.receive_json_from()
         self.assertTrue(response)
-        self.assertEquals(await self.messages_count(), 2)
+        self.assertEqual(await self.messages_count(), 2)
+
+        await communicator.send_json_to({
+            "type": "change_message",
+            "message": {"id": str(self.message.id),
+                        "text": "Hola el Mundo!"},
+        })
+        response_2 = await communicator.receive_json_from()
+        self.assertEqual(response_2["message"]["text"], "Hola el Mundo!")
+
+        await communicator.send_json_to({
+            "type": "viewed",
+            "message": {"id": str(self.message.id)},
+        })
+        response_3 = await communicator.receive_json_from()
+        self.assertTrue(response_3["message"]["viewed"])
 
         # Tests should end with disconnecting
         await communicator.disconnect()

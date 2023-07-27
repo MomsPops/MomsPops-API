@@ -45,28 +45,13 @@ class ChatTest(TestChatGroupFixture):
         """Simple chat creation test."""
         new_chat = Chat.chat_manager.create_standart_chat(self.user_account, self.user2_account)
         self.assertTrue(new_chat is not None)
-        self.assertEqual(new_chat.type, 'STND')
         self.assertTrue(self.user_account in new_chat.members.all())
         self.assertTrue(self.user2_account in new_chat.members.all())
         self.assertEqual(Chat.objects.count(), 3)
 
-    def test_create_custom_chat(self):
-        """Custom chat creation test."""
-        list_of_account = [self.user_account, self.user2_account, self.user3_account]
-        new_chat = Chat.chat_manager.create_custom_chat(list_of_account)
-        self.assertTrue(new_chat is not None)
-        self.assertEqual(new_chat.type, 'CSTM')
-        self.assertTrue(self.user_account in new_chat.members.all())
-        self.assertTrue(self.user2_account in new_chat.members.all())
-        self.assertTrue(self.user3_account in new_chat.members.all())
-
     def test_get_all_chats_by_account(self):
         chats = Chat.chat_manager.get_all_chats_by_account(self.user3_account)
         self.assertEqual(len(chats), 1)
-
-    def test_leave_chat(self):
-        self.simple_chat.leave_chat(self.user2_account)
-        self.assertEqual(self.simple_chat.members.count(), 1)
 
 
 class MessageTest(TestChatGroupFixture):
@@ -99,3 +84,8 @@ class MessageTest(TestChatGroupFixture):
         image = MessageMediaFile.objects.create(img=self.uploaded)
         message.media_files.add(image)
         self.assertTrue(image in message.media_files.all())
+
+    def test_message_view(self):
+        self.assertFalse(self.message.viewed)
+        self.message.view()
+        self.assertTrue(self.message.viewed)
