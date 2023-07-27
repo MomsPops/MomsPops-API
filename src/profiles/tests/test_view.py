@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from profiles.models import Post
+from profiles.models import Post, Profile
 from service.fixtues import TestProfileFixture, TestPostFixture
 
 
@@ -21,7 +21,7 @@ class TestProfileViews(TestProfileFixture, APITestCase):
     def test_profile_list(self):
         response = self.user_client.get(reverse("profiles"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 2)
+        self.assertEqual(len(response.json()), len(Profile.profile_manager.all()))
 
     def test_profile_update(self):
         data_update = {"bio": "I was born tomorrow."}

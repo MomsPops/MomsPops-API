@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase, APIClient
 
+from coordinates.models import Coordinate
 from locations.models import Region, City
 from notifications.models import NotificationAccount, Notification
 from profiles.models import Profile, Post
@@ -122,9 +123,20 @@ class TestGroupFixture(TestProfileFixture, APITestCase):
             title="Football league.",
             account=cls.user_account
         )
+        Coordinate.coordinate_manager.create(
+            lat=20,
+            lon=20,
+            source=cls.group1
+        )
+        cls.group1.save()
         cls.group2 = Group.group_manager.create_group(
             title="C# is better than Python",
             account=cls.user2_account
+        )
+        Coordinate.coordinate_manager.create(
+            lat=20.001,
+            lon=20,
+            source=cls.group2
         )
         cls.group2.members.add(cls.user_account)
         cls.group2.save()
@@ -137,4 +149,13 @@ class TestGroupFixture(TestProfileFixture, APITestCase):
             text="However I love VS.",
             group=cls.group2,
             account=cls.user_account
+        )
+        cls.group3 = Group.group_manager.create_group(
+            title="Snoop Dogg concert.",
+            account=cls.user3_account
+        )
+        Coordinate.coordinate_manager.create(
+            lat=20.01,
+            lon=20,
+            source=cls.group3
         )
