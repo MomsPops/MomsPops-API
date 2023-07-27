@@ -27,6 +27,7 @@ class AccountRouter(SimpleRouter):
             detail=False,
             initkwargs={'suffix': 'Me'}
         ),
+
         DynamicRoute(
                      url=r'^{prefix}/{url_path}{trailing_slash}$',
                      name='{basename}_{url_name}',

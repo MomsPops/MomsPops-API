@@ -39,5 +39,20 @@ def send_email(request, user):
     )
 
 
+def send_password_reset_email(request, user, code):
+    message_subject = "Password Reset Code"
+    message_content = render_to_string(
+        template_name='registrations/password_reset_email.html',
+        context={
+            'user': user.username,
+            'code': code,
+            'domain': get_current_site(request).domain,
+        }
+    )
+    send_email_task.apply_async(
+        args=[message_subject, message_content, user.email]
+    )
+
+
 def decode_uid(uid: str):
     return force_str(urlsafe_base64_decode(uid))

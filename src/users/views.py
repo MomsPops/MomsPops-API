@@ -1,20 +1,75 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets, mixins
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view
 from http import HTTPStatus
-
 from .serializers import (
     AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer,
-    BlockUserCreateSerializer, PasswordResetSerializer
-
+    BlockUserCreateSerializer, PasswordResetSerializer, PasswordResetPostSerializer,
+    PasswordResetConfirmSerializer
 )
 from .models import Account, User
-from .service.email import send_email, decode_uid, check_activation_token
+from .service.email import send_email, decode_uid, check_activation_token, send_password_reset_email
 from rest_framework.decorators import action
+
+from rest_framework.views import APIView
+
+from rest_framework import status
+
+import random
+
+
+class PasswordResetRequestView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordResetPostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = request.data.get('email')
+
+        try:
+            user = User.objects.filter(email=email).first()
+        except User.DoesNotExist:
+            return Response({'detail': 'Please register an account.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate 8-digit random code and set it as the user's password reset token
+        code = str(random.randint(10000000, 99999999))
+        user.set_password(code)
+        user.save()
+
+        # Send the password reset email with the code
+        send_password_reset_email(
+                request=request,
+                user=user,
+                code=code
+        )
+
+        return Response({'detail': 'Password reset code sent to your email.'}, status=status.HTTP_201_CREATED)
+
+
+class PasswordResetConfirmView(APIView):
+    def put(self, request, *args, **kwargs):
+        code = request.data.get('code')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        # Decode the user ID from the code
+        uid = request.user.id
+
+        # Check if the code is valid and matches the user's password reset token
+        user = User.objects.get(pk=uid)
+        if not user.check_password(code):
+            return Response({'detail': 'Invalid or expired code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if new_password and confirm_password match
+        if new_password != confirm_password:
+            return Response({'detail': 'New password and confirm password do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Reset the user's password with the new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'detail': 'Password reset successful.'}, status=status.HTTP_200_OK)
 
 
 class AccountViewSet(mixins.RetrieveModelMixin,
@@ -22,11 +77,15 @@ class AccountViewSet(mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin,
                      viewsets.GenericViewSet):
+
     queryset = Account.objects.all()
     serializer_class = AccountCreateSerializer
 
     def get_permissions(self):
-        if self.action == "create" or self.action == "password_reset":
+        if (self.action == "create" or
+            self.action == "password_reset" or
+            self.action == "password_reset_confirm" or
+            self.action == "reset_password_request"):
             perm_classes = [AllowAny]
         else:
             perm_classes = [IsAuthenticated]
@@ -97,6 +156,19 @@ class AccountViewSet(mixins.RetrieveModelMixin,
         user.set_password(new_password)
         user.save()
         return Response({'message': 'Password reset successfully'}, status=HTTPStatus.OK)
+
+    @action(detail=False, methods=['post'], serializer_class=PasswordResetPostSerializer)
+    def reset_password_request(self, request, *args, **kwargs):
+        # Создайте экземпляр PasswordResetRequestView
+        reset_request_view = PasswordResetRequestView()
+
+        # Вызовите метод post с передачей аргумента request
+        return reset_request_view.post(request, *args, **kwargs)
+
+    @action(detail=False, methods=['put'], serializer_class=PasswordResetConfirmSerializer)
+    def reset_password_confirm(self, request, *args, **kwargs):
+        reset_confirm_view = PasswordResetConfirmView.as_view()
+        return reset_confirm_view(request, *args, **kwargs)
 
 
 @api_view(['GET'])

@@ -53,3 +53,13 @@ class PasswordResetSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128)
     new_password = serializers.CharField(max_length=128)
+
+
+class PasswordResetPostSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=8)
+    new_password = serializers.CharField(max_length=128)
+    new_password_confirm = serializers.CharField(max_length=128)
