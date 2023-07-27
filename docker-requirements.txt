@@ -10,6 +10,7 @@ channels==4.0.0
 channels_redis==4.1.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
+django-filter==23.2
 drf-yasg==1.21.5
 flake8==6.0.0
 googlemaps==4.10.0
