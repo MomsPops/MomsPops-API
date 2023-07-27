@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from typing import Callable, Optional, Sequence, Generator, Iterable
 
 from .validators import validate_latitude, validate_longitude
@@ -10,7 +10,7 @@ from .service.google_api import get_location_details
 
 class CoordinateManager(models.Manager):
     distance_needed: float = 3000  # in meters
-    delta_limit: timedelta = timedelta(minutes=5)
+    time_delta_limit: timedelta = timedelta(minutes=5)
 
     def update(self, instance, lat: float, lon: float):
         instance.lat = validate_latitude(lat)
@@ -25,6 +25,15 @@ class CoordinateManager(models.Manager):
         source.coordinate = new_coordinate
         source.save()
         return new_coordinate
+
+    def filter_time(self, queryset=None) -> filter:
+        if queryset is None:
+            queryset = self.all()
+        now_time = datetime.now(tz=timezone.utc)
+        return filter(
+            lambda coord: now_time - coord.last_time <= self.time_delta_limit,
+            queryset
+        )
 
     @staticmethod
     def is_near(source_coordinate, distance) -> Callable:

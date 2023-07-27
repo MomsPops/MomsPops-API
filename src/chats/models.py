@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from service.models import (
     UUIDModel,
@@ -8,12 +9,6 @@ from service.models import (
 from users.models import Account
 
 
-# TODO: change folder path
-def get_group_preview_file_path(instance, *_, **__) -> str:
-    return instance.time_created.strftime("uploads/chat_previews/%Y/%m/%d/") + str(instance.id)  # type: ignore
-
-
-# TODO: change folder path
 def get_message_img_file_path(instance, *_, **__) -> str:
     return instance.time_created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)    # type: ignore
 
@@ -78,7 +73,7 @@ class Group(TimeCreateUpdateModel, UUIDModel):
     )
     img_preview = models.ImageField(
         verbose_name="Аватар группы",
-        upload_to=get_group_preview_file_path,
+        upload_to="uploads/group_img/",
         null=True,
         blank=True
     )
@@ -89,7 +84,7 @@ class Group(TimeCreateUpdateModel, UUIDModel):
 
     def get_image_preview_url(self) -> str:
         if not self.img_preview:
-            return "..."  # default image url
+            return settings.MEDIA_URL + "uploads/group_img/default_image_preview.png"      # type: ignore
         return self.img_preview.url    # type: ignore
 
     def __str__(self):

@@ -44,16 +44,15 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     objects = models.Manager()
     profile_manager = ProfileManager()
 
-    def get_photo_url(self):
+    def get_photo_url(self) -> str:
         """Static url to user photo"""
-        path_for_default_img = settings.MEDIA_URL + "default_img/user_standart_avatar.png"
-        if self.photo:
-            return "http://127.0.0.1:8000" + self.photo.url
-        return "http://127.0.0.1:8000" + path_for_default_img
+        if not self.photo:
+            return settings.MEDIA_URL + "uploads/profile_img/default_avatar.png"       # type: ignore
+        return self.photo.url   # type: ignore
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         """Reversed url to single profile."""
-        return reverse("profiles_detail", kwargs={"username": self.account.user.username})
+        return reverse("profiles_detail", kwargs={"username": self.account.user.username})     # type: ignore
 
 
 class PostManager(models.Manager):
@@ -81,7 +80,7 @@ class Post(UUIDModel, TimeCreateUpdateModel):  # type: ignore
 
     def get_photo_url(self) -> Optional[str]:
         if self.photo:
-            return "http://127.0.0.1:8000" + self.photo.url   # type: ignore
+            return self.photo.url   # type: ignore
         return None
 
     def get_preview_text(self) -> str:  # type: ignore
