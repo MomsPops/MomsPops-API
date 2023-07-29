@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import timedelta, datetime, timezone
-from typing import Callable, Optional, Sequence, Generator, Iterable
+from typing import Callable, Optional, Sequence, Generator, Iterable, Union
+
 
 from .validators import validate_latitude, validate_longitude
 from .service.calculations import calculate_distance_1, calculate_vector_distance, \
@@ -53,7 +54,7 @@ class CoordinateManager(models.Manager):
             distance: int = 5000,
             queryset: Optional[Sequence] = None,
             sort: bool = True
-    ) -> filter | list | Generator:
+    ) -> Union[filter, list, Generator]:
         """Return all new users on given radius about `source_user`."""
         if source.coordinate is None:
             return []
@@ -90,7 +91,7 @@ class CoordinateManager(models.Manager):
             distance: int = 5000,
             queryset: Optional[Iterable] = None,
             sort: bool = True
-    ) -> filter | list | Generator:
+    ) -> Union[filter, list, Generator]:
         """
         Return all new users on given radius about `source_user`, but faster.
         The idea is to reduce CPU time for taking over data and give the vector data to
