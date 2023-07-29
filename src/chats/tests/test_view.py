@@ -25,12 +25,12 @@ class TestGroupView(TestGroupFixture, APITestCase):
             {
                 'title': 'C# is better than Python',
                 'owner': {
-                          'bio': None,
-                          'get_photo_url': '/media/uploads/profile_img/default_avatar.png',
-                          'get_absolute_url': f'/api/v1/profiles/{self.user2_account.user.username}/',
-                          'first_name': '',
-                          'last_name': ''
-                          },
+                    'bio': None,
+                    'get_photo_url': '/media/uploads/profile_img/default_avatar.png',
+                    'get_absolute_url': f'/api/v1/profiles/{self.user2_account.user.username}/',
+                    'first_name': '',
+                    'last_name': ''
+                },
                 'get_image_preview_url': '/media/uploads/group_img/default_image_preview.png'
             }
         )
