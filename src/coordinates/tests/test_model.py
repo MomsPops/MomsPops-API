@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 from django.core.exceptions import ValidationError  # , ObjectDoesNotExist
+from typing import Generator
 import random
 
 from service.fixtues import TestAccountFixture
@@ -73,19 +74,24 @@ class TestCoordinatesManager(APITestCase):
         self.assertEqual(len([*filter_time_coords]), len(self.accounts))
 
     def test_all_near_instance(self):
-        all_near_coords = Coordinate.coordinate_manager.all_near(self.account1.coordinate)
-        self.assertIsInstance(all_near_coords, filter)
+        all_near_coords = Coordinate.coordinate_manager.all_near(self.account1)
+        assert isinstance(all_near_coords, filter) or isinstance(all_near_coords, Generator)
 
     def test_all_near_user_exclude(self):
         Coordinate_custom = Coordinate
-        Coordinate_custom.coordinate_manager.distance_needed = 3_000_000
-        all_near_coords = Coordinate_custom.coordinate_manager.all_near(self.account1.coordinate)
+        all_near_coords = Coordinate_custom.coordinate_manager.all_near(
+            source=self.account1,
+            distance=300000,
+        )
         self.assertNotIn(self.account1.coordinate, all_near_coords)
 
     def test_all_near_user_count(self):
         Coordinate_custom = Coordinate
-        Coordinate_custom.coordinate_manager.distance_needed = 3_000_000
-        all_near_coords = Coordinate_custom.coordinate_manager.all_near(self.account1.coordinate)
+        all_near_coords = Coordinate_custom.coordinate_manager.all_near(
+            source=self.account1,
+            distance=300000,
+            sort=False
+        )
         self.assertEqual(len([*all_near_coords]), len(self.accounts) - 1)
 
     def test_deactivate(self):

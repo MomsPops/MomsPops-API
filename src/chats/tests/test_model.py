@@ -27,15 +27,14 @@ class GroupTest(TestAccountFixture):
         """Group creation test."""
 
         # Group creation without account test
-        group1 = Group.group_manager.create_group(title="First Group")
+        group1 = Group.group_manager.create_group(title="First Group", account=self.user2_account)
         self.assertTrue(group1 is not None)
-        self.assertEqual(group1.location_coordinate, None)
 
         # Group creation without coordinates test
         account_without_coord = self.user_account
         group2 = Group.group_manager.create_group(title="Second Group", account=account_without_coord)
         self.assertTrue(group2 is not None)
-        self.assertEqual(group2.location_coordinate, None)
+        self.assertEqual(group2.coordinate, None)
 
         coordinate = Coordinate.objects.create(lat=1, lon=2)
         self.assertTrue(coordinate is not None)
@@ -43,10 +42,13 @@ class GroupTest(TestAccountFixture):
         # Group creation with coordinates and members test
         account_with_coord = self.user_account
         account_with_coord.coordinate = coordinate
-        group3 = Group.group_manager.create_group(title="Third Group", account=account_with_coord)
+        group3 = Group.group_manager.create_group(
+            title="Third Group",
+            account=account_with_coord,
+        )
         self.assertTrue(group3 is not None)
         self.assertEqual(account_with_coord.coordinate, coordinate)
-        self.assertEqual(group3.location_coordinate, coordinate)
+        self.assertEqual(group3.coordinate, coordinate)
         self.assertTrue(group3.members is not None)
         self.assertEqual(group3.members.first(), account_with_coord)
 
@@ -87,8 +89,8 @@ class MessageTest(TestAccountFixture):
         super().setUpClass()
         cls.simple_chat = Chat.objects.create(type='STND')
         cls.simple_chat.members.add(cls.user_account, cls.user2_account)
-        cls.group1 = Group.group_manager.create_group(title="First Group")
-        cls.group2 = Group.group_manager.create_group(title="Second Group")
+        cls.group1 = Group.group_manager.create_group(title="First Group", account=cls.user_account)
+        cls.group2 = Group.group_manager.create_group(title="Second Group", account=cls.user3_account)
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'

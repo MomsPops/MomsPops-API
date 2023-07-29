@@ -1,5 +1,4 @@
-from typing import Union
-
+from django.conf import settings
 from django.db import models
 from service.models import (
     UUIDModel,
@@ -10,12 +9,6 @@ from service.models import (
 from users.models import Account
 
 
-# TODO: change folder path
-def get_group_preview_file_path(instance, *_, **__) -> str:
-    return instance.time_created.strftime("uploads/chat_previews/%Y/%m/%d/") + str(instance.id)  # type: ignore
-
-
-# TODO: change folder path
 def get_message_img_file_path(instance, *_, **__) -> str:
     return instance.time_created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)    # type: ignore
 
@@ -24,20 +17,20 @@ class GroupManager(models.Manager):
     def get(self, *args, **kwargs):
         return (
             super()
-            .select_related("owner", "owner__user", "location_coordinate")
-            .prefetch_related("messages", "members")
+            .select_related("owner", "owner__user", "coordinate", "owner__profile")
+            # .prefetch_related("messages", "members")
             .get(*args, **kwargs)
         )
 
     def all(self):
         return (
             super()
-            .select_related("owner", "owner__user", "location_coordinate")
-            .prefetch_related("messages", "members")
+            .select_related("owner", "owner__user", "coordinate", "owner__profile")
+            # .prefetch_related("messages", "members")
             .all()
         )
 
-    def create_group(self, title, account: Union[Account, None] = None):
+    def create_group(self, title, account):
         new_group = self.model(title=title)
         new_group.save(using=self._db)
 
@@ -45,7 +38,7 @@ class GroupManager(models.Manager):
             new_group.owner = account
             new_group.members.add(account)
             if account.coordinate:
-                new_group.location_coordinate = account.coordinate
+                new_group.coordinate = account.coordinate
             new_group.save()
         return new_group
 
@@ -63,9 +56,14 @@ class Group(TimeCreateUpdateModel, UUIDModel):
         null=True,
         blank=True,
     )
-    members = models.ManyToManyField(to=Account, blank=True, related_name="groups", verbose_name="Участники группы")
+    members = models.ManyToManyField(
+        to=Account,
+        blank=True,
+        related_name="groups",
+        verbose_name="Участники группы"
+    )
     meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
-    location_coordinate = models.ForeignKey(
+    coordinate = models.ForeignKey(
         "coordinates.Coordinate",
         default=None,
         blank=True,
@@ -75,13 +73,19 @@ class Group(TimeCreateUpdateModel, UUIDModel):
     )
     img_preview = models.ImageField(
         verbose_name="Аватар группы",
-        upload_to=get_group_preview_file_path,
+        upload_to="uploads/group_img/",
         null=True,
         blank=True
     )
 
-    objects = models.Manager()
+    objects = GroupManager()
+    # objects = models.Manager()
     group_manager = GroupManager()
+
+    def get_image_preview_url(self) -> str:
+        if not self.img_preview:
+            return settings.MEDIA_URL + "uploads/group_img/default_image_preview.png"      # type: ignore
+        return self.img_preview.url    # type: ignore
 
     def __str__(self):
         return f"{self.title}:{self.id}"
@@ -165,6 +169,33 @@ class ChatMessage(models.Model):
         ]
 
 
+class GroupMessageManager(models.Manager):
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("group", "message", "message__account", "message__account__user", "message__reactions")
+            .get(*args, **kwargs)
+        )
+
+    def all(self):
+        return (
+            super()
+            .select_related("group", "message", "message__account", "message__account__user", "message__reactions")
+            .all()
+        )
+
+    def create(self, account, text, group, available: bool = True):
+        group_message = super().create(
+            group=group,
+            message=Message.message_manager.create(
+                account=account,
+                text=text,
+                available=available
+            )
+        )
+        return group_message
+
+
 class GroupMessage(models.Model):
     """
     Model for group and message relation.
@@ -177,6 +208,9 @@ class GroupMessage(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Содержание сообщения"
     )
+
+    objects = models.Manager()
+    group_message_manager = GroupMessageManager()
 
     def __str__(self) -> str:
         return f"Сообщение из чата, автор:{self.message.account.id}"
@@ -203,6 +237,14 @@ class MessageManager(models.Manager):
             .prefetch_related("reactions", "media_files")
             .all()
         )
+
+    def create(self, account, text, available: bool = True):
+        message = super().create(
+            account=account,
+            text=text,
+            available=available
+        )
+        return message
 
 
 class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
