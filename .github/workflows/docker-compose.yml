@@ -1,0 +1,25 @@
+name: Codacy Security Scan
+
+on:
+  push:
+    branches: [ "actions_test"]
+  pull_request:
+    branches: [ "actions_test" ]
+permissions:
+  contents: read
+
+jobs:
+  docker-compose:
+    name: Docker compose check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: isbang/compose-action@v1.5.0
+      with:
+        compose-file: "./docker-compose.yml"
+        down-flags: "--volumes"
+        services: |
+          web-app
+          redis
+          db
+          celery
