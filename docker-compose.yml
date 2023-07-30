@@ -27,7 +27,7 @@ services:
     volumes:
       - ./src:/src
     env_file:
-      - ./src/.dev.env
+      - ./src/.de.env
     depends_on:
       - redis
       - web-app
