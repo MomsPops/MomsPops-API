@@ -2,6 +2,7 @@ from django.db import models
 from datetime import timedelta, datetime, timezone
 from typing import Callable, Optional, Sequence, Generator, Iterable, Union
 
+
 from .validators import validate_latitude, validate_longitude
 from .service.calculations import calculate_distance_1, calculate_vector_distance, \
     vectorize_queryset_related
