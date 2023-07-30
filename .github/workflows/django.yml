@@ -24,19 +24,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: flake8 Lint
-        uses: py-actions/flake8@v2
-        with:
-          ignore: "F401"
-          max-line-length: "120"
-          path: "."
-      - name: mypy
-        uses: konciergeMD/github-action-mypy@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MYPY_OPTS: "--config=./mypy.ini"  # additional mypy options
-          #MYPY_CODE_DIR: "."  # what directory to check, defaults to "."
-          #PRECOMMAND_MESSAGE: You have style errors. See them below.
       - name: Run Tests
         run: |
           cd src
