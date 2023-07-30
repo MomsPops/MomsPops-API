@@ -26,10 +26,8 @@ services:
     command: celery -A core worker -l info
     volumes:
       - ./src:/src
-    environment:
-      - DOCKER=1
     env_file:
-      - ./src/.docker.env
+      - ./src/.dev.env
     depends_on:
       - redis
       - web-app
