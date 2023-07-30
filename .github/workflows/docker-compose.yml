@@ -1,10 +1,10 @@
-name: Codacy Security Scan
+name: Docker compose
 
 on:
   push:
-    branches: [ "actions_test"]
+    branches: [ "development", "main"]
   pull_request:
-    branches: [ "actions_test" ]
+    branches: [ "development", "main"]
 permissions:
   contents: read
 
