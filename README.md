@@ -1,5 +1,9 @@
 # MomsPops API
 [![Build Status](https://github.com/MomsPops/MomsPops-API/actions/workflows/django.yml/badge.svg)](https://github.com/MomsPops/MomsPops-API/actions/workflows/django.yml/)
+[![Build Status](https://github.com/MomsPops/MomsPops-API/actions/workflows/codacy.yml/badge.svg)](https://github.com/MomsPops/MomsPops-API/actions/workflows/codacy.yml/)
+[![Build Status](https://github.com/MomsPops/MomsPops-API/actions/workflows/docker-compose.yml/badge.svg)](https://github.com/MomsPops/MomsPops-API/actions/workflows/docker-compose.yml/)
+[![Build Status](https://github.com/MomsPops/MomsPops-API/actions/workflows/python-app.yml/badge.svg)](https://github.com/MomsPops/MomsPops-API/actions/workflows/python-app.yml/)
+
 
 # Work branch - development
 ## For developers:
