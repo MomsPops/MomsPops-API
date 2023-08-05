@@ -1,294 +1,222 @@
-from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
 from django.db import models
-from service.models import (
-    UUIDModel,
-    TimeCreateModel,
-    TimeCreateUpdateModel,
-    AccountForeignModel,
-)
-from users.models import Account
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from rest_framework.exceptions import NotFound, PermissionDenied
+from django.conf import settings
+from typing import Union
 
 
-def get_message_img_file_path(instance, *_, **__) -> str:
-    return instance.time_created.strftime("uploads/message_img/%Y/%m/%d/") + str(instance.id)    # type: ignore
-
-
-class GroupManager(models.Manager):
+class MessengerManager(models.Manager):
     def get(self, *args, **kwargs):
+        try:
+            obj = (
+                super()
+                .prefetch_related("messages", "members", "messages__account", "messages__medias")
+                .get(*args, **kwargs)
+            )
+            return obj
+        except self.model.DoesNotExist:
+            raise NotFound()
+
+    def filter(self, **kwargs):
         return (
             super()
-            .select_related("owner", "owner__user", "coordinate", "owner__profile")
-            # .prefetch_related("messages", "members")
-            .get(*args, **kwargs)
+            .prefetch_related("messages", "members", "messages__account")
+            .filter(**kwargs)
         )
 
     def all(self):
         return (
             super()
-            .select_related("owner", "owner__user", "coordinate", "owner__profile")
-            # .prefetch_related("messages", "members")
+            .prefetch_related("messages", "members", "messages__account")
             .all()
         )
 
-    def create_group(self, title, account):
-        new_group = self.model(title=title)
-        new_group.save(using=self._db)
+    def add_message_instance(self, obj, message):
+        obj.last_message = message
+        obj.save()
 
-        if account:
-            new_group.owner = account
-            new_group.members.add(account)
-            if account.coordinate:
-                new_group.coordinate = account.coordinate
-            new_group.save()
-        return new_group
+    def add_message(self, obj, text: str, account, source):
+        if obj.members.filter(id=account.id).exists():
+            message = Message(
+                content_object=obj,
+                text=text,
+                account=account,
+                source=source
+            )
+            message.save()
+            obj.last_message = message
+            obj.save()
+            return message
+
+        raise PermissionDenied()
+
+    def all_account_in_account_chats(self, account):
+        members = []
+        for ac in account.chats.all():
+            for member in ac.members.all():
+                if member != account:
+                    members.append(member)
+        return members
 
 
-class Group(TimeCreateUpdateModel, UUIDModel):
-    """
-    Group model.
-    """
-    title = models.CharField(max_length=100, verbose_name="Название Группы")
-    owner = models.ForeignKey(
-        to=Account,
-        on_delete=models.SET_NULL,
-        verbose_name="Создатель группы",
-        related_name="groups_owner",
-        null=True,
-        blank=True,
-    )
+class ChatManager(MessengerManager):
+
+    def create_chat(self, members: list):
+        chat = Chat()
+        chat.save()
+        chat.members.add(*members)
+        return chat
+
+    def all_account_chats(self, account):
+        return account.chats.all()
+
+
+class Chat(models.Model):
     members = models.ManyToManyField(
-        to=Account,
-        blank=True,
-        related_name="groups",
-        verbose_name="Участники группы"
+        "users.Account",
+        verbose_name="Members",
+        related_name="chats",
     )
-    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
-    coordinate = models.ForeignKey(
-        "coordinates.Coordinate",
-        default=None,
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        verbose_name="Координаты",
+    messages = GenericRelation("Message", object_id_field="id")
+    last_message = models.OneToOneField("Message", on_delete=models.SET_NULL, null=True, blank=True)
+
+    objects = ChatManager()
+
+
+class GroupManager(MessengerManager):
+
+    def get(self, *args, **kwargs):
+        try:
+            obj = (
+                super()
+                .prefetch_related(
+                    "messages", "members", "messages__account",
+                    "messages__medias", "owner",
+                )
+                .get(*args, **kwargs)
+            )
+            return obj
+        except self.model.DoesNotExist:
+            raise NotFound()
+
+    def create_group(
+            self,
+            members: list,
+            title: str,
+            owner,
+            photo: ContentFile | None = None,
+            is_public: bool = True,
+    ):
+        group = Group(
+            title=title,
+            photo=photo,
+            is_public=is_public,
+            owner=owner
+        )
+        group.save()
+        group.members.add(*members)
+        return group
+
+    def all_account_groups(self, account):
+        return account.groups.all()
+
+
+class Group(models.Model):
+    members = models.ManyToManyField(
+        "users.Account",
+        verbose_name="Members",
+        related_name="group_chats",
     )
-    img_preview = models.ImageField(
-        verbose_name="Аватар группы",
-        upload_to="uploads/group_img/",
-        null=True,
-        blank=True
+    is_public = models.BooleanField(default=True)
+    time_created = models.DateTimeField(auto_created=True, auto_now=True)
+    title = models.CharField(max_length=255)
+    owner = models.ForeignKey(
+        to="users.Account",
+        on_delete=models.CASCADE,
+        related_name="own_groups"
     )
+    photo = models.ImageField(null=True, upload_to="uploads/groups/")
+    messages = GenericRelation("Message", object_id_field="id")
 
     objects = GroupManager()
-    # objects = models.Manager()
-    group_manager = GroupManager()
 
-    def get_image_preview_url(self) -> str:
-        if not self.img_preview:
-            return settings.MEDIA_URL + "uploads/group_img/default_image_preview.png"      # type: ignore
-        return self.img_preview.url    # type: ignore
-
-    def __str__(self):
-        return f"{self.title}:{self.id}"
-
-    class Meta:
-        ordering = ["-time_created"]
-        verbose_name = "Группа"
-        verbose_name_plural = "Группы"
-
-
-class ChatManager(models.Manager):
-    def get(self, *args, **kwargs):
-        return (
-            super()
-            .prefetch_related("messages", "members")
-            .get(*args, **kwargs)
-        )
-
-    def all(self):
-        return (
-            super()
-            .prefetch_related("messages", "members")
-            .all()
-        )
-
-
-CHAT_TYPE = (
-    ("STND", "Стандартный чат 1-1"),
-    ("CSTM", "Кастомный чат любое кол-во людей"),
-)
-
-
-class Chat(TimeCreateUpdateModel, UUIDModel):
-    """
-    Chat model.
-    """
-    type = models.CharField(
-        verbose_name="Тип чата",
-        max_length=4,
-        choices=CHAT_TYPE,
-        default="STND"
-    )
-
-    members = models.ManyToManyField(
-        verbose_name='Участники чата',
-        to="users.Account",
-        blank=True,
-        related_name='chats'
-    )
-
-    objects = models.Manager()
-    chat_manager = ChatManager()
-
-    def __str__(self):
-        return f"{self.type.title}:{self.id}"
-
-    class Meta:
-        ordering = ["-time_created"]
-        verbose_name = "Чат"
-        verbose_name_plural = "Чаты"
-
-
-class ChatMessage(models.Model):
-    """
-    Model for chat and message relation.
-    """
-    chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE, verbose_name="Чат", related_name="messages")
-    message = models.ForeignKey(
-        to="Message",
-        on_delete=models.CASCADE,
-        verbose_name="Содержание сообщения",
-        related_name='chats'
-    )
-
-    def __str__(self) -> str:
-        return f"Сообщение из чата, автор:{self.message.account.id}"
-
-    class Meta:
-        index_together = [
-            ["chat", "message"],
-        ]
-
-
-class GroupMessageManager(models.Manager):
-    def get(self, *args, **kwargs):
-        return (
-            super()
-            .select_related("group", "message", "message__account", "message__account__user", "message__reactions")
-            .get(*args, **kwargs)
-        )
-
-    def all(self):
-        return (
-            super()
-            .select_related("group", "message", "message__account", "message__account__user", "message__reactions")
-            .all()
-        )
-
-    def create(self, account, text, group, available: bool = True):
-        group_message = super().create(
-            group=group,
-            message=Message.message_manager.create(
-                account=account,
-                text=text,
-                available=available
-            )
-        )
-        return group_message
-
-
-class GroupMessage(models.Model):
-    """
-    Model for group and message relation.
-    """
-    group = models.ForeignKey(
-        to=Group, on_delete=models.CASCADE, verbose_name="Группа", related_name="messages"
-    )
-    message = models.OneToOneField(
-        "Message",
-        on_delete=models.CASCADE,
-        verbose_name="Содержание сообщения"
-    )
-
-    objects = models.Manager()
-    group_message_manager = GroupMessageManager()
-
-    def __str__(self) -> str:
-        return f"Сообщение из чата, автор:{self.message.account.id}"
-
-    class Meta:
-        index_together = [
-            ["group", "message"],
-        ]
+    def get_photo_url(self):
+        if self.photo:
+            return settings.MEDIA_URL + self.photo.url
+        return settings.MEDIA_URL + "uploads/groups/default.png"
 
 
 class MessageManager(models.Manager):
     def get(self, *args, **kwargs):
-        return (
-            super()
-            .select_related("account")
-            .prefetch_related("reactions", "media_files")
-            .get(*args, **kwargs)
-        )
+        try:
+            obj = (
+                super()
+                .prefetch_related("account", "content_object")
+                .get(*args, **kwargs)
+            )
+            return obj
+        except self.model.DoesNotExist:
+            raise NotFound()
 
-    def all(self):
-        return (
-            super()
-            .select_related("account")
-            .prefetch_related("reactions", "media_files")
-            .all()
-        )
-
-    def create(self, account, text, available: bool = True):
-        message = super().create(
-            account=account,
-            text=text,
-            available=available
-        )
-        return message
+    def check_member_permissions(self, obj, account):
+        if account not in obj.members.all():
+            raise PermissionDenied("Account is not the member of the chat or group.")
 
 
-class Message(UUIDModel, TimeCreateModel, AccountForeignModel):
-    """
-    Message model. Fields: id, time_created,
-    """
-    account = models.ForeignKey(
-        to="users.Account",
+class Message(models.Model):
+    content_object = GenericForeignKey(ct_field="content_type", fk_field="id")
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    account = models.ForeignKey("users.Account", on_delete=models.CASCADE)
+    text = models.TextField(max_length=2000, null=True)
+    source = models.ForeignKey(
+        to="self",
         on_delete=models.CASCADE,
-        verbose_name="Автор сообщения",
-        related_name="messages",
+        null=True,
+        blank=True
     )
-    text = models.TextField(max_length=500, verbose_name="Текст сообщения")
-    media_files = models.ManyToManyField(
-        to="MessageMediaFile", blank=True, related_name="message", verbose_name="Приложения к сообщению")
-    viewed = models.BooleanField(default=False, verbose_name="Просмотрено?")
-    reactions = models.ManyToManyField(
-        to="reactions.Reaction", related_name="messages", verbose_name="Реакция на сообщение"
-    )
-    available = models.BooleanField(default=True, verbose_name="Доступно к прочтению")
+    viewed = models.BooleanField(default=False)
+    time_send = models.DateTimeField("Time send", auto_created=True, auto_now=True)
+    time_update = models.DateTimeField("Time update", null=True, auto_now_add=True)
+
+    objects = MessageManager()
+
+    def __str__(self):
+        return self.text
+
+
+def media_upload_to(odj, *args, **kwargs):
+    return f"uploads/{odj.message.id}"
+
+
+class MessageMedia(models.Model):
+    media = models.FileField("Media", upload_to=media_upload_to)
+    message = models.ForeignKey("Message", on_delete=models.CASCADE, related_name="medias")
+    extension = models.CharField(max_length=20, null=True)
 
     objects = models.Manager()
-    message_manager = MessageManager()
-
-    def __str__(self):
-        return f"Account: {self.account.id}, viewed: {self.viewed}"
-
-    class Meta:
-        verbose_name = "Сообщение"
-        verbose_name_plural = "Сообщения"
 
 
-class MessageMediaFile(UUIDModel, TimeCreateModel):
-    """
-    Model for media files of messages.
-    #TODO Добавим изначально только фотографии, после - можно добавить аудио/видео/доки
-    """
+message_types_models = {
+    "chat": Chat,
+    "group": Group,
 
-    img = models.ImageField(upload_to=get_message_img_file_path, null=True)
+}
 
-    def __str__(self):
-        return f"Медиафайл к сообщению {self.message.id}"
+message_types_choices = (
+    ('chat', "chat"),
+    ("group", "group"),
 
-    class Meta:
-        ordering = ["-time_created"]
-        verbose_name = "Приложение к сообщению"
-        verbose_name_plural = "Приложения к сообщениям"
+)
+
+
+Messenger = Union[Chat, Group]
+
+
+def get_messenger_object(type_: str, id_: str) -> Messenger:
+    content_object_model = message_types_models.get(type_)
+    if content_object_model is None:
+        raise ValueError
+    content_object = content_object_model.objects.get(id=id_)
+    return content_object
