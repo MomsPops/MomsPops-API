@@ -41,6 +41,10 @@ class AccountDetailSerializer(ModelSerializer):
         fields = ("user", "city_name", "region_name")
 
 
+class AccountIdSerializer(serializers.Serializer):
+    account_id = serializers.CharField()
+
+
 class BlockUserCreateSerializer(ModelSerializer):
     username = serializers.CharField(source="account.user.username")
 
