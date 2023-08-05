@@ -53,3 +53,31 @@ class BlackListRouter(SimpleRouter):
             initkwargs={'suffix': 'List'}
         ),
     ]
+
+
+class FriendshipRouter(SimpleRouter):
+    """
+    Router for blocking friendship viewset.
+    """
+    routes = [
+        Route(
+            url=r'^{prefix}{trailing_slash}$',
+            mapping={
+                'post': 'create',
+                'get': 'list',
+            },
+            name='{basename}',
+            detail=False,
+            initkwargs={'suffix': 'List'}
+        ),
+        Route(
+            url=r'^{prefix}/{lookup}{trailing_slash}$',
+            mapping={
+                'delete': 'destroy',
+                'put': 'update',
+            },
+            name='{basename}_detail',
+            detail=False,
+            initkwargs={'suffix': 'Me'}
+        ),
+    ]
