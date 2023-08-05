@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.http import Http404
 from typing import Dict, Union
 
@@ -120,9 +120,9 @@ class FriendshipRequestManager(models.Manager):
             raise ValidationError("Cannot send friendship request to yourself.")
 
         if from_account.black_list.filter(id=to_account.id).exists():
-            raise ValidationError("Account to send request is in the black list.")
+            raise PermissionDenied("Account to send request is in the black list.")
         if to_account.black_list.filter(id=from_account.id).exists():
-            raise ValidationError("Account to send friendship request blocked you.")
+            raise PermissionDenied("Account to send friendship request blocked you.")
 
         obj = super().create(from_account=from_account, to_account=to_account)
         return obj

@@ -167,6 +167,8 @@ class BlackListViewSet(mixins.ListModelMixin,
 class FriendshipViewSet(viewsets.GenericViewSet):
     """Friendship view set."""
     queryset = FriendshipRequest.objects.all()
+    lookup_field = "id"
+    lookup_url_kwarg = "friendship_request_id"
 
     def get_permissions(self) -> list:
         permission_classes = [IsAuthenticated]
@@ -174,7 +176,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
             permission_classes.append(IsToAccount)
         elif self.action == "destroy":
             permission_classes.append(IsFromAccount)
-        return [pc for pc in permission_classes]
+        return [pc() for pc in permission_classes]
 
     def get_serializer_context(self) -> dict:
         return {
@@ -205,13 +207,13 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         detail_serializer = FriendshipRequestListSerializer(obj)
         return Response(detail_serializer.data)
 
-    def update(self, request) -> Response:
+    def update(self, request, friendship_request_id: str) -> Response:
         friendship_request = self.get_object()
         self.check_object_permissions(request, friendship_request)
         friendship_request.accept()
         return Response({"detail": "Friend request is accepted successfully."})
 
-    def destroy(self, request) -> Response:
+    def destroy(self, request, friendship_request_id: str) -> Response:
         friendship_request = self.get_object()
         self.check_object_permissions(request, friendship_request)
         friendship_request.delete()
