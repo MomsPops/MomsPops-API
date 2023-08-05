@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import Account, User
+from .models import Account, User, FriendshipRequest
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -53,3 +53,30 @@ class PasswordResetSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128)
     new_password = serializers.CharField(max_length=128)
+
+
+class FriendshipRequestListSerializer(ModelSerializer):
+    to_account = AccountDetailSerializer()
+    from_account = AccountDetailSerializer()
+
+    class Meta:
+        model = FriendshipRequest
+        fields = ("id", "to_account", "from_account")
+
+
+class FriendshipRequestCreateSerializer(ModelSerializer):
+    to_account_id = serializers.CharField()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = FriendshipRequest
+        fields = ("user", "to_account_id")
+
+    def save(self, **kwargs):
+        kwargs.update(self.validated_data)
+        to_account = Account.objects.get(id=kwargs['to_account_id'])
+        obj = FriendshipRequest.friendship_request_manager.create_friendship_request(
+            from_account=kwargs['user'].account,
+            to_account=to_account
+        )
+        return obj
