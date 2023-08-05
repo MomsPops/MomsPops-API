@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
+from rest_framework.exceptions import ValidationError
 from django.http import Http404
 from typing import Dict, Union
 
@@ -89,15 +90,63 @@ class AccountManager(models.Manager):
 
 class Account(UUIDModel):
     """
-    Account model. It`s User model extension with OneToOne relationship, not more.
+    Account model.
     """
     user: User = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
     city = models.ForeignKey(City, on_delete=models.PROTECT, verbose_name="Город", null=True, blank=True)
+    coordinate = models.OneToOneField(
+        "coordinates.Coordinate",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="source",
+        blank=True
+    )
     black_list = models.ManyToManyField("self", blank=True, verbose_name="Игнор лист")
-    coordinate = models.OneToOneField("coordinates.Coordinate", on_delete=models.SET_NULL,
-                                      null=True, related_name="source", blank=True)
+    friends = models.ManyToManyField("self", blank=True, verbose_name="Friends")
 
     objects = AccountManager()
 
     def __str__(self):
         return self.user.username
+
+
+class FriendshipRequestManager(models.Manager):
+    """
+    Friend request manager.
+    """
+
+    def create_friendship_request(self, from_account, to_account):
+        if from_account == to_account:
+            raise ValidationError("Cannot send friendship request to yourself.")
+
+        if from_account.black_list.filter(id=to_account.id).exists():
+            raise ValidationError("Account to send request is in the black list.")
+        if to_account.black_list.filter(id=from_account.id).exists():
+            raise ValidationError("Account to send friendship request blocked you.")
+
+        obj = super().create(from_account=from_account, to_account=to_account)
+        return obj
+
+
+class FriendshipRequest(UUIDModel):
+    """
+    Friend request model.
+    """
+    from_account = models.ForeignKey("Account", on_delete=models.CASCADE, related_name="outcoming_requests")
+    to_account = models.ForeignKey("Account", on_delete=models.CASCADE, related_name="incoming_requests")
+
+    def accept(self):
+        """Accept request method."""
+        self.from_account.friends.add(self.to_account)
+        self.to_account.friends.add(self.from_account)
+        self.delete()
+
+    friendship_request_manager = FriendshipRequestManager()
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.from_account.user.username} -> {self.to_account.user.username}"
+
+    class Meta:
+        verbose_name = "Friendship request"
+        verbose_name_plural = "Friendship requests"
