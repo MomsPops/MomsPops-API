@@ -15,13 +15,15 @@ class ProfileManager(models.Manager):
         return (
             super()
             .select_related("account", "account__user")
+            .prefetch_related("account__friends")
             .all()
         )
 
     def get(self, *args, **kwargs):
         return (
             super()
-            .select_related("account", "account__user")
+            .select_related("account", "account__user", "account__coordinate")
+            .prefetch_related("account__friends")
             .get(*args, **kwargs)
         )
 
@@ -41,7 +43,7 @@ class Profile(UUIDModel, AccountOneToOneModel):  # type: ignore
     tags = models.ManyToManyField("Tag", verbose_name="profiles", related_name="tags", blank=True)
     sex = models.CharField("Пол", choices=SEX_CHOICES, default="Не выбран", max_length=10)
 
-    objects = models.Manager()
+    objects = ProfileManager()
     profile_manager = ProfileManager()
 
     def get_photo_url(self) -> str:
