@@ -2,6 +2,8 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from http import HTTPStatus
 
+from uuid import uuid4
+
 from users.models import Account
 from service.fixtues import TestAccountFixture, TestFriendshipRequestFixture
 
@@ -45,6 +47,7 @@ class TestAccountView(TestAccountFixture, APITestCase):
         response = self.user_client.get(reverse("accounts_me"))
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.json(), {
+            "id": str(self.user_account.id),
             "city_name": self.city1.name,
             "region_name": self.city1.region.name,
             "user": {
@@ -182,6 +185,85 @@ class TestFriendshipRequestView(TestFriendshipRequestFixture, APITestCase):
         self.assertEqual(data['outcoming'], [])
         incoming = data['incoming']
         self.assertEqual(len(incoming), 2)
+
+    def test_create_fail_unauthorized(self):
+        user_account_outcoming_request_amount_before = len(self.user_account.outcoming_requests.all())
+        data = {
+            "to_account_id": self.user_account.id
+        }
+        response = self.client.post(reverse("friendship"), data=data)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        data = response.json()
+        self.assertIn("detail", data)
+        self.superuser_account.refresh_from_db()
+        user_account_outcoming_request_after = self.user_account.outcoming_requests.all()
+        self.assertEqual(len(user_account_outcoming_request_after), user_account_outcoming_request_amount_before)
+
+    def test_create_fail_user_not_found(self):
+        superuser_account_outcoming_request_amount_before = len(self.superuser_account.outcoming_requests.all())
+        data = {
+            "to_account_id": str(uuid4())
+        }
+        response = self.superuser_client.post(reverse("friendship"), data=data)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        data = response.json()
+        self.assertIn("detail", data)
+        self.superuser_account.refresh_from_db()
+        superuser_account_outcoming_request_after = self.superuser_account.outcoming_requests.all()
+        self.assertEqual(
+            len(superuser_account_outcoming_request_after),
+            superuser_account_outcoming_request_amount_before
+        )
+
+    def test_create_fail_request_from_exists(self):
+        user2_account_outcoming_request_amount_before = len(self.user2_account.outcoming_requests.all())
+        data = {
+            "to_account_id": str(self.user_account.id)
+        }
+        response = self.user2_client.post(reverse("friendship"), data=data)
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.user2_account.refresh_from_db()
+        user2_account_outcoming_request_after = self.user2_account.outcoming_requests.all()
+        self.assertEqual(
+            len(user2_account_outcoming_request_after),
+            user2_account_outcoming_request_amount_before
+        )
+
+    def test_create_fail_request_exists(self):
+        user_account_outcoming_request_amount_before = len(self.user_account.outcoming_requests.all())
+        data = {
+            "to_account_id": str(self.user2_account.id)
+        }
+        response = self.user_client.post(reverse("friendship"), data=data)
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.user_account.refresh_from_db()
+        user_account_outcoming_request_after = self.user_account.outcoming_requests.all()
+        self.assertEqual(
+            len(user_account_outcoming_request_after),
+            user_account_outcoming_request_amount_before
+        )
+
+    def test_create_success(self):
+        superuser_account_outcoming_request_amount_before = len(self.superuser_account.outcoming_requests.all())
+        data = {
+            "to_account_id": self.user_account.id
+        }
+        response = self.superuser_client.post(reverse("friendship"), data=data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        data = response.json()
+        self.assertIn("id", data)
+        self.assertIn("to_account", data)
+        self.assertIn("from_account", data)
+        self.assertEqual(data['from_account']['user']['username'], self.superuser_account.user.username)
+        self.assertEqual(data['to_account']['user']['email'], self.user_account.user.email)
+        self.superuser_account.refresh_from_db()
+        superuser_account_outcoming_request_after = self.superuser_account.outcoming_requests.all()
+        self.assertEqual(
+            len(superuser_account_outcoming_request_after) - superuser_account_outcoming_request_amount_before,
+            1
+        )
 
     def test_delete_fail_unauthorized(self):
         account1_friendship_request_outcoming_amount_before = len(self.user_account.outcoming_requests.all())
