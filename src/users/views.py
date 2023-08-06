@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets, mixins
@@ -198,12 +199,18 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         )
 
     def create(self, request) -> Response:
-        serializer = FriendshipRequestCreateSerializer(
-            data=request.data,
-            context=self.get_serializer_context()
-        )
-        serializer.is_valid(raise_exception=True)
-        obj = serializer.save()
+        try:
+            serializer = FriendshipRequestCreateSerializer(
+                data=request.data,
+                context=self.get_serializer_context()
+            )
+            serializer.is_valid(raise_exception=True)
+            obj = serializer.save()
+        except IntegrityError:
+            return Response(
+                {"detail": "Friendship request already exists."},
+                status=HTTPStatus.BAD_REQUEST
+            )
         detail_serializer = FriendshipRequestListSerializer(obj)
         return Response(detail_serializer.data)
 

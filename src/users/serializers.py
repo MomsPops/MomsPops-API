@@ -1,5 +1,7 @@
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
+from rest_framework.exceptions import ValidationError
 
 from .models import Account, User, FriendshipRequest
 
@@ -38,7 +40,7 @@ class AccountDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ("user", "city_name", "region_name")
+        fields = ("id", "user", "city_name", "region_name")
 
 
 class BlockUserCreateSerializer(ModelSerializer):
@@ -75,8 +77,11 @@ class FriendshipRequestCreateSerializer(ModelSerializer):
     def save(self, **kwargs):
         kwargs.update(self.validated_data)
         to_account = Account.objects.get(id=kwargs['to_account_id'])
-        obj = FriendshipRequest.friendship_request_manager.create_friendship_request(
-            from_account=kwargs['user'].account,
-            to_account=to_account
-        )
-        return obj
+        if kwargs['user'].account.incoming_requests.filter(from_account=to_account).exists():
+            raise ValidationError("Cannot send friendship request, place accept incoming one.")
+        with transaction.atomic():
+            obj = FriendshipRequest.friendship_request_manager.create_friendship_request(
+                from_account=kwargs['user'].account,
+                to_account=to_account
+            )
+            return obj
