@@ -61,6 +61,7 @@ class TestAccountFixture(TestUserFixture, TestLocationFixture, APITestCase):
 
         cls.user2_account = Account.objects.create(user=cls.user2)
         cls.user3_account = Account.objects.create(user=cls.user3)
+        cls.superuser_account.friends.add(cls.user3_account)
 
 
 class TestFriendshipRequestFixture(TestAccountFixture, APITestCase):
