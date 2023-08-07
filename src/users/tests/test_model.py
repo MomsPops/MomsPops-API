@@ -1,9 +1,10 @@
 from django.http import Http404
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.test import APITestCase
 from django.core.exceptions import ObjectDoesNotExist
 from service.fixtues import TestAccountFixture
 
-from users.models import Account
+from users.models import Account, FriendshipRequest
 from profiles.models import Profile
 
 
@@ -98,3 +99,53 @@ class TestBlockUserModel(TestAccountFixture, APITestCase):
     def test_unblock_user_fail_not_found(self):
         with self.assertRaises(Http404):
             Account.objects.unblock_user(account=self.user_account, username="Not_found_name")
+
+
+class TestFriendshipRequestModel(TestAccountFixture, APITestCase):
+
+    def test_request_create_success(self):
+        request = FriendshipRequest.friendship_request_manager.create_friendship_request(
+            from_account=self.user_account,
+            to_account=self.user2_account
+        )
+        self.assertEqual(request.from_account, self.user_account)
+        self.assertEqual(request.to_account, self.user2_account)
+        self.assertEqual(request.to_account.user.username, self.user2_account.user.username)
+
+    def test_request_create_fail_same_account(self):
+        with self.assertRaises(ValidationError):
+            FriendshipRequest.friendship_request_manager.create_friendship_request(
+                from_account=self.user2_account,
+                to_account=self.user2_account
+            )
+
+    def test_request_create_fail_to_in_black_list(self):
+        with self.assertRaises(PermissionDenied):
+            self.user_account.black_list.add(self.user2_account)
+            FriendshipRequest.friendship_request_manager.create_friendship_request(
+                from_account=self.user_account,
+                to_account=self.user2_account
+            )
+
+    def test_request_create_fail_from_in_black_list(self):
+        with self.assertRaises(PermissionDenied):
+            self.user2_account.black_list.add(self.user_account)
+            FriendshipRequest.friendship_request_manager.create_friendship_request(
+                from_account=self.user_account,
+                to_account=self.user2_account
+            )
+
+    def test_request_accept(self):
+        user_account_friends_amount_before = len(self.user_account.friends.all())
+        user2_account_friends_amount_before = len(self.user2_account.friends.all())
+        request = FriendshipRequest.friendship_request_manager.create_friendship_request(
+            from_account=self.user_account,
+            to_account=self.user2_account
+        )
+        request.accept()
+        user_account_friends = self.user_account.friends.all()
+        user2_account_friends = self.user2_account.friends.all()
+        self.assertEqual(len(user_account_friends) - user_account_friends_amount_before, 1)
+        self.assertEqual(len(user2_account_friends) - user2_account_friends_amount_before, 1)
+        self.assertIn(self.user_account, user2_account_friends)
+        self.assertIn(self.user2_account, user_account_friends)

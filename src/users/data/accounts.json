@@ -1,0 +1,20 @@
+[
+  {
+    "user": {
+      "username": "michael7nightingale",
+      "password": "password",
+      "first_name": "Michael",
+      "last_name": "Nightingale",
+      "email": "nightingalemichael820@gmail.com"
+    }
+  },
+  {
+    "user": {
+      "username": "suslanmopl",
+      "password": "password",
+      "first_name": "Suslan",
+      "last_name": "Mopl",
+      "email": "suslanchikmopl@gmail.com"
+    }
+  }
+]

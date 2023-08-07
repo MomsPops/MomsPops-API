@@ -4,7 +4,7 @@ from coordinates.models import Coordinate
 from locations.models import Region, City
 from notifications.models import NotificationAccount, Notification
 from profiles.models import Profile, Post
-from users.models import Account, User
+from users.models import Account, User, FriendshipRequest
 from chats.models import Group, GroupMessage
 
 
@@ -61,6 +61,22 @@ class TestAccountFixture(TestUserFixture, TestLocationFixture, APITestCase):
 
         cls.user2_account = Account.objects.create(user=cls.user2)
         cls.user3_account = Account.objects.create(user=cls.user3)
+        cls.superuser_account.friends.add(cls.user3_account)
+
+
+class TestFriendshipRequestFixture(TestAccountFixture, APITestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.friendship_request_from_1_to_2 = FriendshipRequest.friendship_request_manager.create_friendship_request(
+            from_account=cls.user_account,
+            to_account=cls.user2_account
+        )
+        cls.friendship_request_from_3_to_2 = FriendshipRequest.friendship_request_manager.create_friendship_request(
+            from_account=cls.user3_account,
+            to_account=cls.user2_account
+        )
 
 
 class TestProfileFixture(TestAccountFixture, APITestCase):

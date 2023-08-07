@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from rest_framework import viewsets, mixins
@@ -6,12 +7,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view
 from http import HTTPStatus
 
+from .permissions import IsToAccount, IsFromAccount
 from .serializers import (
     AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer,
-    BlockUserCreateSerializer, PasswordResetSerializer
+    BlockUserCreateSerializer, PasswordResetSerializer,
+    FriendshipRequestCreateSerializer, FriendshipRequestListSerializer
 
 )
-from .models import Account, User
+from .models import Account, User, FriendshipRequest
 from .service.email import send_email, decode_uid, check_activation_token
 from rest_framework.decorators import action
 
@@ -78,7 +81,7 @@ class AccountViewSet(mixins.RetrieveModelMixin,
             return Response({"detail": "User deactivated."})
 
     @action(detail=False, methods=['post'], serializer_class=PasswordResetSerializer)
-    def reset_password(self, request, *args, **kwargs):
+    def reset_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
@@ -160,3 +163,65 @@ class BlackListViewSet(mixins.ListModelMixin,
             {"detail": "User unblocked successfully."},
             status=HTTPStatus.OK
         )
+
+
+class FriendshipViewSet(viewsets.GenericViewSet):
+    """Friendship view set."""
+    queryset = FriendshipRequest.objects.all()
+    lookup_field = "id"
+    lookup_url_kwarg = "friendship_request_id"
+
+    def get_permissions(self) -> list:
+        permission_classes = [IsAuthenticated]
+        if self.action == "update":
+            permission_classes.append(IsToAccount)
+        elif self.action == "destroy":
+            permission_classes.append(IsFromAccount)
+        return [pc() for pc in permission_classes]
+
+    def get_serializer_context(self) -> dict:
+        return {
+            "request": self.request
+        }
+
+    def list(self, request):
+        incoming_requests_serializer = FriendshipRequestListSerializer(
+            request.user.account.incoming_requests, many=True
+        )
+        outcoming_requests_serializer = FriendshipRequestListSerializer(
+            request.user.account.outcoming_requests, many=True
+        )
+        return Response(
+            {
+                "incoming": incoming_requests_serializer.data,
+                "outcoming": outcoming_requests_serializer.data
+            }
+        )
+
+    def create(self, request) -> Response:
+        try:
+            serializer = FriendshipRequestCreateSerializer(
+                data=request.data,
+                context=self.get_serializer_context()
+            )
+            serializer.is_valid(raise_exception=True)
+            obj = serializer.save()
+        except IntegrityError:
+            return Response(
+                {"detail": "Friendship request already exists."},
+                status=HTTPStatus.BAD_REQUEST
+            )
+        detail_serializer = FriendshipRequestListSerializer(obj)
+        return Response(detail_serializer.data)
+
+    def update(self, request, friendship_request_id: str) -> Response:
+        friendship_request = self.get_object()
+        self.check_object_permissions(request, friendship_request)
+        friendship_request.accept()
+        return Response({"detail": "Friend request is accepted successfully."})
+
+    def destroy(self, request, friendship_request_id: str) -> Response:
+        friendship_request = self.get_object()
+        self.check_object_permissions(request, friendship_request)
+        friendship_request.delete()
+        return Response({"detail": "Friend request is deleted successfully."})
