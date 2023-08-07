@@ -70,10 +70,10 @@ class ProfileViewSet(mixins.ListModelMixin,
     @action(methods=['get'], detail=True)
     def friends(self, request, username):
         profile = self.get_object()
-        serializer = self.get_serializer(instance=profile.account.friends, many=True)
+        serializer = self.get_serializer(instance=profile.account.friends.all(), many=True)
         return Response(serializer.data)
 
-    @action(methods=['delete'], detail=True)
+    @action(methods=['delete'], detail=True, url_path='friends-delete', url_name='friend_delete')
     def friend_delete(self, request, username):
         profile = self.get_object()
         if profile.account == request.user.account:

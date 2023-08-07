@@ -79,6 +79,8 @@ class FriendshipRequestCreateSerializer(ModelSerializer):
         to_account = Account.objects.get(id=kwargs['to_account_id'])
         if kwargs['user'].account.incoming_requests.filter(from_account=to_account).exists():
             raise ValidationError("Cannot send friendship request, place accept incoming one.")
+        if kwargs['user'].account.friends.filter(id=kwargs['to_account_id']).exists():
+            raise ValidationError("Account is already a friend.")
         with transaction.atomic():
             obj = FriendshipRequest.friendship_request_manager.create_friendship_request(
                 from_account=kwargs['user'].account,
