@@ -37,7 +37,6 @@ class TimeCreateUpdateModel(models.Model):
 
 
 class AccountForeignModel(models.Model):
-    # TODO: delet this model verbose_name - important !!!
     account = models.ForeignKey("users.Account", on_delete=models.CASCADE)
 
     class Meta:
@@ -45,7 +44,6 @@ class AccountForeignModel(models.Model):
 
 
 class AccountOneToOneModel(models.Model):
-    # TODO: delet this model verbose_name - important !!!
     account = models.OneToOneField("users.Account", on_delete=models.CASCADE)
 
     class Meta:
