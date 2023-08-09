@@ -56,3 +56,11 @@ uuid==1.30
 vine==5.0.0
 wcwidth==0.2.6
 websockets==11.0.3
+
+redis~=4.6.0
+django-filter~=23.2
+djangochannelsrestframework~=1.1.0
+vk~=3.0
+googlemaps~=4.10.0
+numpy~=1.25.0
+opencage~=2.2.0

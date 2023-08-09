@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.conf import settings
-from typing import Union
+from typing import Union, Type
 
 from users.models import Account
 
@@ -17,7 +17,7 @@ class MessengerManager(models.Manager):
                 .prefetch_related("messages", "members", "messages__account", "messages__medias")
                 .get(*args, **kwargs)
             )
-            return obj
+            return obj    # type: ignore
         except self.model.DoesNotExist:
             raise NotFound()
 
@@ -38,7 +38,7 @@ class MessengerManager(models.Manager):
     def add_message_instance(self, obj, message) -> "Message":
         obj.last_message = message
         obj.save()
-        return message
+        return message    # type: ignore
 
     def add_message(self, obj, text: str, account, source) -> "Message":
         if obj.members.filter(id=account.id).exists():
@@ -98,7 +98,7 @@ class GroupManager(MessengerManager):
                 )
                 .get(*args, **kwargs)
             )
-            return obj
+            return obj    # type: ignore
         except self.model.DoesNotExist:
             raise NotFound()
 
@@ -145,8 +145,8 @@ class Group(models.Model):
 
     def get_photo_url(self) -> str:
         if self.photo:
-            return settings.MEDIA_URL + self.photo.url
-        return settings.MEDIA_URL + "uploads/groups/default.png"
+            return settings.MEDIA_URL + self.photo.url  # type: ignore
+        return settings.MEDIA_URL + "uploads/groups/default.png"  # type: ignore
 
 
 class MessageManager(models.Manager):
@@ -157,7 +157,7 @@ class MessageManager(models.Manager):
                 .prefetch_related("account", "content_object")
                 .get(*args, **kwargs)
             )
-            return obj
+            return obj    # type: ignore
         except self.model.DoesNotExist:
             raise NotFound()
 
@@ -199,7 +199,10 @@ class MessageMedia(models.Model):
     objects = models.Manager()
 
 
-message_types_models = {
+Messenger = Union[Chat, Group]
+
+
+message_types_models: dict[str, Type[Messenger]] = {
     "chat": Chat,
     "group": Group,
 
@@ -212,12 +215,9 @@ message_types_choices = (
 )
 
 
-Messenger = Union[Chat, Group]
-
-
 def get_messenger_object(type_: str, id_: str) -> Messenger:
     content_object_model = message_types_models.get(type_)
     if content_object_model is None:
         raise ValueError
-    content_object = content_object_model.objects.get(id=id_)
-    return content_object
+    content_object = content_object_model.objects.get(id=id_)     # type: ignore
+    return content_object       # type: ignore

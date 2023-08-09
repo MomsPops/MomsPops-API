@@ -1,10 +1,11 @@
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.serializers import Serializer
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.observer.generics import ObserverModelInstanceMixin
 from djangochannelsrestframework.decorators import action
 from channels.db import database_sync_to_async
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.serializers import Serializer
 from asgiref.sync import sync_to_async
+from typing import Callable
 
 from users.models import Account
 from .permissions import check_is_group_owner, check_is_group_public
@@ -17,7 +18,21 @@ from .serializers import (
 from .models import Chat, get_messenger_object, Group, Message
 
 
-class MessengerGenericConsumerMixin:
+class BaseChatMixin:
+    account_id: str | int
+    account: Account
+    get_serializer_data: Callable
+    imitate_request: Callable
+    save_serializer: Callable
+    update_serializer: Callable
+    prepare_data: Callable
+    notify_accounts_by_list: Callable
+    get_accounts_by_ids: Callable
+    notify_accounts_by_ids: Callable
+    notify_accounts_by_chat_or_group: Callable
+
+
+class MessengerGenericConsumerMixin(BaseChatMixin):
     @database_sync_to_async
     def get_members(self, chat_or_group):
         return [m for m in chat_or_group.members.all()]
@@ -26,6 +41,8 @@ class MessengerGenericConsumerMixin:
 class ChatConsumerMixin(MessengerGenericConsumerMixin,
                         ObserverModelInstanceMixin,
                         GenericAsyncAPIConsumer):
+    get_message_serializer: Callable
+
     chat_actions = {
         "chat_create": ChatCreateSerializer,
         "chat_list": ChatListSerializer,
@@ -34,7 +51,7 @@ class ChatConsumerMixin(MessengerGenericConsumerMixin,
     }
 
     @database_sync_to_async
-    def get_chat_serializer(self, action_kwargs: dict | None = None, *args, **kwargs) -> Serializer:
+    def get_chat_serializer(self, action_kwargs: dict, *args, **kwargs) -> Serializer:
         action_ = action_kwargs.get("action")
         if action_ not in self.chat_actions:
             raise AssertionError(f"Please define action {action_}")
@@ -69,12 +86,12 @@ class ChatConsumerMixin(MessengerGenericConsumerMixin,
                 raise PermissionDenied("You blocked this user")
             elif not Account.objects.are_you_blocked(kwargs['account'], account):
                 raise PermissionDenied("User blocked you.")
-            if account in await self.all_accounts_chatting(self.account):
+            if account in await sync_to_async(Chat.objects.all_account_in_account_chats)(self.account):
                 await self.send_json({"detail": "Chat already exists."})
             else:
                 accounts = [self.account, account]
                 chat = await self.save_serializer(serializer, members=accounts)
-                last_message_serializer = await self.get_serializer(
+                last_message_serializer = await self.get_message_serializer(
                     action_kwargs={"action": "message_detail"},
                     instance=chat.last_message
                 )
@@ -86,7 +103,8 @@ class ChatConsumerMixin(MessengerGenericConsumerMixin,
                 )
 
 
-class GroupConsumerMixin(MessengerGenericConsumerMixin,
+class GroupConsumerMixin(
+                         MessengerGenericConsumerMixin,
                          ObserverModelInstanceMixin,
                          GenericAsyncAPIConsumer):
     group_actions = {
@@ -101,7 +119,7 @@ class GroupConsumerMixin(MessengerGenericConsumerMixin,
     }
 
     @database_sync_to_async
-    def get_group_serializer(self, action_kwargs: dict | None = None, *args, **kwargs) -> Serializer:
+    def get_group_serializer(self, action_kwargs: dict, *args, **kwargs) -> Serializer:
         action_ = action_kwargs.get("action")
         if action_ not in self.group_actions:
             raise AssertionError(f"Please define action {action_}")
@@ -127,7 +145,7 @@ class GroupConsumerMixin(MessengerGenericConsumerMixin,
                 return
             accounts.append(self.account)
             group = await self.save_serializer(serializer, members=accounts)
-            group_detail_serializer = await self.get_serializer(
+            group_detail_serializer = await self.get_group_serializer(
                 action_kwargs={
                     "request_id": action_kwargs['request_id'],
                     "action": "group_detail"
@@ -153,7 +171,7 @@ class GroupConsumerMixin(MessengerGenericConsumerMixin,
         group = await sync_to_async(Group.objects.get)(id=serializer.validated_data.get('id'))
         check_is_group_owner(self.account, group)
         group = await self.update_serializer(serializer, instance=group)
-        group_detail_serializer = await self.get_serializer(
+        group_detail_serializer = await self.get_group_serializer(
             action_kwargs={
                 "request_id": action_kwargs['request_id'],
                 "action": "group_detail"
@@ -226,7 +244,8 @@ class GroupConsumerMixin(MessengerGenericConsumerMixin,
         )
 
 
-class MessageConsumerMixin(ObserverModelInstanceMixin,
+class MessageConsumerMixin(BaseChatMixin,
+                           ObserverModelInstanceMixin,
                            GenericAsyncAPIConsumer):
     message_actions = {
         "send_message": MessageCreateSerializer,
@@ -236,7 +255,7 @@ class MessageConsumerMixin(ObserverModelInstanceMixin,
     }
 
     @database_sync_to_async
-    def get_message_serializer(self, action_kwargs: dict | None = None, *args, **kwargs) -> Serializer:
+    def get_message_serializer(self, action_kwargs: dict, *args, **kwargs) -> Serializer:
         action_ = action_kwargs.get("action")
         if action_ not in self.message_actions:
             raise AssertionError(f"Please define action {action_}")

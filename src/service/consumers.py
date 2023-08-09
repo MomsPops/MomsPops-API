@@ -5,6 +5,8 @@ from djangochannelsrestframework.scope_utils import ensure_async
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.serializers import Serializer
 
+from users.models import Account
+
 
 class RequestImitator:
     def __init__(self, user):
@@ -13,13 +15,16 @@ class RequestImitator:
 
 class BaseConsumer(ObserverModelInstanceMixin,
                    GenericAsyncAPIConsumer):
+    account_id: str | int
+    account: Account
+
     @database_sync_to_async
     def get_serializer(self, action_kwargs: dict | None = None, *args, **kwargs) -> Serializer:
         return Serializer(*args, **kwargs)
 
     @database_sync_to_async
     def get_serializer_data(self, serializer: Serializer) -> dict:
-        return serializer.data
+        return serializer.data    # type: ignore
 
     @database_sync_to_async
     def save_serializer(self, serializer: Serializer, **kwargs):
@@ -29,7 +34,7 @@ class BaseConsumer(ObserverModelInstanceMixin,
     def update_serializer(self, serializer: Serializer, *args, **kwargs):
         return serializer.update(*args, **kwargs)
 
-    async def websocket_connect(self, message):
+    async def websocket_connect(self, message) -> None:
         try:
             for permission in await self.get_permissions(action="connect"):
                 if not await ensure_async(permission.can_connect)(

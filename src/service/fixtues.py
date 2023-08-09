@@ -1,11 +1,9 @@
 from rest_framework.test import APITestCase, APIClient
 
-from coordinates.models import Coordinate
 from locations.models import Region, City
 from notifications.models import NotificationAccount, Notification
 from profiles.models import Profile, Post
 from users.models import Account, User, FriendshipRequest
-from chats.models import Group, GroupMessage
 
 
 class TestUserFixture(APITestCase):
@@ -131,47 +129,47 @@ class TestNotificationAccountFixture(TestAccountFixture, APITestCase):
         )
 
 
-class TestGroupFixture(TestProfileFixture, APITestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.group1 = Group.group_manager.create_group(
-            title="Football league.",
-            account=cls.user_account
-        )
-        Coordinate.coordinate_manager.create(
-            lat=20,
-            lon=20,
-            source=cls.group1
-        )
-        cls.group1.save()
-        cls.group2 = Group.group_manager.create_group(
-            title="C# is better than Python",
-            account=cls.user2_account
-        )
-        Coordinate.coordinate_manager.create(
-            lat=20.001,
-            lon=20,
-            source=cls.group2
-        )
-        cls.group2.members.add(cls.user_account)
-        cls.group2.save()
-        cls.group2_message1 = GroupMessage.group_message_manager.create(
-            text="I think Unity sucks. Unreal, but Unreal is cooler.",
-            group=cls.group2,
-            account=cls.user_account
-        )
-        cls.group2_message2 = GroupMessage.group_message_manager.create(
-            text="However I love VS.",
-            group=cls.group2,
-            account=cls.user_account
-        )
-        cls.group3 = Group.group_manager.create_group(
-            title="Snoop Dogg concert.",
-            account=cls.user3_account
-        )
-        Coordinate.coordinate_manager.create(
-            lat=20.01,
-            lon=20,
-            source=cls.group3
-        )
+# class TestGroupFixture(TestProfileFixture, APITestCase):
+#     @classmethod
+#     def setUpClass(cls):
+#         super().setUpClass()
+#         cls.group1 = Group.group_manager.create_group(
+#             title="Football league.",
+#             account=cls.user_account
+#         )
+#         Coordinate.coordinate_manager.create(
+#             lat=20,
+#             lon=20,
+#             source=cls.group1
+#         )
+#         cls.group1.save()
+#         cls.group2 = Group.group_manager.create_group(
+#             title="C# is better than Python",
+#             account=cls.user2_account
+#         )
+#         Coordinate.coordinate_manager.create(
+#             lat=20.001,
+#             lon=20,
+#             source=cls.group2
+#         )
+#         cls.group2.members.add(cls.user_account)
+#         cls.group2.save()
+#         cls.group2_message1 = GroupMessage.group_message_manager.create(
+#             text="I think Unity sucks. Unreal, but Unreal is cooler.",
+#             group=cls.group2,
+#             account=cls.user_account
+#         )
+#         cls.group2_message2 = GroupMessage.group_message_manager.create(
+#             text="However I love VS.",
+#             group=cls.group2,
+#             account=cls.user_account
+#         )
+#         cls.group3 = Group.group_manager.create_group(
+#             title="Snoop Dogg concert.",
+#             account=cls.user3_account
+#         )
+#         Coordinate.coordinate_manager.create(
+#             lat=20.01,
+#             lon=20,
+#             source=cls.group3
+#         )
