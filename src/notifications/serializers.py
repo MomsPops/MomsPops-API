@@ -54,9 +54,8 @@ class NotificationCreateSerializer(ModelSerializer):
         kwargs.update(self.validated_data)
         sender = None
         if kwargs['sender_id'] is not None:
-            sender = Account.objects.get(id=kwargs['sender_id'])
-        kwargs.pop('sender_id')
-        notification = NotificationAccount.objects.create(
+            sender = Account.objects.get(id=kwargs.pop('sender_id'))
+        notification = Notification.objects.create(
             sender=sender,
             **kwargs
         )

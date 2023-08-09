@@ -6,9 +6,11 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from django.conf import settings
 from typing import Union
 
+from users.models import Account
+
 
 class MessengerManager(models.Manager):
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> "Messenger":
         try:
             obj = (
                 super()
@@ -33,11 +35,12 @@ class MessengerManager(models.Manager):
             .all()
         )
 
-    def add_message_instance(self, obj, message):
+    def add_message_instance(self, obj, message) -> "Message":
         obj.last_message = message
         obj.save()
+        return message
 
-    def add_message(self, obj, text: str, account, source):
+    def add_message(self, obj, text: str, account, source) -> "Message":
         if obj.members.filter(id=account.id).exists():
             message = Message(
                 content_object=obj,
@@ -46,13 +49,11 @@ class MessengerManager(models.Manager):
                 source=source
             )
             message.save()
-            obj.last_message = message
-            obj.save()
-            return message
+            return self.add_message_instance(obj, message)
 
         raise PermissionDenied()
 
-    def all_account_in_account_chats(self, account):
+    def all_account_in_account_chats(self, account) -> list["Account"]:
         members = []
         for ac in account.chats.all():
             for member in ac.members.all():
@@ -63,7 +64,7 @@ class MessengerManager(models.Manager):
 
 class ChatManager(MessengerManager):
 
-    def create_chat(self, members: list):
+    def create_chat(self, members: list) -> "Chat":
         chat = Chat()
         chat.save()
         chat.members.add(*members)
@@ -87,7 +88,7 @@ class Chat(models.Model):
 
 class GroupManager(MessengerManager):
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> "Group":
         try:
             obj = (
                 super()
@@ -108,7 +109,7 @@ class GroupManager(MessengerManager):
             owner,
             photo: ContentFile | None = None,
             is_public: bool = True,
-    ):
+    ) -> "Group":
         group = Group(
             title=title,
             photo=photo,
@@ -142,14 +143,14 @@ class Group(models.Model):
 
     objects = GroupManager()
 
-    def get_photo_url(self):
+    def get_photo_url(self) -> str:
         if self.photo:
             return settings.MEDIA_URL + self.photo.url
         return settings.MEDIA_URL + "uploads/groups/default.png"
 
 
 class MessageManager(models.Manager):
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> "Message":
         try:
             obj = (
                 super()
@@ -160,7 +161,7 @@ class MessageManager(models.Manager):
         except self.model.DoesNotExist:
             raise NotFound()
 
-    def check_member_permissions(self, obj, account):
+    def check_member_permissions(self, obj, account) -> None:
         if account not in obj.members.all():
             raise PermissionDenied("Account is not the member of the chat or group.")
 
@@ -186,7 +187,7 @@ class Message(models.Model):
         return self.text
 
 
-def media_upload_to(odj, *args, **kwargs):
+def media_upload_to(odj, *args, **kwargs) -> str:
     return f"uploads/{odj.message.id}"
 
 

@@ -64,7 +64,7 @@ class NotificationAccount(models.Model):
     notification = models.ForeignKey(
         verbose_name="Уведомление",
         to=Notification,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     viewed = models.BooleanField("Viewed", default=False, null=True)
 
