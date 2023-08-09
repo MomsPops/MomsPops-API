@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Account, User
+from .models import Account, User, FriendshipRequest
 
 
 @admin.register(Account)
@@ -13,3 +13,8 @@ class AccountAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("id", "username", "email")
+
+
+@admin.register(FriendshipRequest)
+class FriendshipRequestAdmin(admin.ModelAdmin):
+    list_display = ("id", "to_account", "from_account")

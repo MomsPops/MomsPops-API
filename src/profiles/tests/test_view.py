@@ -1,8 +1,11 @@
+from http import HTTPStatus
+
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from profiles.models import Post, Profile
 from service.fixtues import TestProfileFixture, TestPostFixture
+from users.models import Account
 
 
 class TestProfileViews(TestProfileFixture, APITestCase):
@@ -46,6 +49,95 @@ class TestProfileViews(TestProfileFixture, APITestCase):
             reverse("profiles_posts", kwargs={'username': self.user_account.user.username})
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_profile_friends_both_side(self):
+        response = self.user2_client.get(
+            reverse("profiles_friends", kwargs={'username': self.superuser_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        account3_data = data[0]
+        self.assertEqual(account3_data['user']['username'], self.user3_account.user.username)
+
+    def test_profile_friends(self):
+        response = self.user_client.get(
+            reverse("profiles_friends", kwargs={'username': self.user3_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        account3_data = data[0]
+        self.assertEqual(account3_data['city_name'], self.superuser_account.city.name)
+
+    def test_profile_fail_unauthorized(self):
+        response = self.client.get(
+            reverse("profiles_friends", kwargs={'username': self.user3_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        data = response.json()
+        self.assertIn('detail', data)
+
+    def test_profile_friend_delete_fail(self):
+        account1_friends_amount_before = len(self.user_account.friends.all())
+        all_accounts_friends_amount_before = sum(a.friends.count() for a in Account.objects.all())
+        response = self.user_client.delete(
+            reverse("profiles_friend_delete", kwargs={'username': self.user3_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.assertEqual(data['detail'], f"Account {self.user3_account} is not your friend.")
+        self.user_account.refresh_from_db()
+        account1_friends_after = self.user_account.friends.all()
+        all_accounts_friends_amount_after = sum(a.friends.count() for a in Account.objects.all())
+        self.assertEqual(len(account1_friends_after), account1_friends_amount_before)
+        self.assertEqual(all_accounts_friends_amount_after, all_accounts_friends_amount_before)
+
+    def test_profile_friend_fail_yourself(self):
+        account1_friends_amount_before = len(self.user_account.friends.all())
+        all_accounts_friends_amount_before = sum(a.friends.count() for a in Account.objects.all())
+        response = self.user_client.delete(
+            reverse("profiles_friend_delete", kwargs={'username': self.user_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.assertEqual(data['detail'], "Cannot delete yourself from friends.")
+        self.user_account.refresh_from_db()
+        account1_friends_after = self.user_account.friends.all()
+        all_accounts_friends_amount_after = sum(a.friends.count() for a in Account.objects.all())
+        self.assertEqual(len(account1_friends_after), account1_friends_amount_before)
+        self.assertEqual(all_accounts_friends_amount_after, all_accounts_friends_amount_before)
+
+    def test_profile_friend_fail_unauthorized(self):
+        all_accounts_friends_amount_before = sum(a.friends.count() for a in Account.objects.all())
+        response = self.client.delete(
+            reverse("profiles_friend_delete", kwargs={'username': self.user2_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.user_account.refresh_from_db()
+        all_accounts_friends_amount_after = sum(a.friends.count() for a in Account.objects.all())
+        self.assertEqual(all_accounts_friends_amount_after, all_accounts_friends_amount_before)
+
+    def test_profile_friend_success(self):
+        self.assertIn(self.user3_account, self.superuser_account.friends.all())
+        self.assertIn(self.superuser_account, self.user3_account.friends.all())
+        all_accounts_friends_amount_before = sum(a.friends.count() for a in Account.objects.all())
+        response = self.user3_client.delete(
+            reverse("profiles_friend_delete", kwargs={'username': self.superuser_account.user.username})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        data = response.json()
+        self.assertIn('detail', data)
+        self.assertEqual(data['detail'], "Friendship is broken successfully.")
+        self.user_account.refresh_from_db()
+        all_accounts_friends_amount_after = sum(a.friends.count() for a in Account.objects.all())
+        self.assertEqual(all_accounts_friends_amount_before - all_accounts_friends_amount_after, 2)
+        self.assertNotIn(self.user3_account, self.superuser_account.friends.all())
+        self.assertNotIn(self.superuser_account, self.user3_account.friends.all())
 
 
 class TestPostView(TestPostFixture, APITestCase):
