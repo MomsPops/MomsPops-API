@@ -6,7 +6,6 @@ from pathlib import Path
 
 from .redis import REDIS_URL
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -37,6 +36,7 @@ INSTALLED_APPS = [
     "profiles",
     "reactions",
     "chats",
+    "events",
 
     # libraries
     "channels",

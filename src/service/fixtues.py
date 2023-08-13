@@ -1,11 +1,14 @@
-from rest_framework.test import APITestCase, APIClient
+from datetime import datetime, timedelta
 
-from coordinates.models import Coordinate
-from locations.models import Region, City
-from notifications.models import NotificationAccount, Notification
-from profiles.models import Profile, Post
-from users.models import Account, User, FriendshipRequest
+from rest_framework.test import APIClient, APITestCase
+
 from chats.models import Group, GroupMessage
+from coordinates.models import Coordinate
+from events.models import Event
+from locations.models import City, Region
+from notifications.models import Notification, NotificationAccount
+from profiles.models import Post, Profile
+from users.models import Account, FriendshipRequest, User
 
 
 class TestUserFixture(APITestCase):
@@ -174,4 +177,34 @@ class TestGroupFixture(TestProfileFixture, APITestCase):
             lat=20.01,
             lon=20,
             source=cls.group3
+        )
+
+
+class TestEventsFixture(TestProfileFixture, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.event1 = Event.objects.create(
+            creator=cls.user2_account,
+            title="first_event",
+            description="First event description.",
+            event_start_time=datetime.now() + timedelta(hours=1),
+            event_end_time=datetime.now() + timedelta(hours=2)
+        )
+        Coordinate.coordinate_manager.create(
+            lat=10,
+            lon=20,
+            source=cls.event1
+        )
+        cls.event2 = Event.objects.create(
+            creator=cls.user3_account,
+            title="second_event",
+            description="Second event description.",
+            event_start_time=datetime.now() + timedelta(hours=2),
+            event_end_time=datetime.now() + timedelta(hours=4)
+        )
+        Coordinate.coordinate_manager.create(
+            lat=30,
+            lon=20,
+            source=cls.event2
         )

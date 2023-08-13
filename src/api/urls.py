@@ -24,6 +24,7 @@ urlpatterns = [
     # but make their urls not relative ones
     path("", include("profiles.urls")),
     path("", include("users.urls")),
-    path("", include("chats.urls"))
+    path("", include("chats.urls")),
+    path("", include("events.urls")),
 
 ]
