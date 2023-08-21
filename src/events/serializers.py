@@ -1,41 +1,36 @@
-from rest_framework.fields import CurrentUserDefault
-from rest_framework.serializers import DateTimeField, ModelSerializer
+from rest_framework.serializers import ModelSerializer
 
 from coordinates.models import Coordinate
 from coordinates.serializers import CoordinateCreateSerializer
 from users.serializers import AccountDetailSerializer
 
 from .models import Event
+from .validators import EventValidator
 
 
 class EventCreateSerializer(ModelSerializer):
     """
     Serializer for event creation.
     """
-    coordinates = CoordinateCreateSerializer()
-    event_start_time = DateTimeField()
-    event_end_time = DateTimeField()
+    coordinate = CoordinateCreateSerializer()
 
     class Meta:
         model = Event
         fields = [
             "title",
             "description",
-            "coordinates",
-            "event_start_time",
-            "event_end_time"
+            "coordinate",
+            "time_started",
+            "time_finished"
         ]
+        validators = [EventValidator()]
 
     def create(self, validated_data):
-        if "coordinates" not in self.initial_data:
-            user = CurrentUserDefault()
-            coordinates = user.account.coordinate
-            event = Event.objects.create(**validated_data)
-            event.coordinates = coordinates
-            return event
-        coordinates = validated_data.pop("coordinates")
+        coordinate = validated_data.pop("coordinate")
         event = Event.objects.create(**validated_data)
-        Coordinate.objects.create(lat=coordinates["lat"], lon=coordinates["lon"], source=event)
+        event_coordinate = Coordinate.objects.create(lat=coordinate["lat"], lon=coordinate["lon"])
+        event.coordinate = event_coordinate
+        event.save()
         return event
 
 
@@ -44,9 +39,7 @@ class EventDetailSerializer(ModelSerializer):
     Serializer for event detail.
     """
     creator = AccountDetailSerializer(read_only=True)
-    coordinates = CoordinateCreateSerializer()
-    event_start_time = DateTimeField()
-    event_end_time = DateTimeField()
+    coordinate = CoordinateCreateSerializer()
 
     class Meta:
         model = Event
@@ -56,7 +49,7 @@ class EventDetailSerializer(ModelSerializer):
             "description",
             "creator",
             "group",
-            "event_start_time",
-            "event_end_time",
-            "coordinates",
+            "time_started",
+            "time_finished",
+            "coordinate",
         ]

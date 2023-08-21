@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from django_filters import (CharFilter, DateTimeFromToRangeFilter, FilterSet,
                             TypedChoiceFilter)
 
@@ -14,8 +13,7 @@ class EventsFilterSet(FilterSet):
     """
     creator = CharFilter(field_name='creator__user__username', lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
-    description = CharFilter(lookup_expr='icontains')
-    event_start_time = DateTimeFromToRangeFilter(field_name='event_start_time')
+    event_start_time = DateTimeFromToRangeFilter(field_name='time_started')
     is_active = TypedChoiceFilter(choices=BOOLEAN_CHOICES,
                                   method='get_is_actives')
     is_ongoing = TypedChoiceFilter(choices=BOOLEAN_CHOICES,
@@ -23,11 +21,11 @@ class EventsFilterSet(FilterSet):
 
     class Meta:
         model = Event
-        fields = ['creator', 'title', 'description', 'event_start_time']
+        fields = ['creator', 'title', 'time_started']
 
     def get_is_actives(self, queryset, name, value):
-        return queryset.filter(event_end_time__gte=datetime.now())
+        return queryset.filter(time_finished__gte=timezone.now())
 
     def get_is_ongoings(self, queryset, name, value):
-        return queryset.filter(event_start_time__gte=datetime.now(),
-                               event_end_time__lte=datetime.now())
+        return queryset.filter(time_started__gte=timezone.now(),
+                               time_finished__lte=timezone.now())

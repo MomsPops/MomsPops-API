@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from chats.models import Group
@@ -15,8 +16,8 @@ class TestEvents(TestEventsFixture, APITestCase):
             title="Event_1_title",
             description="Event_1_description",
             creator=self.user_account,
-            event_start_time=datetime.now() + timedelta(hours=4),
-            event_end_time=datetime.now() + timedelta(hours=6)
+            time_started=timezone.now() + timedelta(hours=4),
+            time_finished=timezone.now() + timedelta(hours=6)
         )
         self.assertTrue(Event.objects.filter(title="Event_1_title").exists())
         self.assertTrue(Group.objects.filter(title="Event_1_title").exists())

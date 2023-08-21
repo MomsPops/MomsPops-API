@@ -26,7 +26,7 @@ class Event(UUIDModel, TimeCreateUpdateModel):
     Models for events.
     """
     title = models.CharField("Название события", max_length=100)
-    description = models.TextField("Описание события", max_length=300)
+    description = models.TextField("Описание события", max_length=500)
     creator = models.ForeignKey(
         Account,
         on_delete=models.SET_NULL,
@@ -41,17 +41,17 @@ class Event(UUIDModel, TimeCreateUpdateModel):
         verbose_name="Группа события",
         null=True
     )
-    coordinates = models.ForeignKey(
+    coordinate = models.ForeignKey(
         Coordinate,
         on_delete=models.SET_NULL,
         related_name="events",
         verbose_name="Координаты события",
         null=True
     )
-    event_start_time = models.DateTimeField("Время начала события")
-    event_end_time = models.DateTimeField("Время завершения события")
+    time_started = models.DateTimeField("Время начала события")
+    time_finished = models.DateTimeField("Время завершения события")
 
-    objects = EventManager
+    objects = EventManager()
 
     def __str__(self) -> str:
         return self.title

@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from django.utils import timezone
 from rest_framework.test import APIClient, APITestCase
 
 from chats.models import Group, GroupMessage
@@ -188,23 +189,42 @@ class TestEventsFixture(TestProfileFixture, APITestCase):
             creator=cls.user2_account,
             title="first_event",
             description="First event description.",
-            event_start_time=datetime.now() + timedelta(hours=1),
-            event_end_time=datetime.now() + timedelta(hours=2)
+            time_started=timezone.now() + timedelta(hours=1),
+            time_finished=timezone.now() + timedelta(hours=2)
         )
-        Coordinate.coordinate_manager.create(
+        coordinates_1 = Coordinate.objects.create(
             lat=10,
             lon=20,
-            source=cls.event1
         )
+        cls.event1.coordinate = coordinates_1
+        cls.event1.save()
         cls.event2 = Event.objects.create(
             creator=cls.user3_account,
             title="second_event",
             description="Second event description.",
-            event_start_time=datetime.now() + timedelta(hours=2),
-            event_end_time=datetime.now() + timedelta(hours=4)
+            time_started=timezone.now() + timedelta(hours=2),
+            time_finished=timezone.now() + timedelta(hours=4)
         )
-        Coordinate.coordinate_manager.create(
+        coordinates_2 = Coordinate.objects.create(
             lat=30,
             lon=20,
-            source=cls.event2
         )
+        group_2 = Group.objects.create_group("second_event", cls.user3_account)
+        cls.event2.group = group_2
+        cls.event2.coordinate = coordinates_2
+        cls.event2.save()
+        cls.event3 = Event.objects.create(
+            creator=cls.user3_account,
+            title="past_event",
+            description="Past event description.",
+            time_started=timezone.now() - timedelta(hours=4),
+            time_finished=timezone.now() - timedelta(hours=2)
+        )
+        coordinates_3 = Coordinate.objects.create(
+            lat=34,
+            lon=28,
+        )
+        group_3 = Group.objects.create_group("past_event", cls.user3_account)
+        cls.event3.coordinate = coordinates_3
+        cls.event3.group = group_3
+        cls.event3.save()
