@@ -53,7 +53,7 @@ class Event(UUIDModel, TimeCreateUpdateModel):
 
     objects = EventManager()
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
     class Meta:
