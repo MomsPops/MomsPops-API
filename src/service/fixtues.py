@@ -1,11 +1,15 @@
-from rest_framework.test import APITestCase, APIClient
+from datetime import timedelta
 
-from coordinates.models import Coordinate
-from locations.models import Region, City
-from notifications.models import NotificationAccount, Notification
-from profiles.models import Profile, Post
-from users.models import Account, User, FriendshipRequest
+from django.utils import timezone
+from rest_framework.test import APIClient, APITestCase
+
 from chats.models import Group, GroupMessage
+from coordinates.models import Coordinate
+from events.models import Event
+from locations.models import City, Region
+from notifications.models import Notification, NotificationAccount
+from profiles.models import Post, Profile
+from users.models import Account, FriendshipRequest, User
 
 
 class TestUserFixture(APITestCase):
@@ -175,3 +179,52 @@ class TestGroupFixture(TestProfileFixture, APITestCase):
             lon=20,
             source=cls.group3
         )
+
+
+class TestEventsFixture(TestProfileFixture, APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.event1 = Event.objects.create(
+            creator=cls.user2_account,
+            title="first_event",
+            description="First event description.",
+            time_started=timezone.now() + timedelta(hours=1),
+            time_finished=timezone.now() + timedelta(hours=2)
+        )
+        coordinates_1 = Coordinate.objects.create(
+            lat=10,
+            lon=20,
+        )
+        cls.event1.coordinate = coordinates_1
+        cls.event1.save()
+        cls.event2 = Event.objects.create(
+            creator=cls.user3_account,
+            title="second_event",
+            description="Second event description.",
+            time_started=timezone.now() + timedelta(hours=2),
+            time_finished=timezone.now() + timedelta(hours=4)
+        )
+        coordinates_2 = Coordinate.objects.create(
+            lat=30,
+            lon=20,
+        )
+        group_2 = Group.objects.create_group("second_event", cls.user3_account)
+        cls.event2.group = group_2
+        cls.event2.coordinate = coordinates_2
+        cls.event2.save()
+        cls.event3 = Event.objects.create(
+            creator=cls.user3_account,
+            title="past_event",
+            description="Past event description.",
+            time_started=timezone.now() - timedelta(hours=4),
+            time_finished=timezone.now() - timedelta(hours=2)
+        )
+        coordinates_3 = Coordinate.objects.create(
+            lat=34,
+            lon=28,
+        )
+        group_3 = Group.objects.create_group("past_event", cls.user3_account)
+        cls.event3.coordinate = coordinates_3
+        cls.event3.group = group_3
+        cls.event3.save()
