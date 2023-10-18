@@ -48,6 +48,7 @@ class Event(UUIDModel, TimeCreateUpdateModel):
         verbose_name="Координаты события",
         null=True
     )
+    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
     time_started = models.DateTimeField("Время начала события")
     time_finished = models.DateTimeField("Время завершения события")
 

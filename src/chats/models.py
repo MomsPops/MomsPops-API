@@ -62,7 +62,6 @@ class Group(TimeCreateUpdateModel, UUIDModel):
         related_name="groups",
         verbose_name="Участники группы"
     )
-    meeting_time = models.DateTimeField(verbose_name="Время встречи", blank=True, null=True)
     coordinate = models.ForeignKey(
         "coordinates.Coordinate",
         default=None,
